@@ -336,7 +336,15 @@ function applyTheme(theme) {
     ? theme
     : "natural-cream";
 
-  document.body.className = `theme-${selectedTheme}`;
+  document.body.classList.remove(
+    "theme-clean-bright",
+    "theme-premium-dark",
+    "theme-natural-cream",
+    "theme-soft-pink"
+  );
+
+  document.body.classList.add(`theme-${selectedTheme}`);
+  document.documentElement.style.background = "var(--bg)";
 }
 
 function renderLandingPage(data) {
@@ -538,7 +546,7 @@ ${pageCss}
   </style>
 </head>
 <body class="${document.body.className}">
-  <main>
+  <main id="landingPage">
 ${pageHtml}
   </main>
 </body>

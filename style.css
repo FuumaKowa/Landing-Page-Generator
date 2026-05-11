@@ -120,13 +120,20 @@ body.theme-soft-pink .final-cta p {
 
 html {
   scroll-behavior: smooth;
+  background: var(--bg);
 }
 
 body {
+  min-height: 100vh;
   font-family: Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+main {
+  background: var(--bg);
 }
 
 .preview-panel {
