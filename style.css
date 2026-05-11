@@ -188,12 +188,18 @@ section {
   font-size: 0.8rem;
 }
 
-.content-controls input {
+.content-controls input,
+.content-controls textarea {
   width: 100%;
   padding: 9px 12px;
   border: 0;
   border-radius: 12px;
   font: inherit;
+}
+
+.content-controls textarea {
+  min-height: 84px;
+  resize: vertical;
 }
 
 .content-controls .wide-control {

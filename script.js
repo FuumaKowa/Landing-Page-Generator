@@ -11,6 +11,9 @@ const exportJsonBtn = document.getElementById("exportJsonBtn");
 const exportHtmlBtn = document.getElementById("exportHtmlBtn");
 const clearDraftBtn = document.getElementById("clearDraftBtn");
 const importJsonInput = document.getElementById("importJsonInput");
+const packageDetailsInput = document.getElementById("packageDetailsInput");
+const productImageInput = document.getElementById("productImageInput");
+const agentPhotoInput = document.getElementById("agentPhotoInput");
 
 let currentAgentData = null;
 
@@ -563,20 +566,26 @@ function createSlug(text) {
 
 function setupContentControls(data) {
   if (
-    !agentNameInput ||
-    !whatsappInput ||
-    !packageNameInput ||
-    !packagePriceInput ||
-    !shortMessageInput
-  ) {
-    return;
-  }
+  !agentNameInput ||
+  !whatsappInput ||
+  !packageNameInput ||
+  !packagePriceInput ||
+  !shortMessageInput ||
+  !packageDetailsInput ||
+  !productImageInput ||
+  !agentPhotoInput
+) {
+  return;
+}
 
   agentNameInput.value = data.agentName || "";
   whatsappInput.value = data.whatsappNumber || "";
   packageNameInput.value = data.packageName || "";
   packagePriceInput.value = data.packagePrice || "";
   shortMessageInput.value = data.shortMessage || "";
+  packageDetailsInput.value = data.packageDetails || "";
+  productImageInput.value = data.productImage || "";
+  agentPhotoInput.value = data.agentPhoto || "";
 
   const updateContent = () => {
   currentAgentData.agentName = agentNameInput.value.trim();
@@ -585,6 +594,9 @@ function setupContentControls(data) {
   currentAgentData.packageName = packageNameInput.value.trim();
   currentAgentData.packagePrice = packagePriceInput.value.trim();
   currentAgentData.shortMessage = shortMessageInput.value.trim();
+  currentAgentData.packageDetails = packageDetailsInput.value.trim();
+  currentAgentData.productImage = productImageInput.value.trim();
+  currentAgentData.agentPhoto = agentPhotoInput.value.trim();
 
   renderLandingPage(currentAgentData);
   saveDraftToBrowser();
@@ -595,6 +607,9 @@ function setupContentControls(data) {
   packageNameInput.addEventListener("input", updateContent);
   packagePriceInput.addEventListener("input", updateContent);
   shortMessageInput.addEventListener("input", updateContent);
+  packageDetailsInput.addEventListener("input", updateContent);
+  productImageInput.addEventListener("input", updateContent);
+  agentPhotoInput.addEventListener("input", updateContent);
 }
 
 function setupExportControls() {
