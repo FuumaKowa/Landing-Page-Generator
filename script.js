@@ -372,6 +372,28 @@ function renderLandingPage(data) {
     .join("");
 }
 
+function saveDraftToBrowser() {
+  if (!currentAgentData) return;
+
+  localStorage.setItem(
+    "dogoodAgentLandingDraft",
+    JSON.stringify(currentAgentData)
+  );
+}
+
+function loadDraftFromBrowser() {
+  const savedDraft = localStorage.getItem("dogoodAgentLandingDraft");
+
+  if (!savedDraft) return null;
+
+  try {
+    return JSON.parse(savedDraft);
+  } catch (error) {
+    console.warn("Invalid saved draft found. Ignoring draft.", error);
+    return null;
+  }
+}
+
 function setupPreviewControls(data) {
   if (!themeSelect || !audienceSelect) return;
 
@@ -406,18 +428,21 @@ function setupPreviewControls(data) {
       ];
 
       renderLandingPage(currentAgentData);
+      saveDraftToBrowser();
     });
   });
 
   themeSelect.addEventListener("change", () => {
-    currentAgentData.theme = themeSelect.value;
-    renderLandingPage(currentAgentData);
-  });
+  currentAgentData.theme = themeSelect.value;
+  renderLandingPage(currentAgentData);
+  saveDraftToBrowser();
+});
 
-  audienceSelect.addEventListener("change", () => {
-    currentAgentData.targetAudience = audienceSelect.value;
-    renderLandingPage(currentAgentData);
-  });
+audienceSelect.addEventListener("change", () => {
+  currentAgentData.targetAudience = audienceSelect.value;
+  renderLandingPage(currentAgentData);
+  saveDraftToBrowser();
+});
 }
 
 function downloadJsonFile(data, filename) {
@@ -520,6 +545,7 @@ function setupContentControls(data) {
   currentAgentData.shortMessage = shortMessageInput.value.trim();
 
   renderLandingPage(currentAgentData);
+  saveDraftToBrowser();
 };
 
   agentNameInput.addEventListener("input", updateContent);
@@ -554,7 +580,9 @@ function setupExportControls() {
 async function init() {
   try {
     const agentData = await loadAgentData();
-    currentAgentData = agentData;
+    const savedDraft = loadDraftFromBrowser();
+
+    currentAgentData = savedDraft || agentData;
 
     renderLandingPage(currentAgentData);
     setupPreviewControls(currentAgentData);
