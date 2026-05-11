@@ -7,6 +7,8 @@ const whatsappInput = document.getElementById("whatsappInput");
 const packageNameInput = document.getElementById("packageNameInput");
 const packagePriceInput = document.getElementById("packagePriceInput");
 const shortMessageInput = document.getElementById("shortMessageInput");
+const exportJsonBtn = document.getElementById("exportJsonBtn");
+const exportHtmlBtn = document.getElementById("exportHtmlBtn");
 
 let currentAgentData = null;
 
@@ -418,6 +420,72 @@ function setupPreviewControls(data) {
   });
 }
 
+function downloadJsonFile(data, filename) {
+  const jsonText = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonText], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const downloadLink = document.createElement("a");
+  downloadLink.href = url;
+  downloadLink.download = filename;
+  downloadLink.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function downloadTextFile(text, filename, type = "text/html") {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+
+  const downloadLink = document.createElement("a");
+  downloadLink.href = url;
+  downloadLink.download = filename;
+  downloadLink.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function getGeneratedCss() {
+  const stylesheets = Array.from(document.styleSheets);
+
+  let cssText = "";
+
+  stylesheets.forEach((stylesheet) => {
+    try {
+      const rules = Array.from(stylesheet.cssRules);
+      rules.forEach((rule) => {
+        cssText += `${rule.cssText}\n`;
+      });
+    } catch (error) {
+      console.warn("Unable to read stylesheet:", error);
+    }
+  });
+
+  return cssText;
+}
+
+function generateStandaloneHtml(data) {
+  const pageHtml = landingPage.innerHTML;
+  const pageCss = getGeneratedCss();
+
+  return `<!DOCTYPE html>
+<html lang="${data.language || "en"}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${data.agentName || "Do Good Agent"} | Do Good Wellness</title>
+  <style>
+${pageCss}
+  </style>
+</head>
+<body class="${document.body.className}">
+  <main>
+${pageHtml}
+  </main>
+</body>
+</html>`;
+}
+
 function setupContentControls(data) {
   if (
     !agentNameInput ||
@@ -452,6 +520,28 @@ function setupContentControls(data) {
   shortMessageInput.addEventListener("input", updateContent);
 }
 
+function setupExportControls() {
+  if (exportJsonBtn) {
+    exportJsonBtn.addEventListener("click", () => {
+      if (!currentAgentData) return;
+
+      const safeSlug = currentAgentData.slug || "agent-page";
+      downloadJsonFile(currentAgentData, `${safeSlug}.json`);
+    });
+  }
+
+  if (exportHtmlBtn) {
+    exportHtmlBtn.addEventListener("click", () => {
+      if (!currentAgentData) return;
+
+      const safeSlug = currentAgentData.slug || "agent-page";
+      const htmlText = generateStandaloneHtml(currentAgentData);
+
+      downloadTextFile(htmlText, `${safeSlug}.html`);
+    });
+  }
+}
+
 async function init() {
   try {
     const agentData = await loadAgentData();
@@ -460,6 +550,7 @@ async function init() {
     renderLandingPage(currentAgentData);
     setupPreviewControls(currentAgentData);
     setupContentControls(currentAgentData);
+    setupExportControls();
   } catch (error) {
     landingPage.innerHTML = `
       <section>

@@ -213,10 +213,47 @@ body {
   grid-column: span 4;
 }
 
+.export-controls {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.export-controls button {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111111;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.export-controls button:nth-child(2) {
+  background: #d4af37;
+  color: #111111;
+}
+
+.export-controls button:hover {
+  opacity: 0.86;
+}
+
 @media (max-width: 650px) {
   .preview-panel {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .export-controls {
+  flex-direction: column;
+  justify-content: stretch;
+}
+
+  .export-controls button {
+    width: 100%;
   }
 
     .content-controls {
