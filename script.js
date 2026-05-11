@@ -9,6 +9,7 @@ const packagePriceInput = document.getElementById("packagePriceInput");
 const shortMessageInput = document.getElementById("shortMessageInput");
 const exportJsonBtn = document.getElementById("exportJsonBtn");
 const exportHtmlBtn = document.getElementById("exportHtmlBtn");
+const clearDraftBtn = document.getElementById("clearDraftBtn");
 
 let currentAgentData = null;
 
@@ -573,6 +574,19 @@ function setupExportControls() {
       const htmlText = generateStandaloneHtml(currentAgentData);
 
       downloadTextFile(htmlText, `${safeSlug}.html`);
+    });
+  }
+
+  if (clearDraftBtn) {
+    clearDraftBtn.addEventListener("click", () => {
+      const confirmClear = confirm(
+        "Clear saved draft and reload the original agent data?"
+      );
+
+      if (!confirmClear) return;
+
+      localStorage.removeItem("dogoodAgentLandingDraft");
+      window.location.reload();
     });
   }
 }

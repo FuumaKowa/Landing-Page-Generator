@@ -237,6 +237,11 @@ body {
   color: #111111;
 }
 
+.export-controls button:nth-child(3) {
+  background: #ffdddd;
+  color: #7a1f1f;
+}
+
 .export-controls button:hover {
   opacity: 0.86;
 }
