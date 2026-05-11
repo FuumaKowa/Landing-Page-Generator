@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Do Good Agent Landing Page</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="preview-panel">
+    <strong>Preview Controls</strong>
+
+    <label>
+      Theme
+      <select id="themeSelect">
+        <option value="clean-bright">Clean Bright</option>
+        <option value="premium-dark">Premium Dark</option>
+        <option value="natural-cream">Natural Cream</option>
+        <option value="soft-pink">Soft Pink</option>
+      </select>
+    </label>
+
+    <label>
+      Target Audience
+      <select id="audienceSelect">
+        <option value="Working adults">Working adults</option>
+        <option value="Parents / family care">Parents / family care</option>
+        <option value="Busy lifestyle users">Busy lifestyle users</option>
+        <option value="First-time wellness users">First-time wellness users</option>
+        <option value="General audience">General audience</option>
+      </select>
+    </label>
+
+    <div class="section-controls">
+  <span>Sections</span>
+
+  <label>
+    <input type="checkbox" value="pain-point" checked>
+    Pain Point
+  </label>
+
+  <label>
+    <input type="checkbox" value="product" checked>
+    Product
+  </label>
+
+  <label>
+    <input type="checkbox" value="benefits" checked>
+    Benefits
+  </label>
+
+  <label>
+    <input type="checkbox" value="package" checked>
+    Package
+  </label>
+
+  <label>
+    <input type="checkbox" value="agent" checked>
+    Agent
+  </label>
+
+  <label>
+    <input type="checkbox" value="faq" checked>
+    FAQ
+  </label>
+</div>
+
+<div class="content-controls">
+  <label>
+    Agent Name
+    <input type="text" id="agentNameInput" placeholder="Agent name">
+  </label>
+
+  <label>
+    WhatsApp
+    <input type="text" id="whatsappInput" placeholder="60123456789">
+  </label>
+
+  <label>
+    Package Name
+    <input type="text" id="packageNameInput" placeholder="Package name">
+  </label>
+
+  <label>
+    Package Price
+    <input type="text" id="packagePriceInput" placeholder="RM188">
+  </label>
+
+  <label class="wide-control">
+    Short Message
+    <input type="text" id="shortMessageInput" placeholder="Short landing page message">
+  </label>
+</div>
+
+  </div>
+
+  <main id="landingPage"></main>
+
+  <script src="script.js"></script>
+</body>
+</html>

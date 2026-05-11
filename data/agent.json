@@ -1,0 +1,25 @@
+{
+  "slug": "agent-daniel",
+  "agentName": "Daniel",
+  "whatsappNumber": "601123456789",
+  "theme": "premium-dark",
+  "language": "en",
+  "sections": [
+  "hero",
+  "pain-point",
+  "product",
+  "benefits",
+  "package",
+  "agent",
+  "faq",
+  "cta"
+],
+  "targetAudience": "General audience",
+  "packageName": "Starter Wellness Package",
+  "packagePrice": "RM188",
+  "packageDetails": "1 box of Do Good Enzyme with 30 sachets and personal agent guidance.",
+  "shortMessage": "Start your simple daily wellness routine with guidance from your Do Good agent.",
+  "productName": "Do Good Premium Natural Complex Enzyme 131",
+  "productImage": "https://via.placeholder.com/600x600?text=Do+Good+Product",
+  "agentPhoto": "https://via.placeholder.com/400x400?text=Agent+Photo"
+}
