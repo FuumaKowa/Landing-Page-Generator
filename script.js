@@ -10,6 +10,7 @@ const shortMessageInput = document.getElementById("shortMessageInput");
 const exportJsonBtn = document.getElementById("exportJsonBtn");
 const exportHtmlBtn = document.getElementById("exportHtmlBtn");
 const clearDraftBtn = document.getElementById("clearDraftBtn");
+const importJsonInput = document.getElementById("importJsonInput");
 
 let currentAgentData = null;
 
@@ -446,6 +447,38 @@ audienceSelect.addEventListener("change", () => {
 });
 }
 
+function normalizeAgentData(data) {
+  const defaultSections = [
+    "hero",
+    "pain-point",
+    "product",
+    "benefits",
+    "package",
+    "agent",
+    "faq",
+    "cta"
+  ];
+
+  return {
+    slug: data.slug || createSlug(data.agentName || "agent-page"),
+    agentName: data.agentName || "Do Good Agent",
+    whatsappNumber: data.whatsappNumber || "",
+    theme: data.theme || "natural-cream",
+    language: data.language || "en",
+    sections: Array.isArray(data.sections) && data.sections.length
+      ? data.sections
+      : defaultSections,
+    targetAudience: data.targetAudience || "General audience",
+    packageName: data.packageName || "Starter Wellness Package",
+    packagePrice: data.packagePrice || "",
+    packageDetails: data.packageDetails || "",
+    shortMessage: data.shortMessage || "Start your simple daily wellness routine with guidance from your Do Good agent.",
+    productName: data.productName || "Do Good Premium Natural Complex Enzyme 131",
+    productImage: data.productImage || "https://via.placeholder.com/600x600?text=Do+Good+Product",
+    agentPhoto: data.agentPhoto || "https://via.placeholder.com/400x400?text=Agent+Photo"
+  };
+}
+
 function downloadJsonFile(data, filename) {
   const jsonText = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonText], { type: "application/json" });
@@ -591,17 +624,45 @@ function setupExportControls() {
   }
 }
 
+function setupImportControls() {
+  if (!importJsonInput) return;
+
+  importJsonInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      try {
+        const importedData = JSON.parse(reader.result);
+        currentAgentData = normalizeAgentData(importedData);
+
+        saveDraftToBrowser();
+        window.location.reload();
+      } catch (error) {
+        alert("Invalid JSON file. Please import a valid agent JSON file.");
+        console.error(error);
+      }
+    };
+
+    reader.readAsText(file);
+  });
+}
+
 async function init() {
   try {
     const agentData = await loadAgentData();
     const savedDraft = loadDraftFromBrowser();
-
-    currentAgentData = savedDraft || agentData;
+    
+    currentAgentData = normalizeAgentData(savedDraft || agentData);
 
     renderLandingPage(currentAgentData);
     setupPreviewControls(currentAgentData);
     setupContentControls(currentAgentData);
     setupExportControls();
+    setupImportControls();
   } catch (error) {
     landingPage.innerHTML = `
       <section>

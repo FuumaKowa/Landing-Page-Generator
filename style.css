@@ -216,12 +216,14 @@ body {
 .export-controls {
   width: 100%;
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
   margin-top: 4px;
 }
 
-.export-controls button {
+.export-controls button,
+.import-json-label {
   padding: 10px 16px;
   border: 0;
   border-radius: 999px;
@@ -232,7 +234,17 @@ body {
   cursor: pointer;
 }
 
-.export-controls button:nth-child(2) {
+.import-json-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.import-json-label input {
+  display: none;
+}
+
+.export-controls button:nth-of-type(2) {
   background: #d4af37;
   color: #111111;
 }
@@ -257,9 +269,10 @@ body {
   justify-content: stretch;
 }
 
-  .export-controls button {
+  .export-controls button,
+  .import-json-label {
     width: 100%;
-  }
+}
 
     .content-controls {
     grid-template-columns: 1fr;

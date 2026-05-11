@@ -93,9 +93,14 @@
 </div>
 
 <div class="export-controls">
-  <button id="exportJsonBtn" type="button">Export Agent JSON</button>
-  <button id="exportHtmlBtn" type="button">Export Landing Page HTML</button>
-  <button id="clearDraftBtn" type="button">Clear Draft</button>
+  <label class="import-json-label">
+  Import Agent JSON
+  <input type="file" id="importJsonInput" accept="application/json">
+</label>
+
+<button id="exportJsonBtn" type="button">Export Agent JSON</button>
+<button id="exportHtmlBtn" type="button">Export Landing Page HTML</button>
+<button id="clearDraftBtn" type="button">Clear Draft</button>
 </div>
 
   <main id="landingPage"></main>
