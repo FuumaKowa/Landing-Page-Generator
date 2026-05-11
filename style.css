@@ -251,6 +251,28 @@ section {
   opacity: 0.86;
 }
 
+.validation-status {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.validation-status.valid {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+.validation-status.warning {
+  background: #fff7d6;
+  color: #6b4e00;
+}
+
+.validation-status ul {
+  margin-left: 18px;
+}
+
 .eyebrow {
   color: var(--primary);
   font-weight: 800;

@@ -1,0 +1,24 @@
+{
+  "slug": "qash",
+  "agentName": "Qash",
+  "whatsappNumber": "601123456789",
+  "theme": "premium-dark",
+  "language": "en",
+  "structure": "sales-focus",
+  "sections": [
+    "hero",
+    "pain-point",
+    "benefits",
+    "package",
+    "faq",
+    "cta"
+  ],
+  "targetAudience": "Working adults",
+  "packageName": "Premium Wellness Package",
+  "packagePrice": "RM128",
+  "packageDetails": "1 box of Do Good Enzyme with 30 sachets and personal agent guidance.",
+  "shortMessage": "Start your premium daily life with guidance from your Do Good agent.",
+  "productName": "Do Good Premium Natural Complex Enzyme 131",
+  "productImage": "assets/product.png",
+  "agentPhoto": "assets/agent.jpg"
+}

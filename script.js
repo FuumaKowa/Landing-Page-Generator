@@ -12,6 +12,7 @@ const exportJsonBtn = document.getElementById("exportJsonBtn");
 const exportHtmlBtn = document.getElementById("exportHtmlBtn");
 const clearDraftBtn = document.getElementById("clearDraftBtn");
 const importJsonInput = document.getElementById("importJsonInput");
+const validationStatus = document.getElementById("validationStatus");
 const packageDetailsInput = document.getElementById("packageDetailsInput");
 const productImageInput = document.getElementById("productImageInput");
 const agentPhotoInput = document.getElementById("agentPhotoInput");
@@ -359,8 +360,65 @@ function applyTheme(theme) {
   document.documentElement.style.background = "var(--bg)";
 }
 
+function validateAgentData(data) {
+  const issues = [];
+
+  if (!data.agentName || !data.agentName.trim()) {
+    issues.push("Agent name is missing.");
+  }
+
+  if (!data.whatsappNumber || !String(data.whatsappNumber).trim()) {
+    issues.push("WhatsApp number is missing.");
+  }
+
+  const cleanWhatsapp = String(data.whatsappNumber || "").replace(/\D/g, "");
+
+  if (cleanWhatsapp && cleanWhatsapp.length < 10) {
+    issues.push("WhatsApp number looks too short.");
+  }
+
+  if (!data.packageName || !data.packageName.trim()) {
+    issues.push("Package name is missing.");
+  }
+
+  if (!data.packagePrice || !data.packagePrice.trim()) {
+    issues.push("Package price is missing.");
+  }
+
+  if (!data.productImage || !data.productImage.trim()) {
+    issues.push("Product image is missing.");
+  }
+
+  if (!data.agentPhoto || !data.agentPhoto.trim()) {
+    issues.push("Agent photo is missing.");
+  }
+
+  return issues;
+}
+
+function updateValidationStatus(data) {
+  if (!validationStatus) return;
+
+  const issues = validateAgentData(data);
+
+  if (!issues.length) {
+    validationStatus.className = "validation-status valid";
+    validationStatus.innerHTML = "Page status: Ready to export.";
+    return;
+  }
+
+  validationStatus.className = "validation-status warning";
+  validationStatus.innerHTML = `
+    <strong>Page status: Needs attention before final export.</strong>
+    <ul>
+      ${issues.map((issue) => `<li>${issue}</li>`).join("")}
+    </ul>
+  `;
+}
+
 function renderLandingPage(data) {
   applyTheme(data.theme);
+  updateValidationStatus(data);
 
   const defaultSections = [
     "hero",
