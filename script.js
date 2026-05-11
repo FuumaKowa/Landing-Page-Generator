@@ -473,7 +473,7 @@ function generateStandaloneHtml(data) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${data.agentName || "Do Good Agent"} | Do Good Wellness</title>
+  <title>${data.agentName || "Do Good Agent"} | Do Good Agent Landing Page</title>
   <style>
 ${pageCss}
   </style>
@@ -484,6 +484,14 @@ ${pageHtml}
   </main>
 </body>
 </html>`;
+}
+
+function createSlug(text) {
+  return String(text || "agent-page")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "agent-page";
 }
 
 function setupContentControls(data) {
@@ -504,14 +512,15 @@ function setupContentControls(data) {
   shortMessageInput.value = data.shortMessage || "";
 
   const updateContent = () => {
-    currentAgentData.agentName = agentNameInput.value.trim();
-    currentAgentData.whatsappNumber = whatsappInput.value.trim();
-    currentAgentData.packageName = packageNameInput.value.trim();
-    currentAgentData.packagePrice = packagePriceInput.value.trim();
-    currentAgentData.shortMessage = shortMessageInput.value.trim();
+  currentAgentData.agentName = agentNameInput.value.trim();
+  currentAgentData.slug = createSlug(currentAgentData.agentName);
+  currentAgentData.whatsappNumber = whatsappInput.value.trim();
+  currentAgentData.packageName = packageNameInput.value.trim();
+  currentAgentData.packagePrice = packagePriceInput.value.trim();
+  currentAgentData.shortMessage = shortMessageInput.value.trim();
 
-    renderLandingPage(currentAgentData);
-  };
+  renderLandingPage(currentAgentData);
+};
 
   agentNameInput.addEventListener("input", updateContent);
   whatsappInput.addEventListener("input", updateContent);
