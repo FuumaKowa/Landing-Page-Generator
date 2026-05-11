@@ -1,6 +1,7 @@
 const landingPage = document.getElementById("landingPage");
 const themeSelect = document.getElementById("themeSelect");
 const audienceSelect = document.getElementById("audienceSelect");
+const structureSelect = document.getElementById("structureSelect");
 const sectionCheckboxes = document.querySelectorAll(".section-controls input[type='checkbox']");
 const agentNameInput = document.getElementById("agentNameInput");
 const whatsappInput = document.getElementById("whatsappInput");
@@ -415,11 +416,78 @@ function loadDraftFromBrowser() {
   }
 }
 
+function getStructureSections(structure) {
+  const structures = {
+    standard: [
+      "hero",
+      "pain-point",
+      "product",
+      "benefits",
+      "package",
+      "agent",
+      "faq",
+      "cta"
+    ],
+
+    simple: [
+      "hero",
+      "product",
+      "package",
+      "agent",
+      "cta"
+    ],
+
+    "sales-focus": [
+      "hero",
+      "pain-point",
+      "benefits",
+      "package",
+      "faq",
+      "cta"
+    ],
+
+    "trust-focus": [
+      "hero",
+      "pain-point",
+      "product",
+      "agent",
+      "faq",
+      "cta"
+    ]
+  };
+
+  return structures[structure] || structures.standard;
+}
+
+function getStructureFromSections(sections) {
+  const sectionString = Array.isArray(sections) ? sections.join(",") : "";
+
+  const structureMap = {
+    standard: getStructureSections("standard").join(","),
+    simple: getStructureSections("simple").join(","),
+    "sales-focus": getStructureSections("sales-focus").join(","),
+    "trust-focus": getStructureSections("trust-focus").join(",")
+  };
+
+  return Object.keys(structureMap).find(
+    (key) => structureMap[key] === sectionString
+  ) || "custom";
+}
+
+function syncSectionCheckboxes(sections) {
+  sectionCheckboxes.forEach((checkbox) => {
+    checkbox.checked = sections.includes(checkbox.value);
+  });
+}
+
 function setupPreviewControls(data) {
-  if (!themeSelect || !audienceSelect) return;
+  if (!themeSelect || !audienceSelect || !structureSelect) return;
 
   themeSelect.value = data.theme || "natural-cream";
   audienceSelect.value = data.targetAudience || "General audience";
+  structureSelect.value = data.structure && data.structure !== "custom"
+    ? data.structure
+    : "standard";
 
   const currentSections = Array.isArray(data.sections) && data.sections.length
     ? data.sections
@@ -434,24 +502,29 @@ function setupPreviewControls(data) {
         "cta"
       ];
 
-  sectionCheckboxes.forEach((checkbox) => {
-    checkbox.checked = currentSections.includes(checkbox.value);
+  syncSectionCheckboxes(currentSections);
 
-    checkbox.addEventListener("change", () => {
-      const selectedOptionalSections = Array.from(sectionCheckboxes)
-        .filter((item) => item.checked)
-        .map((item) => item.value);
+sectionCheckboxes.forEach((checkbox) => {
+  checkbox.addEventListener("change", () => {
+    const selectedOptionalSections = Array.from(sectionCheckboxes)
+      .filter((item) => item.checked)
+      .map((item) => item.value);
 
-      currentAgentData.sections = [
-        "hero",
-        ...selectedOptionalSections,
-        "cta"
-      ];
+    currentAgentData.sections = [
+      "hero",
+      ...selectedOptionalSections,
+      "cta"
+    ];
 
-      renderLandingPage(currentAgentData);
-      saveDraftToBrowser();
-    });
+    currentAgentData.structure = getStructureFromSections(currentAgentData.sections);
+    structureSelect.value = currentAgentData.structure === "custom"
+      ? "standard"
+      : currentAgentData.structure;
+
+    renderLandingPage(currentAgentData);
+    saveDraftToBrowser();
   });
+});
 
   themeSelect.addEventListener("change", () => {
   currentAgentData.theme = themeSelect.value;
@@ -464,6 +537,19 @@ audienceSelect.addEventListener("change", () => {
   renderLandingPage(currentAgentData);
   saveDraftToBrowser();
 });
+
+structureSelect.addEventListener("change", () => {
+  const selectedStructure = structureSelect.value;
+  const selectedSections = getStructureSections(selectedStructure);
+
+  currentAgentData.structure = selectedStructure;
+  currentAgentData.sections = selectedSections;
+
+  syncSectionCheckboxes(selectedSections);
+  renderLandingPage(currentAgentData);
+  saveDraftToBrowser();
+});
+
 }
 
 function normalizeAgentData(data) {
@@ -484,9 +570,10 @@ function normalizeAgentData(data) {
     whatsappNumber: data.whatsappNumber || "",
     theme: data.theme || "natural-cream",
     language: data.language || "en",
+    structure: data.structure || getStructureFromSections(data.sections || defaultSections),
     sections: Array.isArray(data.sections) && data.sections.length
-      ? data.sections
-      : defaultSections,
+    ? data.sections
+    : getStructureSections(data.structure || "standard"),
     targetAudience: data.targetAudience || "General audience",
     packageName: data.packageName || "Starter Wellness Package",
     packagePrice: data.packagePrice || "",
