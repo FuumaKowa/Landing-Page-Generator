@@ -33,6 +33,14 @@ function createWhatsAppLink(number, message) {
   return `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
 }
 
+function getSafeImage(imageUrl, fallbackText) {
+  const safeText = encodeURIComponent(fallbackText || "Do Good Image");
+
+  return imageUrl && imageUrl.trim()
+    ? imageUrl.trim()
+    : `https://placehold.co/600x600?text=${safeText}`;
+}
+
 function HeroSection(data) {
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
@@ -50,8 +58,8 @@ function HeroSection(data) {
         </div>
 
         <div class="hero-image">
-          <img src="${data.productImage}" alt="${data.productName}">
-        </div>
+          <img src="${getSafeImage(data.productImage, "Do Good Product")}" alt="${data.productName}" onerror="this.src='https://placehold.co/600x600?text=Do+Good+Product'">
+          </div>
       </div>
     </section>
   `;
@@ -263,7 +271,7 @@ function AgentSection(data) {
     <section>
       <div class="container agent-grid">
         <div class="agent-photo">
-          <img src="${data.agentPhoto}" alt="${data.agentName}">
+          <img src="${getSafeImage(data.agentPhoto, "Agent Photo")}" alt="${data.agentName}" onerror="this.src='https://placehold.co/600x600?text=Agent+Photo'">
         </div>
 
         <div>
