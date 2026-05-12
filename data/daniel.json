@@ -1,0 +1,32 @@
+{
+  "slug": "daniel",
+  "agentName": "Daniel",
+  "whatsappNumber": "601123456789",
+  "theme": "premium-dark",
+  "language": "en",
+  "heroStyle": "agent-focus",
+  "heroTitle": "Lorem Ipsum Dolor Sit Amet",
+  "heroSubtitle": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit",
+  "structure": "standard",
+  "sections": [
+    "hero",
+    "pain-point",
+    "product",
+    "benefits",
+    "package",
+    "agent",
+    "faq",
+    "cta"
+  ],
+  "targetAudience": "Parents / family care",
+  "packageName": "Premium Wellness Package",
+  "packagePrice": "RM128",
+  "packageDetails": "1 box of Do Good Enzyme with 30 sachets and personal agent guidance.",
+  "shortMessage": "Start your premium daily life with guidance from your Do Good agent.",
+  "productName": "Do Good Premium Natural Complex Enzyme 131",
+  "productDescription": "Do Good is a convenient enzyme-based wellness drink designed for people who want to build a simple daily health routine. It comes in sachet form, making it easy to consume at home, at work, or while travelling.",
+  "productImage": "assets/product.png",
+  "agentPhoto": "assets/agent.jpg",
+  "agentDescription": "test",
+  "whatsappMessage": "test"
+}

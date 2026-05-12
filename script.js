@@ -11,6 +11,7 @@ const productNameInput = document.getElementById("productNameInput");
 const productDescriptionInput = document.getElementById("productDescriptionInput");
 const packageNameInput = document.getElementById("packageNameInput");
 const packagePriceInput = document.getElementById("packagePriceInput");
+const packageCheckoutLinkInput = document.getElementById("packageCheckoutLinkInput");
 const shortMessageInput = document.getElementById("shortMessageInput");
 const heroTitleInput = document.getElementById("heroTitleInput");
 const heroSubtitleInput = document.getElementById("heroSubtitleInput");
@@ -465,13 +466,15 @@ function BenefitsSection(data) {
 
 function PackageSection(data) {
   const text = getText(data.language);
-  const whatsappLink = createWhatsAppLink(
-    data.whatsappNumber,
-    getWhatsAppMessage(
-      data,
-      `Hi ${data.agentName}, I want to ask about the ${data.packageName}.`
-    )
-  );
+  const packageLink = data.packageCheckoutLink && data.packageCheckoutLink.trim()
+  ? data.packageCheckoutLink.trim()
+  : createWhatsAppLink(
+      data.whatsappNumber,
+      getWhatsAppMessage(
+        data,
+        `Hi ${data.agentName}, I want to ask about the ${data.packageName}.`
+      )
+    );
 
   return `
     <section id="package">
@@ -481,7 +484,7 @@ function PackageSection(data) {
           <h2>${data.packageName}</h2>
           <p>${data.packageDetails}</p>
           <div class="package-price">${data.packagePrice}</div>
-          <a class="btn" href="${whatsappLink}" target="_blank">Ask for Package Details</a>
+          <a class="btn" href="${packageLink}" target="_blank">Checkout Package</a>
         </div>
 
         <div class="package-box">
@@ -906,6 +909,7 @@ function normalizeAgentData(data) {
     targetAudience: data.targetAudience || "General audience",
     packageName: data.packageName || "Starter Wellness Package",
     packagePrice: data.packagePrice || "",
+    packageCheckoutLink: data.packageCheckoutLink || "https://dogood.asia/Checkout?cl=8f14e45fceea167a5a36dedd4bea2543",
     packageDetails: data.packageDetails || "",
     shortMessage: data.shortMessage || "Start your simple daily wellness routine with guidance from your Do Good agent.",
     productName: data.productName || "Do Good Premium Natural Complex Enzyme 131",
@@ -999,6 +1003,7 @@ function setupContentControls(data) {
     !productDescriptionInput ||
     !packageNameInput ||
     !packagePriceInput ||
+    !packageCheckoutLinkInput ||
     !shortMessageInput ||
     !heroTitleInput ||
     !heroSubtitleInput ||
@@ -1017,6 +1022,7 @@ function setupContentControls(data) {
   productDescriptionInput.value = data.productDescription || "";
   packageNameInput.value = data.packageName || "";
   packagePriceInput.value = data.packagePrice || "";
+  packageCheckoutLinkInput.value = data.packageCheckoutLink || "";
   shortMessageInput.value = data.shortMessage || "";
   heroTitleInput.value = data.heroTitle || "";
   heroSubtitleInput.value = data.heroSubtitle || "";
@@ -1034,6 +1040,7 @@ function setupContentControls(data) {
     currentAgentData.productDescription = productDescriptionInput.value.trim();
     currentAgentData.packageName = packageNameInput.value.trim();
     currentAgentData.packagePrice = packagePriceInput.value.trim();
+    currentAgentData.packageCheckoutLink = packageCheckoutLinkInput.value.trim();
     currentAgentData.shortMessage = shortMessageInput.value.trim();
     currentAgentData.heroTitle = heroTitleInput.value.trim();
     currentAgentData.heroSubtitle = heroSubtitleInput.value.trim();
@@ -1053,6 +1060,7 @@ function setupContentControls(data) {
   productDescriptionInput.addEventListener("input", updateContent);
   packageNameInput.addEventListener("input", updateContent);
   packagePriceInput.addEventListener("input", updateContent);
+  packageCheckoutLinkInput.addEventListener("input", updateContent);
   shortMessageInput.addEventListener("input", updateContent);
   heroTitleInput.addEventListener("input", updateContent);
   heroSubtitleInput.addEventListener("input", updateContent);
