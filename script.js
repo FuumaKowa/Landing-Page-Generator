@@ -43,6 +43,63 @@ function getSafeImage(imageUrl, fallbackText) {
     : `https://placehold.co/600x600?text=${safeText}`;
 }
 
+function HeaderSection(data) {
+  const whatsappLink = createWhatsAppLink(
+    data.whatsappNumber,
+    `Hi ${data.agentName}, I want to know more about ${data.productName}.`
+  );
+
+  const selectedSections = Array.isArray(data.sections) ? data.sections : [];
+
+  const navItems = [
+    {
+      label: "Product",
+      target: "product",
+      section: "product"
+    },
+    {
+      label: "Package",
+      target: "package",
+      section: "package"
+    },
+    {
+      label: "Agent",
+      target: "agent",
+      section: "agent"
+    },
+    {
+      label: "FAQ",
+      target: "faq",
+      section: "faq"
+    }
+  ];
+
+  const visibleNavItems = navItems.filter((item) =>
+    selectedSections.includes(item.section)
+  );
+
+  return `
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="#hero" class="brand">
+          <span class="brand-mark">DG</span>
+          <span>Do Good</span>
+        </a>
+
+        <nav class="site-nav">
+          ${visibleNavItems.map((item) => `
+            <a href="#${item.target}">${item.label}</a>
+          `).join("")}
+        </nav>
+
+        <a class="header-cta" href="${whatsappLink}" target="_blank">
+          WhatsApp
+        </a>
+      </div>
+    </header>
+  `;
+}
+
 function HeroSection(data) {
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
@@ -50,7 +107,7 @@ function HeroSection(data) {
   );
 
   return `
-    <section class="hero">
+    <section id="hero" class="hero">
       <div class="container hero-grid">
         <div class="hero-text">
           <p class="eyebrow">Do Good Wellness</p>
@@ -193,7 +250,7 @@ function PainPointSection(data) {
 
 function ProductSection(data) {
   return `
-    <section>
+    <section id="product">
       <div class="container product-grid">
         <div class="product-image">
           <img src="${data.productImage}" alt="${data.productName}">
@@ -244,7 +301,7 @@ function PackageSection(data) {
   );
 
   return `
-    <section>
+    <section id="package">
       <div class="container package-grid">
         <div>
           <p class="eyebrow">Package Offer</p>
@@ -270,7 +327,7 @@ function AgentSection(data) {
   );
 
   return `
-    <section>
+    <section id="agent">
       <div class="container agent-grid">
         <div class="agent-photo">
           <img src="${getSafeImage(data.agentPhoto, "Agent Photo")}" alt="${data.agentName}" onerror="this.src='https://placehold.co/600x600?text=Agent+Photo'">
@@ -289,7 +346,7 @@ function AgentSection(data) {
 
 function FAQSection() {
   return `
-    <section>
+    <section id="faq">
       <div class="container">
         <p class="eyebrow">Questions</p>
         <h2>Frequently Asked Questions</h2>
@@ -446,10 +503,14 @@ function renderLandingPage(data) {
     "cta": FinalCTASection
   };
 
-  landingPage.innerHTML = selectedSections
+  const renderedSections = selectedSections
     .filter((sectionName) => sectionComponents[sectionName])
     .map((sectionName) => sectionComponents[sectionName](data))
     .join("");
+  landingPage.innerHTML = `
+    ${HeaderSection(data)}
+    ${renderedSections}
+  `;
 }
 
 function saveDraftToBrowser() {
