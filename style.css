@@ -131,7 +131,11 @@ section {
 }
 
 .preview-panel strong {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+}
+
+.preview-panel strong::after {
+  content: " Builder";
 }
 
 .preview-panel label {
@@ -237,12 +241,22 @@ section {
   display: none;
 }
 
+.export-controls button:nth-of-type(1) {
+  background: #e0f2fe;
+  color: #075985;
+}
+
 .export-controls button:nth-of-type(2) {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+.export-controls button:nth-of-type(4) {
   background: #d4af37;
   color: #111111;
 }
 
-.export-controls button:nth-of-type(3) {
+.export-controls button:nth-of-type(5) {
   background: #ffdddd;
   color: #7a1f1f;
 }
@@ -271,6 +285,45 @@ section {
 
 .validation-status ul {
   margin-left: 18px;
+}
+
+.compliance-note {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f5f5;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+body.customer-preview .preview-panel {
+  display: none;
+}
+
+body.customer-preview .site-header {
+  top: 0;
+}
+
+.customer-preview-exit {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1200;
+  display: none;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
+body.customer-preview .customer-preview-exit {
+  display: inline-flex;
 }
 
 .eyebrow {
@@ -633,7 +686,7 @@ body.theme-soft-pink .final-cta p {
   section {
     padding: 64px 6%;
   }
-  
+
   .header-inner {
     min-height: auto;
     padding-top: 16px;

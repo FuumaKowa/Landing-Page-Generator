@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="preview-panel">
-    <strong>Preview Controls</strong>
+    <strong>Landing Page Builder</strong>
 
     <label>
       Theme
@@ -181,13 +181,22 @@
 </label>
 
 <div id="validationStatus" class="validation-status"></div>
+<div class="compliance-note">
+  Please avoid medical claims such as cure, treat, prevent disease, reduce cholesterol, fix diabetes, or replace medication.
+</div>
 
+<button id="previewModeBtn" type="button">Preview as Customer</button>
+<button id="submitRequestBtn" type="button">Submit Landing Page Request</button>
 <button id="exportJsonBtn" type="button">Export Agent JSON</button>
 <button id="exportHtmlBtn" type="button">Export Landing Page HTML</button>
 <button id="clearDraftBtn" type="button">Clear Draft</button>
 </div>
 
   <main id="landingPage"></main>
+
+  <button id="exitPreviewModeBtn" class="customer-preview-exit" type="button">
+    Back to Edit
+  </button>
 
   <script src="script.js"></script>
 </body>

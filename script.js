@@ -23,6 +23,9 @@ const agentPhotoInput = document.getElementById("agentPhotoInput");
 const agentDescriptionInput = document.getElementById("agentDescriptionInput");
 const whatsappMessageInput = document.getElementById("whatsappMessageInput");
 
+const previewModeBtn = document.getElementById("previewModeBtn");
+const exitPreviewModeBtn = document.getElementById("exitPreviewModeBtn");
+const submitRequestBtn = document.getElementById("submitRequestBtn");
 const exportJsonBtn = document.getElementById("exportJsonBtn");
 const exportHtmlBtn = document.getElementById("exportHtmlBtn");
 const clearDraftBtn = document.getElementById("clearDraftBtn");
@@ -651,12 +654,20 @@ function validateAgentData(data) {
     issues.push("WhatsApp number looks too short.");
   }
 
+  if (!data.productName || !data.productName.trim()) {
+    issues.push("Product name is missing.");
+  }
+
   if (!data.packageName || !data.packageName.trim()) {
     issues.push("Package name is missing.");
   }
 
   if (!data.packagePrice || !data.packagePrice.trim()) {
     issues.push("Package price is missing.");
+  }
+
+  if (!data.packageCheckoutLink || !data.packageCheckoutLink.trim()) {
+    issues.push("Package checkout link is missing.");
   }
 
   if (!data.productImage || !data.productImage.trim()) {
@@ -1096,6 +1107,91 @@ function setupContentControls(data) {
   whatsappMessageInput.addEventListener("input", updateContent);
 }
 
+function createSubmissionId() {
+  return `submission-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function getStoredSubmissions() {
+  const savedSubmissions = localStorage.getItem("dogoodLandingSubmissions");
+
+  if (!savedSubmissions) return [];
+
+  try {
+    const parsedSubmissions = JSON.parse(savedSubmissions);
+    return Array.isArray(parsedSubmissions) ? parsedSubmissions : [];
+  } catch (error) {
+    console.warn("Invalid submission list found. Resetting submissions.", error);
+    return [];
+  }
+}
+
+function saveSubmission(data) {
+  const submissions = getStoredSubmissions();
+
+  const submission = {
+    id: createSubmissionId(),
+    status: "pending_review",
+    paymentStatus: "unpaid",
+    approvalStatus: "not_approved",
+    submittedAt: new Date().toISOString(),
+    agentData: normalizeAgentData(data)
+  };
+
+  submissions.unshift(submission);
+
+  localStorage.setItem(
+    "dogoodLandingSubmissions",
+    JSON.stringify(submissions)
+  );
+
+  return submission;
+}
+
+function setupPreviewModeControls() {
+  if (previewModeBtn) {
+    previewModeBtn.addEventListener("click", () => {
+      document.body.classList.add("customer-preview");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  if (exitPreviewModeBtn) {
+    exitPreviewModeBtn.addEventListener("click", () => {
+      document.body.classList.remove("customer-preview");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+}
+
+function setupSubmitRequestControls() {
+  if (!submitRequestBtn) return;
+
+  submitRequestBtn.addEventListener("click", () => {
+    if (!currentAgentData) return;
+
+    const issues = validateAgentData(currentAgentData);
+
+    if (issues.length) {
+      alert(
+        `Please complete these required fields before submitting:\n\n${issues.join("\n")}`
+      );
+      return;
+    }
+
+    const confirmSubmit = confirm(
+      "Submit this landing page request for admin review?"
+    );
+
+    if (!confirmSubmit) return;
+
+    const submission = saveSubmission(currentAgentData);
+
+    alert(
+      `Your landing page request has been submitted for review.\n\nSubmission ID: ${submission.id}\n\nPlease send your payment confirmation to the admin.`
+    );
+  });
+}
+
 function setupExportControls() {
   if (exportJsonBtn) {
     exportJsonBtn.addEventListener("click", () => {
@@ -1168,6 +1264,8 @@ async function init() {
     renderLandingPage(currentAgentData);
     setupPreviewControls(currentAgentData);
     setupContentControls(currentAgentData);
+    setupPreviewModeControls();
+    setupSubmitRequestControls();
     setupExportControls();
     setupImportControls();
   } catch (error) {
