@@ -73,6 +73,12 @@ function getText(language = "en") {
       productIntro: "Product Introduction",
       whyItHelps: "Why It Helps",
       benefitsTitle: "What makes it easy to start?",
+      benefitSachetTitle: "Sachet Format",
+      benefitSachetText: "Easy to bring, prepare, and consume wherever your day takes you.",
+      benefitMonthlyTitle: "Monthly Routine",
+      benefitMonthlyText: "One box can support a simple and consistent daily wellness habit.",
+      benefitAgentTitle: "Agent Guidance",
+      benefitAgentText: "Your Do Good agent can guide you before and after you begin.",
       packageOffer: "Package Offer",
       includedPackage: "Included in this package",
       packageIncludedText: "Product details, basic usage guidance, ordering support, and follow-up from your Do Good agent.",
@@ -80,6 +86,12 @@ function getText(language = "en") {
       agentGuidanceTitle: "Your Do Good Agent Will Guide You",
       questions: "Questions",
       faqTitle: "Frequently Asked Questions",
+      faqOneQuestion: "What is Do Good Enzyme?",
+      faqOneAnswer: "It is an enzyme-based wellness drink designed to support a simple daily health routine.",
+      faqTwoQuestion: "Is it suitable for first-time users?",
+      faqTwoAnswer: "Yes, it is designed to be simple and easy to include in a daily routine.",
+      faqThreeQuestion: "How do I order?",
+      faqThreeAnswer: "You can contact the agent directly through the WhatsApp button on this page.",
       startToday: "Start Today",
       finalCtaTitle: "Ready to start your simple wellness routine?",
       finalCtaButton: "WhatsApp My Agent Now",
@@ -112,6 +124,12 @@ function getText(language = "en") {
       productIntro: "产品介绍",
       whyItHelps: "产品优势",
       benefitsTitle: "为什么容易开始？",
+      benefitSachetTitle: "独立小包设计",
+      benefitSachetText: "方便携带、冲泡和饮用，适合日常生活、上班或外出时使用。",
+      benefitMonthlyTitle: "简单月度习惯",
+      benefitMonthlyText: "一盒可帮助你建立更简单、更持续的每日健康习惯。",
+      benefitAgentTitle: "代理贴心指导",
+      benefitAgentText: "你的善金代理可以在你开始前后提供基本说明和跟进。",
       packageOffer: "产品配套",
       includedPackage: "此配套包含",
       packageIncludedText: "产品资料、基本使用指导、下单协助，以及善金代理的后续跟进。",
@@ -119,6 +137,12 @@ function getText(language = "en") {
       agentGuidanceTitle: "你的善金代理将为你提供指导",
       questions: "常见问题",
       faqTitle: "常见问题",
+      faqOneQuestion: "什么是善金酵素？",
+      faqOneAnswer: "这是一款酵素型健康饮品，适合想建立简单日常健康习惯的人群。",
+      faqTwoQuestion: "第一次使用适合吗？",
+      faqTwoAnswer: "适合。它的设计方向是简单、方便，并容易加入日常生活习惯中。",
+      faqThreeQuestion: "我要如何下单？",
+      faqThreeAnswer: "你可以直接点击页面上的 WhatsApp 按钮联系代理了解详情。",
       startToday: "立即开始",
       finalCtaTitle: "准备开始你的简单健康习惯了吗？",
       finalCtaButton: "立即 WhatsApp 我的代理",
@@ -402,18 +426,18 @@ function BenefitsSection(data) {
 
         <div class="card-grid">
           <div class="card">
-            <h3>Sachet Format</h3>
-            <p>Easy to bring, prepare, and consume wherever your day takes you.</p>
+            <h3>${text.benefitSachetTitle}</h3>
+            <p>${text.benefitSachetText}</p>
           </div>
 
           <div class="card">
-            <h3>Monthly Routine</h3>
-            <p>One box can support a simple and consistent daily wellness habit.</p>
+            <h3>${text.benefitMonthlyTitle}</h3>
+            <p>${text.benefitMonthlyText}</p>
           </div>
 
           <div class="card">
-            <h3>Agent Guidance</h3>
-            <p>Your Do Good agent can guide you before and after you begin.</p>
+            <h3>${text.benefitAgentTitle}</h3>
+            <p>${text.benefitAgentText}</p>
           </div>
         </div>
       </div>
@@ -484,18 +508,18 @@ function FAQSection(data) {
 
         <div class="faq-list">
           <div class="faq-item">
-            <h3>What is Do Good Enzyme?</h3>
-            <p>It is an enzyme-based wellness drink designed to support a simple daily health routine.</p>
+            <h3>${text.faqOneQuestion}</h3>
+            <p>${text.faqOneAnswer}</p>
           </div>
 
           <div class="faq-item">
-            <h3>Is it suitable for first-time users?</h3>
-            <p>Yes, it is designed to be simple and easy to include in a daily routine.</p>
+            <h3>${text.faqTwoQuestion}</h3>
+            <p>${text.faqTwoAnswer}</p>
           </div>
 
           <div class="faq-item">
-            <h3>How do I order?</h3>
-            <p>You can contact the agent directly through the WhatsApp button on this page.</p>
+            <h3>${text.faqThreeQuestion}</h3>
+            <p>${text.faqThreeAnswer}</p>
           </div>
         </div>
       </div>
