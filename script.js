@@ -12,6 +12,7 @@ const productDescriptionInput = document.getElementById("productDescriptionInput
 const packageNameInput = document.getElementById("packageNameInput");
 const packagePriceInput = document.getElementById("packagePriceInput");
 const packageCheckoutLinkInput = document.getElementById("packageCheckoutLinkInput");
+const packageButtonTextInput = document.getElementById("packageButtonTextInput");
 const shortMessageInput = document.getElementById("shortMessageInput");
 const heroTitleInput = document.getElementById("heroTitleInput");
 const heroSubtitleInput = document.getElementById("heroSubtitleInput");
@@ -484,7 +485,7 @@ function PackageSection(data) {
           <h2>${data.packageName}</h2>
           <p>${data.packageDetails}</p>
           <div class="package-price">${data.packagePrice}</div>
-          <a class="btn" href="${packageLink}" target="_blank">Checkout Package</a>
+          <a class="btn" href="${packageLink}" target="_blank">${data.packageButtonText || "Checkout Package"}</a>
         </div>
 
         <div class="package-box">
@@ -910,6 +911,7 @@ function normalizeAgentData(data) {
     packageName: data.packageName || "Starter Wellness Package",
     packagePrice: data.packagePrice || "",
     packageCheckoutLink: data.packageCheckoutLink || "https://dogood.asia/Checkout?cl=8f14e45fceea167a5a36dedd4bea2543",
+    packageButtonText: data.packageButtonText || "Checkout Package",
     packageDetails: data.packageDetails || "",
     shortMessage: data.shortMessage || "Start your simple daily wellness routine with guidance from your Do Good agent.",
     productName: data.productName || "Do Good Premium Natural Complex Enzyme 131",
@@ -1004,6 +1006,7 @@ function setupContentControls(data) {
     !packageNameInput ||
     !packagePriceInput ||
     !packageCheckoutLinkInput ||
+    !packageButtonTextInput ||
     !shortMessageInput ||
     !heroTitleInput ||
     !heroSubtitleInput ||
@@ -1023,6 +1026,7 @@ function setupContentControls(data) {
   packageNameInput.value = data.packageName || "";
   packagePriceInput.value = data.packagePrice || "";
   packageCheckoutLinkInput.value = data.packageCheckoutLink || "";
+  packageButtonTextInput.value = data.packageButtonText || "";
   shortMessageInput.value = data.shortMessage || "";
   heroTitleInput.value = data.heroTitle || "";
   heroSubtitleInput.value = data.heroSubtitle || "";
@@ -1041,6 +1045,7 @@ function setupContentControls(data) {
     currentAgentData.packageName = packageNameInput.value.trim();
     currentAgentData.packagePrice = packagePriceInput.value.trim();
     currentAgentData.packageCheckoutLink = packageCheckoutLinkInput.value.trim();
+    currentAgentData.packageButtonText = packageButtonTextInput.value.trim();
     currentAgentData.shortMessage = shortMessageInput.value.trim();
     currentAgentData.heroTitle = heroTitleInput.value.trim();
     currentAgentData.heroSubtitle = heroSubtitleInput.value.trim();
@@ -1061,6 +1066,7 @@ function setupContentControls(data) {
   packageNameInput.addEventListener("input", updateContent);
   packagePriceInput.addEventListener("input", updateContent);
   packageCheckoutLinkInput.addEventListener("input", updateContent);
+  packageButtonTextInput.addEventListener("input", updateContent);
   shortMessageInput.addEventListener("input", updateContent);
   heroTitleInput.addEventListener("input", updateContent);
   heroSubtitleInput.addEventListener("input", updateContent);
