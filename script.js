@@ -3,6 +3,7 @@ const themeSelect = document.getElementById("themeSelect");
 const audienceSelect = document.getElementById("audienceSelect");
 const structureSelect = document.getElementById("structureSelect");
 const heroStyleSelect = document.getElementById("heroStyleSelect");
+const languageSelect = document.getElementById("languageSelect");
 const sectionCheckboxes = document.querySelectorAll(".section-controls input[type='checkbox']");
 const agentNameInput = document.getElementById("agentNameInput");
 const whatsappInput = document.getElementById("whatsappInput");
@@ -44,7 +45,92 @@ function getSafeImage(imageUrl, fallbackText) {
     : `https://placehold.co/600x600?text=${safeText}`;
 }
 
+function getText(language = "en") {
+  const texts = {
+    en: {
+      brand: "Do Good",
+      whatsapp: "WhatsApp",
+      product: "Product",
+      package: "Package",
+      agent: "Agent",
+      faq: "FAQ",
+
+      heroProductEyebrow: "Do Good Wellness",
+      heroProductTitle: "Start Your Daily Wellness Routine with Do Good",
+      heroProductFallback: "A simple wellness routine guided by your Do Good agent.",
+
+      heroAgentEyebrow: "Personal Agent Guidance",
+      heroAgentTitle: "Start Your Wellness Journey with",
+      heroAgentFallback: "Your Do Good Agent",
+      heroAgentText: "Get simple product guidance, package explanation, and support before you begin your daily wellness routine.",
+
+      heroProblemEyebrow: "Simple Daily Wellness",
+      heroProblemTitle: "Feeling Tired, Heavy, or Inconsistent with Your Routine?",
+      heroProblemText: "Do Good helps you begin with a simple daily wellness habit that is easy to understand and easy to follow.",
+      askHowToStart: "Ask How To Start",
+
+      dailyConcern: "Daily Wellness Concern",
+      productIntro: "Product Introduction",
+      whyItHelps: "Why It Helps",
+      benefitsTitle: "What makes it easy to start?",
+      packageOffer: "Package Offer",
+      includedPackage: "Included in this package",
+      packageIncludedText: "Product details, basic usage guidance, ordering support, and follow-up from your Do Good agent.",
+      agentGuidance: "Agent Guidance",
+      agentGuidanceTitle: "Your Do Good Agent Will Guide You",
+      questions: "Questions",
+      faqTitle: "Frequently Asked Questions",
+      startToday: "Start Today",
+      finalCtaTitle: "Ready to start your simple wellness routine?",
+      finalCtaButton: "WhatsApp My Agent Now",
+      disclaimer: "This product is a wellness supplement and is not intended to diagnose, treat, cure, or prevent any disease. Individual experiences may vary. Please consult a doctor or pharmacist before consumption if you are pregnant, breastfeeding, under medication, have allergies, or have an existing medical condition."
+    },
+
+    zh: {
+      brand: "善金",
+      whatsapp: "WhatsApp",
+      product: "产品",
+      package: "配套",
+      agent: "代理",
+      faq: "常见问题",
+
+      heroProductEyebrow: "善金健康生活",
+      heroProductTitle: "从善金开始你的每日健康习惯",
+      heroProductFallback: "由你的善金代理为你提供简单的日常健康指导。",
+
+      heroAgentEyebrow: "个人代理指导",
+      heroAgentTitle: "与你的善金代理开始健康旅程：",
+      heroAgentFallback: "善金代理",
+      heroAgentText: "在开始每日健康习惯之前，获得产品说明、配套讲解和基本指导。",
+
+      heroProblemEyebrow: "简单日常养护",
+      heroProblemTitle: "是否经常感到疲惫、沉重，或生活习惯不稳定？",
+      heroProblemText: "善金帮助你从简单、容易理解、容易坚持的日常健康习惯开始。",
+      askHowToStart: "询问如何开始",
+
+      dailyConcern: "日常健康关注",
+      productIntro: "产品介绍",
+      whyItHelps: "产品优势",
+      benefitsTitle: "为什么容易开始？",
+      packageOffer: "产品配套",
+      includedPackage: "此配套包含",
+      packageIncludedText: "产品资料、基本使用指导、下单协助，以及善金代理的后续跟进。",
+      agentGuidance: "代理指导",
+      agentGuidanceTitle: "你的善金代理将为你提供指导",
+      questions: "常见问题",
+      faqTitle: "常见问题",
+      startToday: "立即开始",
+      finalCtaTitle: "准备开始你的简单健康习惯了吗？",
+      finalCtaButton: "立即 WhatsApp 我的代理",
+      disclaimer: "本产品为健康辅助食品，并非用于诊断、治疗、治愈或预防任何疾病。个人体验可能有所不同。如你正在怀孕、哺乳、服用药物、对特定成分敏感，或有任何既有健康状况，食用前请先咨询医生或药剂师。"
+    }
+  };
+
+  return texts[language] || texts.en;
+}
+
 function HeaderSection(data) {
+  const text = getText(data.language);
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
     `Hi ${data.agentName}, I want to know more about ${data.productName}.`
@@ -54,22 +140,22 @@ function HeaderSection(data) {
 
   const navItems = [
     {
-      label: "Product",
+      label: text.product,
       target: "product",
       section: "product"
     },
     {
-      label: "Package",
+      label: text.package,
       target: "package",
       section: "package"
     },
     {
-      label: "Agent",
+      label: text.agent,
       target: "agent",
       section: "agent"
     },
     {
-      label: "FAQ",
+      label: text.faq,
       target: "faq",
       section: "faq"
     }
@@ -84,7 +170,7 @@ function HeaderSection(data) {
       <div class="container header-inner">
         <a href="#hero" class="brand">
           <span class="brand-mark">DG</span>
-          <span>Do Good</span>
+          <span>${text.brand}</span>
         </a>
 
         <nav class="site-nav">
@@ -94,7 +180,7 @@ function HeaderSection(data) {
         </nav>
 
         <a class="header-cta" href="${whatsappLink}" target="_blank">
-          WhatsApp
+        ${text.whatsapp}
         </a>
       </div>
     </header>
@@ -102,32 +188,34 @@ function HeaderSection(data) {
 }
 
 function getHeroContent(data) {
+  const text = getText(data.language);
+
   const heroStyles = {
     "product-focus": {
-      eyebrow: "Do Good Wellness",
-      title: "Start Your Daily Wellness Routine with Do Good",
-      text: data.shortMessage || "A simple wellness routine guided by your Do Good agent.",
+      eyebrow: text.heroProductEyebrow,
+      title: text.heroProductTitle,
+      text: data.shortMessage || text.heroProductFallback,
       image: getSafeImage(data.productImage, "Do Good Product"),
       imageAlt: data.productName || "Do Good Product",
       buttonText: `WhatsApp ${data.agentName || "Agent"}`
     },
 
     "agent-focus": {
-      eyebrow: "Personal Agent Guidance",
-      title: `Start Your Wellness Journey with ${data.agentName || "Your Do Good Agent"}`,
-      text: "Get simple product guidance, package explanation, and support before you begin your daily wellness routine.",
+      eyebrow: text.heroAgentEyebrow,
+      title: `${text.heroAgentTitle} ${data.agentName || text.heroAgentFallback}`,
+      text: text.heroAgentText,
       image: getSafeImage(data.agentPhoto, "Agent Photo"),
       imageAlt: data.agentName || "Do Good Agent",
       buttonText: `Chat with ${data.agentName || "Agent"}`
     },
 
     "problem-focus": {
-      eyebrow: "Simple Daily Wellness",
-      title: "Feeling Tired, Heavy, or Inconsistent with Your Routine?",
-      text: "Do Good helps you begin with a simple daily wellness habit that is easy to understand and easy to follow.",
+      eyebrow: text.heroProblemEyebrow,
+      title: text.heroProblemTitle,
+      text: text.heroProblemText,
       image: getSafeImage(data.productImage, "Do Good Product"),
       imageAlt: data.productName || "Do Good Product",
-      buttonText: "Ask How To Start"
+      buttonText: text.askHowToStart
     }
   };
 
@@ -285,6 +373,7 @@ function PainPointSection(data) {
 }
 
 function ProductSection(data) {
+  const text = getText(data.language);
   return `
     <section id="product">
       <div class="container product-grid">
@@ -293,7 +382,7 @@ function ProductSection(data) {
         </div>
 
         <div>
-          <p class="eyebrow">Product Introduction</p>
+          <p class="eyebrow">${text.productIntro}</p>
           <h2>${data.productName}</h2>
           <p>Do Good is a convenient enzyme-based wellness drink designed for people who want to build a simple daily health routine. It comes in sachet form, making it easy to consume at home, at work, or while travelling.</p>
         </div>
@@ -302,12 +391,14 @@ function ProductSection(data) {
   `;
 }
 
-function BenefitsSection() {
+function BenefitsSection(data) {
+  const text = getText(data.language);
+
   return `
     <section>
       <div class="container">
-        <p class="eyebrow">Why It Helps</p>
-        <h2>What makes it easy to start?</h2>
+        <p class="eyebrow">${text.whyItHelps}</p>
+        <h2>${text.benefitsTitle}</h2>
 
         <div class="card-grid">
           <div class="card">
@@ -331,6 +422,7 @@ function BenefitsSection() {
 }
 
 function PackageSection(data) {
+  const text = getText(data.language);
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
     `Hi ${data.agentName}, I want to ask about the ${data.packageName}.`
@@ -340,7 +432,7 @@ function PackageSection(data) {
     <section id="package">
       <div class="container package-grid">
         <div>
-          <p class="eyebrow">Package Offer</p>
+          <p class="eyebrow">${text.packageOffer}</p>
           <h2>${data.packageName}</h2>
           <p>${data.packageDetails}</p>
           <div class="package-price">${data.packagePrice}</div>
@@ -348,8 +440,8 @@ function PackageSection(data) {
         </div>
 
         <div class="package-box">
-          <h3>Included in this package</h3>
-          <p>Product details, basic usage guidance, ordering support, and follow-up from your Do Good agent.</p>
+        <h3>${text.includedPackage}</h3>
+        <p>${text.packageIncludedText}</p>
         </div>
       </div>
     </section>
@@ -357,6 +449,7 @@ function PackageSection(data) {
 }
 
 function AgentSection(data) {
+  const text = getText(data.language);
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
     `Hi ${data.agentName}, I need guidance before starting Do Good.`
@@ -370,8 +463,8 @@ function AgentSection(data) {
         </div>
 
         <div>
-          <p class="eyebrow">Agent Guidance</p>
-          <h2>Your Do Good Agent Will Guide You</h2>
+        <p class="eyebrow">${text.agentGuidance}</p>
+        <h2>${text.agentGuidanceTitle}</h2>
           <p>When you order through this page, ${data.agentName} can help you understand the product, choose a suitable package, explain the daily routine, and support your reorder process.</p>
           <a class="btn" href="${whatsappLink}" target="_blank">Chat with ${data.agentName}</a>
         </div>
@@ -380,12 +473,14 @@ function AgentSection(data) {
   `;
 }
 
-function FAQSection() {
+function FAQSection(data) {
+  const text = getText(data.language);
+
   return `
     <section id="faq">
       <div class="container">
-        <p class="eyebrow">Questions</p>
-        <h2>Frequently Asked Questions</h2>
+        <p class="eyebrow">${text.questions}</p>
+        <h2>${text.faqTitle}</h2>
 
         <div class="faq-list">
           <div class="faq-item">
@@ -409,6 +504,7 @@ function FAQSection() {
 }
 
 function FinalCTASection(data) {
+  const text = getText(data.language);
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
     `Hi ${data.agentName}, I am ready to start my wellness routine with Do Good.`
@@ -417,15 +513,15 @@ function FinalCTASection(data) {
   return `
     <section class="final-cta">
       <div class="container">
-        <p class="eyebrow">Start Today</p>
-        <h2>Ready to start your simple wellness routine?</h2>
+        <p class="eyebrow">${text.startToday}</p>
+        <h2>${text.finalCtaTitle}</h2>
         <p>Speak with ${data.agentName} today and get guidance before you begin.</p>
-        <a class="btn" href="${whatsappLink}" target="_blank">WhatsApp My Agent Now</a>
+        <a class="btn" href="${whatsappLink}" target="_blank">${text.finalCtaButton}</a>
       </div>
     </section>
 
     <div class="disclaimer">
-      This product is a wellness supplement and is not intended to diagnose, treat, cure, or prevent any disease. Individual experiences may vary. Please consult a doctor or pharmacist before consumption if you are pregnant, breastfeeding, under medication, have allergies, or have an existing medical condition.
+      ${text.disclaimer}
     </div>
   `;
 }
@@ -636,11 +732,19 @@ function syncSectionCheckboxes(sections) {
 }
 
 function setupPreviewControls(data) {
-  if (!themeSelect || !audienceSelect || !structureSelect || !heroStyleSelect) return;
-
+  if (
+    !themeSelect ||
+    !audienceSelect ||
+    !structureSelect ||
+    !heroStyleSelect ||
+    !languageSelect
+  ) {
+    return;
+  }
   themeSelect.value = data.theme || "natural-cream";
   audienceSelect.value = data.targetAudience || "General audience";
   heroStyleSelect.value = data.heroStyle || "product-focus";
+  languageSelect.value = data.language || "en";
   structureSelect.value = data.structure && data.structure !== "custom"
     ? data.structure
     : "standard";
@@ -696,6 +800,12 @@ audienceSelect.addEventListener("change", () => {
 
 heroStyleSelect.addEventListener("change", () => {
   currentAgentData.heroStyle = heroStyleSelect.value;
+  renderLandingPage(currentAgentData);
+  saveDraftToBrowser();
+});
+
+languageSelect.addEventListener("change", () => {
+  currentAgentData.language = languageSelect.value;
   renderLandingPage(currentAgentData);
   saveDraftToBrowser();
 });
