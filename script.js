@@ -22,6 +22,7 @@ const validationStatus = document.getElementById("validationStatus");
 const packageDetailsInput = document.getElementById("packageDetailsInput");
 const productImageInput = document.getElementById("productImageInput");
 const agentPhotoInput = document.getElementById("agentPhotoInput");
+const agentDescriptionInput = document.getElementById("agentDescriptionInput");
 const whatsappMessageInput = document.getElementById("whatsappMessageInput");
 
 let currentAgentData = null;
@@ -494,6 +495,9 @@ function PackageSection(data) {
 
 function AgentSection(data) {
   const text = getText(data.language);
+  const agentDescription = data.agentDescription && data.agentDescription.trim()
+  ? data.agentDescription
+  : `When you order through this page, ${data.agentName} can help you understand the product, choose a suitable package, explain the daily routine, and support your reorder process.`;
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
     getWhatsAppMessage(
@@ -512,7 +516,7 @@ function AgentSection(data) {
         <div>
         <p class="eyebrow">${text.agentGuidance}</p>
         <h2>${text.agentGuidanceTitle}</h2>
-          <p>When you order through this page, ${data.agentName} can help you understand the product, choose a suitable package, explain the daily routine, and support your reorder process.</p>
+          <p>${agentDescription}</p>
           <a class="btn" href="${whatsappLink}" target="_blank">Chat with ${data.agentName}</a>
         </div>
       </div>
@@ -908,6 +912,7 @@ function normalizeAgentData(data) {
     productDescription: data.productDescription || "Do Good is a convenient enzyme-based wellness drink designed for people who want to build a simple daily health routine. It comes in sachet form, making it easy to consume at home, at work, or while travelling.",
     productImage: data.productImage || "https://via.placeholder.com/600x600?text=Do+Good+Product",
     agentPhoto: data.agentPhoto || "https://via.placeholder.com/400x400?text=Agent+Photo",
+    agentDescription: data.agentDescription || "",
     whatsappMessage: data.whatsappMessage || ""
   };
 }
@@ -1000,6 +1005,7 @@ function setupContentControls(data) {
     !packageDetailsInput ||
     !productImageInput ||
     !agentPhotoInput ||
+    !agentDescriptionInput ||
     !whatsappMessageInput
   ) {
     return;
@@ -1017,6 +1023,7 @@ function setupContentControls(data) {
   packageDetailsInput.value = data.packageDetails || "";
   productImageInput.value = data.productImage || "";
   agentPhotoInput.value = data.agentPhoto || "";
+  agentDescriptionInput.value = data.agentDescription || "";
   whatsappMessageInput.value = data.whatsappMessage || "";
 
   const updateContent = () => {
@@ -1033,6 +1040,7 @@ function setupContentControls(data) {
     currentAgentData.packageDetails = packageDetailsInput.value.trim();
     currentAgentData.productImage = productImageInput.value.trim();
     currentAgentData.agentPhoto = agentPhotoInput.value.trim();
+    currentAgentData.agentDescription = agentDescriptionInput.value.trim();
     currentAgentData.whatsappMessage = whatsappMessageInput.value.trim();
 
     renderLandingPage(currentAgentData);
@@ -1051,6 +1059,7 @@ function setupContentControls(data) {
   packageDetailsInput.addEventListener("input", updateContent);
   productImageInput.addEventListener("input", updateContent);
   agentPhotoInput.addEventListener("input", updateContent);
+  agentDescriptionInput.addEventListener("input", updateContent);
   whatsappMessageInput.addEventListener("input", updateContent);
 }
 
