@@ -8,6 +8,7 @@ const sectionCheckboxes = document.querySelectorAll(".section-controls input[typ
 const agentNameInput = document.getElementById("agentNameInput");
 const whatsappInput = document.getElementById("whatsappInput");
 const productNameInput = document.getElementById("productNameInput");
+const productDescriptionInput = document.getElementById("productDescriptionInput");
 const packageNameInput = document.getElementById("packageNameInput");
 const packagePriceInput = document.getElementById("packagePriceInput");
 const shortMessageInput = document.getElementById("shortMessageInput");
@@ -424,7 +425,7 @@ function ProductSection(data) {
         <div>
           <p class="eyebrow">${text.productIntro}</p>
           <h2>${data.productName}</h2>
-          <p>Do Good is a convenient enzyme-based wellness drink designed for people who want to build a simple daily health routine. It comes in sachet form, making it easy to consume at home, at work, or while travelling.</p>
+          <p>${data.productDescription}</p>
         </div>
       </div>
     </section>
@@ -904,6 +905,7 @@ function normalizeAgentData(data) {
     packageDetails: data.packageDetails || "",
     shortMessage: data.shortMessage || "Start your simple daily wellness routine with guidance from your Do Good agent.",
     productName: data.productName || "Do Good Premium Natural Complex Enzyme 131",
+    productDescription: data.productDescription || "Do Good is a convenient enzyme-based wellness drink designed for people who want to build a simple daily health routine. It comes in sachet form, making it easy to consume at home, at work, or while travelling.",
     productImage: data.productImage || "https://via.placeholder.com/600x600?text=Do+Good+Product",
     agentPhoto: data.agentPhoto || "https://via.placeholder.com/400x400?text=Agent+Photo",
     whatsappMessage: data.whatsappMessage || ""
@@ -989,6 +991,7 @@ function setupContentControls(data) {
     !agentNameInput ||
     !whatsappInput ||
     !productNameInput ||
+    !productDescriptionInput ||
     !packageNameInput ||
     !packagePriceInput ||
     !shortMessageInput ||
@@ -1005,6 +1008,7 @@ function setupContentControls(data) {
   agentNameInput.value = data.agentName || "";
   whatsappInput.value = data.whatsappNumber || "";
   productNameInput.value = data.productName || "";
+  productDescriptionInput.value = data.productDescription || "";
   packageNameInput.value = data.packageName || "";
   packagePriceInput.value = data.packagePrice || "";
   shortMessageInput.value = data.shortMessage || "";
@@ -1020,6 +1024,7 @@ function setupContentControls(data) {
     currentAgentData.slug = createSlug(currentAgentData.agentName);
     currentAgentData.whatsappNumber = whatsappInput.value.trim();
     currentAgentData.productName = productNameInput.value.trim();
+    currentAgentData.productDescription = productDescriptionInput.value.trim();
     currentAgentData.packageName = packageNameInput.value.trim();
     currentAgentData.packagePrice = packagePriceInput.value.trim();
     currentAgentData.shortMessage = shortMessageInput.value.trim();
@@ -1037,6 +1042,7 @@ function setupContentControls(data) {
   agentNameInput.addEventListener("input", updateContent);
   whatsappInput.addEventListener("input", updateContent);
   productNameInput.addEventListener("input", updateContent);
+  productDescriptionInput.addEventListener("input", updateContent);
   packageNameInput.addEventListener("input", updateContent);
   packagePriceInput.addEventListener("input", updateContent);
   shortMessageInput.addEventListener("input", updateContent);
