@@ -10,6 +10,8 @@ const whatsappInput = document.getElementById("whatsappInput");
 const packageNameInput = document.getElementById("packageNameInput");
 const packagePriceInput = document.getElementById("packagePriceInput");
 const shortMessageInput = document.getElementById("shortMessageInput");
+const heroTitleInput = document.getElementById("heroTitleInput");
+const heroSubtitleInput = document.getElementById("heroSubtitleInput");
 const exportJsonBtn = document.getElementById("exportJsonBtn");
 const exportHtmlBtn = document.getElementById("exportHtmlBtn");
 const clearDraftBtn = document.getElementById("clearDraftBtn");
@@ -217,8 +219,8 @@ function getHeroContent(data) {
   const heroStyles = {
     "product-focus": {
       eyebrow: text.heroProductEyebrow,
-      title: text.heroProductTitle,
-      text: data.shortMessage || text.heroProductFallback,
+      title: data.heroTitle || text.heroProductTitle,
+      text: data.heroSubtitle || data.shortMessage || text.heroProductFallback,
       image: getSafeImage(data.productImage, "Do Good Product"),
       imageAlt: data.productName || "Do Good Product",
       buttonText: `WhatsApp ${data.agentName || "Agent"}`
@@ -226,8 +228,8 @@ function getHeroContent(data) {
 
     "agent-focus": {
       eyebrow: text.heroAgentEyebrow,
-      title: `${text.heroAgentTitle} ${data.agentName || text.heroAgentFallback}`,
-      text: text.heroAgentText,
+      title: data.heroTitle || `${text.heroAgentTitle} ${data.agentName || text.heroAgentFallback}`,
+      text: data.heroSubtitle || text.heroAgentText,
       image: getSafeImage(data.agentPhoto, "Agent Photo"),
       imageAlt: data.agentName || "Do Good Agent",
       buttonText: `Chat with ${data.agentName || "Agent"}`
@@ -235,8 +237,8 @@ function getHeroContent(data) {
 
     "problem-focus": {
       eyebrow: text.heroProblemEyebrow,
-      title: text.heroProblemTitle,
-      text: text.heroProblemText,
+      title: data.heroTitle || text.heroProblemTitle,
+      text: data.heroSubtitle || text.heroProblemText,
       image: getSafeImage(data.productImage, "Do Good Product"),
       imageAlt: data.productName || "Do Good Product",
       buttonText: text.askHowToStart
@@ -867,6 +869,8 @@ function normalizeAgentData(data) {
     theme: data.theme || "natural-cream",
     language: data.language || "en",
     heroStyle: data.heroStyle || "product-focus",
+    heroTitle: data.heroTitle || "",
+    heroSubtitle: data.heroSubtitle || "",
     structure: data.structure || getStructureFromSections(data.sections || defaultSections),
     sections: Array.isArray(data.sections) && data.sections.length
     ? data.sections
@@ -958,23 +962,27 @@ function createSlug(text) {
 
 function setupContentControls(data) {
   if (
-  !agentNameInput ||
-  !whatsappInput ||
-  !packageNameInput ||
-  !packagePriceInput ||
-  !shortMessageInput ||
-  !packageDetailsInput ||
-  !productImageInput ||
-  !agentPhotoInput
-) {
-  return;
-}
+    !agentNameInput ||
+    !whatsappInput ||
+    !packageNameInput ||
+    !packagePriceInput ||
+    !shortMessageInput ||
+    !heroTitleInput ||
+    !heroSubtitleInput ||
+    !packageDetailsInput ||
+    !productImageInput ||
+    !agentPhotoInput
+  ) {
+    return;
+  }
 
   agentNameInput.value = data.agentName || "";
   whatsappInput.value = data.whatsappNumber || "";
   packageNameInput.value = data.packageName || "";
   packagePriceInput.value = data.packagePrice || "";
   shortMessageInput.value = data.shortMessage || "";
+  heroTitleInput.value = data.heroTitle || "";
+  heroSubtitleInput.value = data.heroSubtitle || "";
   packageDetailsInput.value = data.packageDetails || "";
   productImageInput.value = data.productImage || "";
   agentPhotoInput.value = data.agentPhoto || "";
@@ -986,6 +994,8 @@ function setupContentControls(data) {
   currentAgentData.packageName = packageNameInput.value.trim();
   currentAgentData.packagePrice = packagePriceInput.value.trim();
   currentAgentData.shortMessage = shortMessageInput.value.trim();
+  currentAgentData.heroTitle = heroTitleInput.value.trim();
+  currentAgentData.heroSubtitle = heroSubtitleInput.value.trim();
   currentAgentData.packageDetails = packageDetailsInput.value.trim();
   currentAgentData.productImage = productImageInput.value.trim();
   currentAgentData.agentPhoto = agentPhotoInput.value.trim();
@@ -999,6 +1009,8 @@ function setupContentControls(data) {
   packageNameInput.addEventListener("input", updateContent);
   packagePriceInput.addEventListener("input", updateContent);
   shortMessageInput.addEventListener("input", updateContent);
+  heroTitleInput.addEventListener("input", updateContent);
+  heroSubtitleInput.addEventListener("input", updateContent);
   packageDetailsInput.addEventListener("input", updateContent);
   productImageInput.addEventListener("input", updateContent);
   agentPhotoInput.addEventListener("input", updateContent);
