@@ -5,6 +5,7 @@ const structureSelect = document.getElementById("structureSelect");
 const heroStyleSelect = document.getElementById("heroStyleSelect");
 const languageSelect = document.getElementById("languageSelect");
 const sectionCheckboxes = document.querySelectorAll(".section-controls input[type='checkbox']");
+
 const agentNameInput = document.getElementById("agentNameInput");
 const whatsappInput = document.getElementById("whatsappInput");
 const productNameInput = document.getElementById("productNameInput");
@@ -16,16 +17,17 @@ const packageButtonTextInput = document.getElementById("packageButtonTextInput")
 const shortMessageInput = document.getElementById("shortMessageInput");
 const heroTitleInput = document.getElementById("heroTitleInput");
 const heroSubtitleInput = document.getElementById("heroSubtitleInput");
-const exportJsonBtn = document.getElementById("exportJsonBtn");
-const exportHtmlBtn = document.getElementById("exportHtmlBtn");
-const clearDraftBtn = document.getElementById("clearDraftBtn");
-const importJsonInput = document.getElementById("importJsonInput");
-const validationStatus = document.getElementById("validationStatus");
 const packageDetailsInput = document.getElementById("packageDetailsInput");
 const productImageInput = document.getElementById("productImageInput");
 const agentPhotoInput = document.getElementById("agentPhotoInput");
 const agentDescriptionInput = document.getElementById("agentDescriptionInput");
 const whatsappMessageInput = document.getElementById("whatsappMessageInput");
+
+const exportJsonBtn = document.getElementById("exportJsonBtn");
+const exportHtmlBtn = document.getElementById("exportHtmlBtn");
+const clearDraftBtn = document.getElementById("clearDraftBtn");
+const importJsonInput = document.getElementById("importJsonInput");
+const validationStatus = document.getElementById("validationStatus");
 
 let currentAgentData = null;
 
@@ -40,8 +42,8 @@ async function loadAgentData() {
 }
 
 function createWhatsAppLink(number, message) {
-  const cleanNumber = String(number).replace(/\D/g, "");
-  const encodedMessage = encodeURIComponent(message);
+  const cleanNumber = String(number || "").replace(/\D/g, "");
+  const encodedMessage = encodeURIComponent(message || "");
   return `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
 }
 
@@ -79,6 +81,7 @@ function getText(language = "en") {
 
       dailyConcern: "Daily Wellness Concern",
       productIntro: "Product Introduction",
+
       whyItHelps: "Why It Helps",
       benefitsTitle: "What makes it easy to start?",
       benefitSachetTitle: "Sachet Format",
@@ -87,11 +90,14 @@ function getText(language = "en") {
       benefitMonthlyText: "One box can support a simple and consistent daily wellness habit.",
       benefitAgentTitle: "Agent Guidance",
       benefitAgentText: "Your Do Good agent can guide you before and after you begin.",
+
       packageOffer: "Package Offer",
       includedPackage: "Included in this package",
       packageIncludedText: "Product details, basic usage guidance, ordering support, and follow-up from your Do Good agent.",
+
       agentGuidance: "Agent Guidance",
       agentGuidanceTitle: "Your Do Good Agent Will Guide You",
+
       questions: "Questions",
       faqTitle: "Frequently Asked Questions",
       faqOneQuestion: "What is Do Good Enzyme?",
@@ -100,9 +106,12 @@ function getText(language = "en") {
       faqTwoAnswer: "Yes, it is designed to be simple and easy to include in a daily routine.",
       faqThreeQuestion: "How do I order?",
       faqThreeAnswer: "You can contact the agent directly through the WhatsApp button on this page.",
+
       startToday: "Start Today",
       finalCtaTitle: "Ready to start your simple wellness routine?",
+      finalCtaText: "Speak with your Do Good agent today and get guidance before you begin.",
       finalCtaButton: "WhatsApp My Agent Now",
+
       disclaimer: "This product is a wellness supplement and is not intended to diagnose, treat, cure, or prevent any disease. Individual experiences may vary. Please consult a doctor or pharmacist before consumption if you are pregnant, breastfeeding, under medication, have allergies, or have an existing medical condition."
     },
 
@@ -130,6 +139,7 @@ function getText(language = "en") {
 
       dailyConcern: "日常健康关注",
       productIntro: "产品介绍",
+
       whyItHelps: "产品优势",
       benefitsTitle: "为什么容易开始？",
       benefitSachetTitle: "独立小包设计",
@@ -138,11 +148,14 @@ function getText(language = "en") {
       benefitMonthlyText: "一盒可帮助你建立更简单、更持续的每日健康习惯。",
       benefitAgentTitle: "代理贴心指导",
       benefitAgentText: "你的善金代理可以在你开始前后提供基本说明和跟进。",
+
       packageOffer: "产品配套",
       includedPackage: "此配套包含",
       packageIncludedText: "产品资料、基本使用指导、下单协助，以及善金代理的后续跟进。",
+
       agentGuidance: "代理指导",
       agentGuidanceTitle: "你的善金代理将为你提供指导",
+
       questions: "常见问题",
       faqTitle: "常见问题",
       faqOneQuestion: "什么是善金酵素？",
@@ -151,9 +164,12 @@ function getText(language = "en") {
       faqTwoAnswer: "适合。它的设计方向是简单、方便，并容易加入日常生活习惯中。",
       faqThreeQuestion: "我要如何下单？",
       faqThreeAnswer: "你可以直接点击页面上的 WhatsApp 按钮联系代理了解详情。",
+
       startToday: "立即开始",
       finalCtaTitle: "准备开始你的简单健康习惯了吗？",
+      finalCtaText: "立即联系你的善金代理，在开始前获得简单指导。",
       finalCtaButton: "立即 WhatsApp 我的代理",
+
       disclaimer: "本产品为健康辅助食品，并非用于诊断、治疗、治愈或预防任何疾病。个人体验可能有所不同。如你正在怀孕、哺乳、服用药物、对特定成分敏感，或有任何既有健康状况，食用前请先咨询医生或药剂师。"
     }
   };
@@ -169,6 +185,7 @@ function getWhatsAppMessage(data, fallbackMessage) {
 
 function HeaderSection(data) {
   const text = getText(data.language);
+
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
     getWhatsAppMessage(
@@ -221,7 +238,7 @@ function HeaderSection(data) {
         </nav>
 
         <a class="header-cta" href="${whatsappLink}" target="_blank">
-        ${text.whatsapp}
+          ${text.whatsapp}
         </a>
       </div>
     </header>
@@ -394,12 +411,13 @@ function getAudienceContent(targetAudience) {
 }
 
 function PainPointSection(data) {
+  const text = getText(data.language);
   const content = getAudienceContent(data.targetAudience);
 
   return `
     <section>
       <div class="container">
-        <p class="eyebrow">Daily Wellness Concern</p>
+        <p class="eyebrow">${text.dailyConcern}</p>
         <h2>${content.painTitle}</h2>
         <p>${content.painIntro}</p>
 
@@ -418,11 +436,12 @@ function PainPointSection(data) {
 
 function ProductSection(data) {
   const text = getText(data.language);
+
   return `
     <section id="product">
       <div class="container product-grid">
         <div class="product-image">
-          <img src="${data.productImage}" alt="${data.productName}">
+          <img src="${getSafeImage(data.productImage, "Do Good Product")}" alt="${data.productName}" onerror="this.src='https://placehold.co/600x600?text=Do+Good+Product'">
         </div>
 
         <div>
@@ -467,15 +486,20 @@ function BenefitsSection(data) {
 
 function PackageSection(data) {
   const text = getText(data.language);
+
   const packageLink = data.packageCheckoutLink && data.packageCheckoutLink.trim()
-  ? data.packageCheckoutLink.trim()
-  : createWhatsAppLink(
-      data.whatsappNumber,
-      getWhatsAppMessage(
-        data,
-        `Hi ${data.agentName}, I want to ask about the ${data.packageName}.`
-      )
-    );
+    ? data.packageCheckoutLink.trim()
+    : createWhatsAppLink(
+        data.whatsappNumber,
+        getWhatsAppMessage(
+          data,
+          `Hi ${data.agentName}, I want to ask about the ${data.packageName}.`
+        )
+      );
+
+  const packageButtonText = data.packageButtonText && data.packageButtonText.trim()
+    ? data.packageButtonText.trim()
+    : "Checkout Package";
 
   return `
     <section id="package">
@@ -485,12 +509,12 @@ function PackageSection(data) {
           <h2>${data.packageName}</h2>
           <p>${data.packageDetails}</p>
           <div class="package-price">${data.packagePrice}</div>
-          <a class="btn" href="${packageLink}" target="_blank">${data.packageButtonText || "Checkout Package"}</a>
+          <a class="btn" href="${packageLink}" target="_blank">${packageButtonText}</a>
         </div>
 
         <div class="package-box">
-        <h3>${text.includedPackage}</h3>
-        <p>${text.packageIncludedText}</p>
+          <h3>${text.includedPackage}</h3>
+          <p>${text.packageIncludedText}</p>
         </div>
       </div>
     </section>
@@ -499,9 +523,11 @@ function PackageSection(data) {
 
 function AgentSection(data) {
   const text = getText(data.language);
+
   const agentDescription = data.agentDescription && data.agentDescription.trim()
-  ? data.agentDescription
-  : `When you order through this page, ${data.agentName} can help you understand the product, choose a suitable package, explain the daily routine, and support your reorder process.`;
+    ? data.agentDescription.trim()
+    : `When you order through this page, ${data.agentName} can help you understand the product, choose a suitable package, explain the daily routine, and support your reorder process.`;
+
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
     getWhatsAppMessage(
@@ -518,8 +544,8 @@ function AgentSection(data) {
         </div>
 
         <div>
-        <p class="eyebrow">${text.agentGuidance}</p>
-        <h2>${text.agentGuidanceTitle}</h2>
+          <p class="eyebrow">${text.agentGuidance}</p>
+          <h2>${text.agentGuidanceTitle}</h2>
           <p>${agentDescription}</p>
           <a class="btn" href="${whatsappLink}" target="_blank">Chat with ${data.agentName}</a>
         </div>
@@ -560,6 +586,7 @@ function FAQSection(data) {
 
 function FinalCTASection(data) {
   const text = getText(data.language);
+
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
     getWhatsAppMessage(
@@ -573,7 +600,7 @@ function FinalCTASection(data) {
       <div class="container">
         <p class="eyebrow">${text.startToday}</p>
         <h2>${text.finalCtaTitle}</h2>
-        <p>Speak with ${data.agentName} today and get guidance before you begin.</p>
+        <p>${text.finalCtaText}</p>
         <a class="btn" href="${whatsappLink}" target="_blank">${text.finalCtaButton}</a>
       </div>
     </section>
@@ -697,6 +724,7 @@ function renderLandingPage(data) {
     .filter((sectionName) => sectionComponents[sectionName])
     .map((sectionName) => sectionComponents[sectionName](data))
     .join("");
+
   landingPage.innerHTML = `
     ${HeaderSection(data)}
     ${renderedSections}
@@ -799,6 +827,7 @@ function setupPreviewControls(data) {
   ) {
     return;
   }
+
   themeSelect.value = data.theme || "natural-cream";
   audienceSelect.value = data.targetAudience || "General audience";
   heroStyleSelect.value = data.heroStyle || "product-focus";
@@ -809,77 +838,67 @@ function setupPreviewControls(data) {
 
   const currentSections = Array.isArray(data.sections) && data.sections.length
     ? data.sections
-    : [
-        "hero",
-        "pain-point",
-        "product",
-        "benefits",
-        "package",
-        "agent",
-        "faq",
-        "cta"
-      ];
+    : getStructureSections(data.structure || "standard");
 
   syncSectionCheckboxes(currentSections);
 
-sectionCheckboxes.forEach((checkbox) => {
-  checkbox.addEventListener("change", () => {
-    const selectedOptionalSections = Array.from(sectionCheckboxes)
-      .filter((item) => item.checked)
-      .map((item) => item.value);
+  sectionCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", () => {
+      const selectedOptionalSections = Array.from(sectionCheckboxes)
+        .filter((item) => item.checked)
+        .map((item) => item.value);
 
-    currentAgentData.sections = [
-      "hero",
-      ...selectedOptionalSections,
-      "cta"
-    ];
+      currentAgentData.sections = [
+        "hero",
+        ...selectedOptionalSections,
+        "cta"
+      ];
 
-    currentAgentData.structure = getStructureFromSections(currentAgentData.sections);
-    structureSelect.value = currentAgentData.structure === "custom"
-      ? "standard"
-      : currentAgentData.structure;
+      currentAgentData.structure = getStructureFromSections(currentAgentData.sections);
+      structureSelect.value = currentAgentData.structure === "custom"
+        ? "standard"
+        : currentAgentData.structure;
 
+      renderLandingPage(currentAgentData);
+      saveDraftToBrowser();
+    });
+  });
+
+  themeSelect.addEventListener("change", () => {
+    currentAgentData.theme = themeSelect.value;
     renderLandingPage(currentAgentData);
     saveDraftToBrowser();
   });
-});
 
-  themeSelect.addEventListener("change", () => {
-  currentAgentData.theme = themeSelect.value;
-  renderLandingPage(currentAgentData);
-  saveDraftToBrowser();
-});
+  audienceSelect.addEventListener("change", () => {
+    currentAgentData.targetAudience = audienceSelect.value;
+    renderLandingPage(currentAgentData);
+    saveDraftToBrowser();
+  });
 
-audienceSelect.addEventListener("change", () => {
-  currentAgentData.targetAudience = audienceSelect.value;
-  renderLandingPage(currentAgentData);
-  saveDraftToBrowser();
-});
+  heroStyleSelect.addEventListener("change", () => {
+    currentAgentData.heroStyle = heroStyleSelect.value;
+    renderLandingPage(currentAgentData);
+    saveDraftToBrowser();
+  });
 
-heroStyleSelect.addEventListener("change", () => {
-  currentAgentData.heroStyle = heroStyleSelect.value;
-  renderLandingPage(currentAgentData);
-  saveDraftToBrowser();
-});
+  languageSelect.addEventListener("change", () => {
+    currentAgentData.language = languageSelect.value;
+    renderLandingPage(currentAgentData);
+    saveDraftToBrowser();
+  });
 
-languageSelect.addEventListener("change", () => {
-  currentAgentData.language = languageSelect.value;
-  renderLandingPage(currentAgentData);
-  saveDraftToBrowser();
-});
+  structureSelect.addEventListener("change", () => {
+    const selectedStructure = structureSelect.value;
+    const selectedSections = getStructureSections(selectedStructure);
 
-structureSelect.addEventListener("change", () => {
-  const selectedStructure = structureSelect.value;
-  const selectedSections = getStructureSections(selectedStructure);
+    currentAgentData.structure = selectedStructure;
+    currentAgentData.sections = selectedSections;
 
-  currentAgentData.structure = selectedStructure;
-  currentAgentData.sections = selectedSections;
-
-  syncSectionCheckboxes(selectedSections);
-  renderLandingPage(currentAgentData);
-  saveDraftToBrowser();
-});
-
+    syncSectionCheckboxes(selectedSections);
+    renderLandingPage(currentAgentData);
+    saveDraftToBrowser();
+  });
 }
 
 function normalizeAgentData(data) {
@@ -905,8 +924,8 @@ function normalizeAgentData(data) {
     heroSubtitle: data.heroSubtitle || "",
     structure: data.structure || getStructureFromSections(data.sections || defaultSections),
     sections: Array.isArray(data.sections) && data.sections.length
-    ? data.sections
-    : getStructureSections(data.structure || "standard"),
+      ? data.sections
+      : getStructureSections(data.structure || "standard"),
     targetAudience: data.targetAudience || "General audience",
     packageName: data.packageName || "Starter Wellness Package",
     packagePrice: data.packagePrice || "",
@@ -916,8 +935,8 @@ function normalizeAgentData(data) {
     shortMessage: data.shortMessage || "Start your simple daily wellness routine with guidance from your Do Good agent.",
     productName: data.productName || "Do Good Premium Natural Complex Enzyme 131",
     productDescription: data.productDescription || "Do Good is a convenient enzyme-based wellness drink designed for people who want to build a simple daily health routine. It comes in sachet form, making it easy to consume at home, at work, or while travelling.",
-    productImage: data.productImage || "https://via.placeholder.com/600x600?text=Do+Good+Product",
-    agentPhoto: data.agentPhoto || "https://via.placeholder.com/400x400?text=Agent+Photo",
+    productImage: data.productImage || "https://placehold.co/600x600?text=Do+Good+Product",
+    agentPhoto: data.agentPhoto || "https://placehold.co/600x600?text=Agent+Photo",
     agentDescription: data.agentDescription || "",
     whatsappMessage: data.whatsappMessage || ""
   };
@@ -1045,7 +1064,7 @@ function setupContentControls(data) {
     currentAgentData.packageName = packageNameInput.value.trim();
     currentAgentData.packagePrice = packagePriceInput.value.trim();
     currentAgentData.packageCheckoutLink = packageCheckoutLinkInput.value.trim();
-    currentAgentData.packageButtonText = packageButtonTextInput.value.trim();
+    currentAgentData.packageButtonText = packageButtonTextInput.value.trim() || "Checkout Package";
     currentAgentData.shortMessage = shortMessageInput.value.trim();
     currentAgentData.heroTitle = heroTitleInput.value.trim();
     currentAgentData.heroSubtitle = heroSubtitleInput.value.trim();
@@ -1143,7 +1162,7 @@ async function init() {
   try {
     const agentData = await loadAgentData();
     const savedDraft = loadDraftFromBrowser();
-    
+
     currentAgentData = normalizeAgentData(savedDraft || agentData);
 
     renderLandingPage(currentAgentData);
