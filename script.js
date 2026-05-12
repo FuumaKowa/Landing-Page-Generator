@@ -231,10 +231,9 @@ function HeaderSection(data) {
   return `
     <header class="site-header">
       <div class="container header-inner">
-        <a href="#hero" class="brand">
-          <span class="brand-mark">DG</span>
-          <span>${text.brand}</span>
-        </a>
+      <a href="#hero" class="brand">
+        <img class="brand-logo" src="assets/Do Good Asia Logo.png" alt="Do Good Asia Logo">
+      </a>
 
         <nav class="site-nav">
           ${visibleNavItems.map((item) => `

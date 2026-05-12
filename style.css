@@ -561,23 +561,15 @@ p {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
   color: var(--text);
   text-decoration: none;
-  font-weight: 800;
 }
 
-.brand-mark {
-  width: 38px;
-  height: 38px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--primary);
-  color: var(--white);
-  font-size: 0.82rem;
-  letter-spacing: 0.5px;
+.brand-logo {
+  width: auto;
+  height: 42px;
+  object-fit: contain;
+  display: block;
 }
 
 .site-nav {
@@ -843,6 +835,10 @@ body.theme-soft-pink .final-cta p {
 @media (max-width: 850px) {
   section {
     padding: 64px 6%;
+  }
+
+  .brand-logo {
+    height: 38px;
   }
 
   .header-inner {
