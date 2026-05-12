@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="preview-panel">
-    <strong>Landing Page Builder</strong>
+    <strong>Landing Page</strong>
 
     <label>
       Theme
@@ -59,138 +59,140 @@
     </label>
 
     <div class="section-controls">
-  <span>Sections</span>
+      <span>Sections</span>
 
-  <label>
-    <input type="checkbox" value="pain-point" checked>
-    Pain Point
-  </label>
+      <label>
+        <input type="checkbox" value="pain-point" checked>
+        Pain Point
+      </label>
 
-  <label>
-    <input type="checkbox" value="product" checked>
-    Product
-  </label>
+      <label>
+        <input type="checkbox" value="product" checked>
+        Product
+      </label>
 
-  <label>
-    <input type="checkbox" value="benefits" checked>
-    Benefits
-  </label>
+      <label>
+        <input type="checkbox" value="benefits" checked>
+        Benefits
+      </label>
 
-  <label>
-    <input type="checkbox" value="package" checked>
-    Package
-  </label>
+      <label>
+        <input type="checkbox" value="package" checked>
+        Package
+      </label>
 
-  <label>
-    <input type="checkbox" value="agent" checked>
-    Agent
-  </label>
+      <label>
+        <input type="checkbox" value="agent" checked>
+        Agent
+      </label>
 
-  <label>
-    <input type="checkbox" value="faq" checked>
-    FAQ
-  </label>
-</div>
+      <label>
+        <input type="checkbox" value="faq" checked>
+        FAQ
+      </label>
+    </div>
 
-<div class="content-controls">
-  <label>
-    Agent Name
-    <input type="text" id="agentNameInput" placeholder="Agent name">
-  </label>
+    <div class="content-controls">
+      <label>
+        Agent Name
+        <input type="text" id="agentNameInput" placeholder="Agent name">
+      </label>
 
-  <label>
-    WhatsApp
-    <input type="text" id="whatsappInput" placeholder="60123456789">
-  </label>
+      <label>
+        WhatsApp
+        <input type="text" id="whatsappInput" placeholder="60123456789">
+      </label>
 
-  <label>
-    Product Name
-    <input type="text" id="productNameInput" placeholder="Product name">
-  </label>
+      <label>
+        Product Name
+        <input type="text" id="productNameInput" placeholder="Product name">
+      </label>
 
-  <label class="wide-control">
-    Product Description
-    <textarea id="productDescriptionInput" placeholder="Describe the product in simple customer-friendly wording"></textarea>
-  </label>
+      <label class="wide-control">
+        Product Description
+        <textarea id="productDescriptionInput" placeholder="Describe the product in simple customer-friendly wording"></textarea>
+      </label>
 
-  <label>
-    Package Name
-    <input type="text" id="packageNameInput" placeholder="Package name">
-  </label>
+      <label>
+        Package Name
+        <input type="text" id="packageNameInput" placeholder="Package name">
+      </label>
 
-  <label>
-    Package Price
-    <input type="text" id="packagePriceInput" placeholder="RM188">
-  </label>
+      <label>
+        Package Price
+        <input type="text" id="packagePriceInput" placeholder="RM188">
+      </label>
 
-  <label class="wide-control">
-    Package Checkout Link
-    <input type="text" id="packageCheckoutLinkInput" placeholder="Paste checkout link">
-  </label>
+      <label class="wide-control">
+        Package Checkout Link
+        <input type="text" id="packageCheckoutLinkInput" placeholder="Paste checkout link">
+      </label>
 
-  <label>
-    Package Button Text
-    <input type="text" id="packageButtonTextInput" placeholder="Checkout Package">
-  </label>
+      <label>
+        Package Button Text
+        <input type="text" id="packageButtonTextInput" placeholder="Checkout Package">
+      </label>
 
-  <label class="wide-control">
-  Short Message
-  <input type="text" id="shortMessageInput" placeholder="Short landing page message">
-</label>
+      <label class="wide-control">
+        Short Message
+        <input type="text" id="shortMessageInput" placeholder="Short landing page message">
+      </label>
 
-<label class="wide-control">
-  Custom Hero Title
-  <input type="text" id="heroTitleInput" placeholder="Leave empty to use preset headline">
-</label>
+      <label class="wide-control">
+        Custom Hero Title
+        <input type="text" id="heroTitleInput" placeholder="Leave empty to use preset headline">
+      </label>
 
-<label class="wide-control">
-  Custom Hero Subtitle
-  <input type="text" id="heroSubtitleInput" placeholder="Leave empty to use preset subtitle">
-</label>
+      <label class="wide-control">
+        Custom Hero Subtitle
+        <input type="text" id="heroSubtitleInput" placeholder="Leave empty to use preset subtitle">
+      </label>
 
-<label class="wide-control">
-  Package Details
-  <textarea id="packageDetailsInput" placeholder="Describe what is included in this package"></textarea>
-</label>
+      <label class="wide-control">
+        Package Details
+        <textarea id="packageDetailsInput" placeholder="Describe what is included in this package"></textarea>
+      </label>
 
-<label class="wide-control">
-  Product Image URL
-  <input type="text" id="productImageInput" placeholder="Paste product image URL">
-</label>
+      <label class="wide-control">
+        Product Image URL
+        <input type="text" id="productImageInput" placeholder="Paste product image URL">
+      </label>
 
-<label class="wide-control">
-  Agent Photo URL
-  <input type="text" id="agentPhotoInput" placeholder="Paste agent photo URL">
-</label>
+      <label class="wide-control">
+        Agent Photo URL
+        <input type="text" id="agentPhotoInput" placeholder="Paste agent photo URL">
+      </label>
 
-<label class="wide-control">
-  Agent Description
-  <textarea id="agentDescriptionInput" placeholder="Write a short agent introduction or guidance message"></textarea>
-</label>
+      <label class="wide-control">
+        Agent Description
+        <textarea id="agentDescriptionInput" placeholder="Write a short agent introduction or guidance message"></textarea>
+      </label>
 
-<label class="wide-control">
-  Custom WhatsApp Message
-  <textarea id="whatsappMessageInput" placeholder="Leave empty to use default WhatsApp message"></textarea>
-</label>
-</div>
+      <label class="wide-control">
+        Custom WhatsApp Message
+        <textarea id="whatsappMessageInput" placeholder="Leave empty to use default WhatsApp message"></textarea>
+      </label>
+    </div>
 
-<div class="export-controls">
-  <label class="import-json-label">
-  Import Agent JSON
-  <input type="file" id="importJsonInput" accept="application/json">
-</label>
+    <div id="validationStatus" class="validation-status"></div>
 
-<div id="validationStatus" class="validation-status"></div>
-<div class="compliance-note">
-  Please avoid medical claims such as cure, treat, prevent disease, reduce cholesterol, fix diabetes, or replace medication.
-</div>
+    <div class="compliance-note">
+      Please avoid medical claims such as cure, treat, prevent disease, reduce cholesterol, fix diabetes, or replace medication.
+    </div>
 
-<button id="previewModeBtn" type="button">Preview as Customer</button>
-<button id="submitRequestBtn" type="button">Submit Landing Page Request</button>
-<button id="exportJsonBtn" type="button">Export Agent JSON</button>
-<button id="exportHtmlBtn" type="button">Export Landing Page HTML</button>
-<button id="clearDraftBtn" type="button">Clear Draft</button>
-</div>
+    <div class="export-controls">
+      <label class="import-json-label">
+        Import Agent JSON
+        <input type="file" id="importJsonInput" accept="application/json">
+      </label>
+
+      <button id="previewModeBtn" type="button">Preview as Customer</button>
+      <button id="submitRequestBtn" type="button">Submit Landing Page Request</button>
+      <button id="exportJsonBtn" type="button">Export Agent JSON</button>
+      <button id="exportHtmlBtn" type="button">Export Landing Page HTML</button>
+      <button id="clearDraftBtn" type="button">Clear Draft</button>
+    </div>
+  </div>
 
   <main id="landingPage"></main>
 
