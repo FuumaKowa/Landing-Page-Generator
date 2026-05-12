@@ -692,19 +692,26 @@ function updateBuilderProgress(data) {
     .filter((field) => !field.valid)
     .map((field) => field.label);
 
-  if (!remainingFields.length) {
-    builderProgress.innerHTML = `
-      <strong>Completion:</strong> ${status.completedCount} / ${status.totalCount} required fields completed.
-      <br>
-      <strong>Status:</strong> Ready to submit.
-    `;
-    return;
-  }
+  const isReady = remainingFields.length === 0;
+
+  builderProgress.className = isReady
+    ? "builder-progress ready"
+    : "builder-progress incomplete";
 
   builderProgress.innerHTML = `
-    <strong>Completion:</strong> ${status.completedCount} / ${status.totalCount} required fields completed.
-    <br>
-    <strong>Missing:</strong> ${remainingFields.join(", ")}
+    <div class="builder-progress-text">
+      <div class="builder-progress-title">
+        ${isReady ? "Ready to submit" : "Complete your landing page request"}
+      </div>
+      <div class="builder-progress-meta">
+        ${status.completedCount} / ${status.totalCount} required fields completed
+        ${isReady ? "" : ` • Missing: ${remainingFields.slice(0, 3).join(", ")}${remainingFields.length > 3 ? "..." : ""}`}
+      </div>
+    </div>
+
+    <div class="builder-progress-pill">
+      ${isReady ? "Ready" : `${status.totalCount - status.completedCount} missing`}
+    </div>
   `;
 }
 
