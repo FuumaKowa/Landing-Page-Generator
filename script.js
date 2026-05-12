@@ -2,6 +2,7 @@ const landingPage = document.getElementById("landingPage");
 const themeSelect = document.getElementById("themeSelect");
 const audienceSelect = document.getElementById("audienceSelect");
 const structureSelect = document.getElementById("structureSelect");
+const heroStyleSelect = document.getElementById("heroStyleSelect");
 const sectionCheckboxes = document.querySelectorAll(".section-controls input[type='checkbox']");
 const agentNameInput = document.getElementById("agentNameInput");
 const whatsappInput = document.getElementById("whatsappInput");
@@ -100,7 +101,42 @@ function HeaderSection(data) {
   `;
 }
 
+function getHeroContent(data) {
+  const heroStyles = {
+    "product-focus": {
+      eyebrow: "Do Good Wellness",
+      title: "Start Your Daily Wellness Routine with Do Good",
+      text: data.shortMessage || "A simple wellness routine guided by your Do Good agent.",
+      image: getSafeImage(data.productImage, "Do Good Product"),
+      imageAlt: data.productName || "Do Good Product",
+      buttonText: `WhatsApp ${data.agentName || "Agent"}`
+    },
+
+    "agent-focus": {
+      eyebrow: "Personal Agent Guidance",
+      title: `Start Your Wellness Journey with ${data.agentName || "Your Do Good Agent"}`,
+      text: "Get simple product guidance, package explanation, and support before you begin your daily wellness routine.",
+      image: getSafeImage(data.agentPhoto, "Agent Photo"),
+      imageAlt: data.agentName || "Do Good Agent",
+      buttonText: `Chat with ${data.agentName || "Agent"}`
+    },
+
+    "problem-focus": {
+      eyebrow: "Simple Daily Wellness",
+      title: "Feeling Tired, Heavy, or Inconsistent with Your Routine?",
+      text: "Do Good helps you begin with a simple daily wellness habit that is easy to understand and easy to follow.",
+      image: getSafeImage(data.productImage, "Do Good Product"),
+      imageAlt: data.productName || "Do Good Product",
+      buttonText: "Ask How To Start"
+    }
+  };
+
+  return heroStyles[data.heroStyle] || heroStyles["product-focus"];
+}
+
 function HeroSection(data) {
+  const heroContent = getHeroContent(data);
+
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
     `Hi ${data.agentName}, I want to know more about ${data.productName}.`
@@ -110,15 +146,15 @@ function HeroSection(data) {
     <section id="hero" class="hero">
       <div class="container hero-grid">
         <div class="hero-text">
-          <p class="eyebrow">Do Good Wellness</p>
-          <h1>Start Your Daily Wellness Routine with Do Good</h1>
-          <p>${data.shortMessage}</p>
-          <a class="btn" href="${whatsappLink}" target="_blank">WhatsApp ${data.agentName}</a>
+          <p class="eyebrow">${heroContent.eyebrow}</p>
+          <h1>${heroContent.title}</h1>
+          <p>${heroContent.text}</p>
+          <a class="btn" href="${whatsappLink}" target="_blank">${heroContent.buttonText}</a>
         </div>
 
         <div class="hero-image">
-          <img src="${getSafeImage(data.productImage, "Do Good Product")}" alt="${data.productName}" onerror="this.src='https://placehold.co/600x600?text=Do+Good+Product'">
-          </div>
+          <img src="${heroContent.image}" alt="${heroContent.imageAlt}" onerror="this.src='https://placehold.co/600x600?text=Do+Good+Image'">
+        </div>
       </div>
     </section>
   `;
@@ -600,10 +636,11 @@ function syncSectionCheckboxes(sections) {
 }
 
 function setupPreviewControls(data) {
-  if (!themeSelect || !audienceSelect || !structureSelect) return;
+  if (!themeSelect || !audienceSelect || !structureSelect || !heroStyleSelect) return;
 
   themeSelect.value = data.theme || "natural-cream";
   audienceSelect.value = data.targetAudience || "General audience";
+  heroStyleSelect.value = data.heroStyle || "product-focus";
   structureSelect.value = data.structure && data.structure !== "custom"
     ? data.structure
     : "standard";
@@ -657,6 +694,12 @@ audienceSelect.addEventListener("change", () => {
   saveDraftToBrowser();
 });
 
+heroStyleSelect.addEventListener("change", () => {
+  currentAgentData.heroStyle = heroStyleSelect.value;
+  renderLandingPage(currentAgentData);
+  saveDraftToBrowser();
+});
+
 structureSelect.addEventListener("change", () => {
   const selectedStructure = structureSelect.value;
   const selectedSections = getStructureSections(selectedStructure);
@@ -689,6 +732,7 @@ function normalizeAgentData(data) {
     whatsappNumber: data.whatsappNumber || "",
     theme: data.theme || "natural-cream",
     language: data.language || "en",
+    heroStyle: data.heroStyle || "product-focus",
     structure: data.structure || getStructureFromSections(data.sections || defaultSections),
     sections: Array.isArray(data.sections) && data.sections.length
     ? data.sections
