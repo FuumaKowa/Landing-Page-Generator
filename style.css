@@ -115,6 +115,29 @@ section {
   background: var(--section-alt);
 }
 
+.builder-progress {
+  width: 100%;
+  padding: 14px 16px;
+  margin: -4px 0 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.builder-progress strong {
+  width: auto;
+  display: inline;
+  margin: 0;
+  font-size: inherit;
+  color: #ffffff;
+}
+
+.builder-progress strong::after {
+  content: "";
+}
+
 .builder-preview-divider {
   padding: 18px 8%;
   background: #111111;

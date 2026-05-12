@@ -33,6 +33,7 @@ const scrollToPreviewBtn = document.getElementById("scrollToPreviewBtn");
 
 const importJsonInput = document.getElementById("importJsonInput");
 const validationStatus = document.getElementById("validationStatus");
+const builderProgress = document.getElementById("builderProgress");
 
 let currentAgentData = null;
 
@@ -638,6 +639,75 @@ function applyTheme(theme) {
   document.documentElement.style.background = "var(--bg)";
 }
 
+function getRequiredFieldStatus(data) {
+  const requiredFields = [
+    {
+      label: "Agent Name",
+      valid: Boolean(data.agentName && data.agentName.trim())
+    },
+    {
+      label: "WhatsApp Number",
+      valid: Boolean(data.whatsappNumber && String(data.whatsappNumber).trim())
+    },
+    {
+      label: "Product Name",
+      valid: Boolean(data.productName && data.productName.trim())
+    },
+    {
+      label: "Package Name",
+      valid: Boolean(data.packageName && data.packageName.trim())
+    },
+    {
+      label: "Package Price",
+      valid: Boolean(data.packagePrice && data.packagePrice.trim())
+    },
+    {
+      label: "Package Checkout Link",
+      valid: Boolean(data.packageCheckoutLink && data.packageCheckoutLink.trim())
+    },
+    {
+      label: "Product Image",
+      valid: Boolean(data.productImage && data.productImage.trim())
+    },
+    {
+      label: "Agent Photo",
+      valid: Boolean(data.agentPhoto && data.agentPhoto.trim())
+    }
+  ];
+
+  const completedCount = requiredFields.filter((field) => field.valid).length;
+
+  return {
+    requiredFields,
+    completedCount,
+    totalCount: requiredFields.length
+  };
+}
+
+function updateBuilderProgress(data) {
+  if (!builderProgress) return;
+
+  const status = getRequiredFieldStatus(data);
+  const remainingFields = status.requiredFields
+    .filter((field) => !field.valid)
+    .map((field) => field.label);
+
+  if (!remainingFields.length) {
+    builderProgress.innerHTML = `
+      <strong>Completion:</strong> ${status.completedCount} / ${status.totalCount} required fields completed.
+      <br>
+      <strong>Status:</strong> Ready to submit.
+    `;
+    return;
+  }
+
+  builderProgress.innerHTML = `
+    <strong>Completion:</strong> ${status.completedCount} / ${status.totalCount} required fields completed.
+    <br>
+    <strong>Missing:</strong> ${remainingFields.join(", ")}
+  `;
+}
+
 function validateAgentData(data) {
   const issues = [];
 
@@ -705,6 +775,7 @@ function updateValidationStatus(data) {
 function renderLandingPage(data) {
   applyTheme(data.theme);
   updateValidationStatus(data);
+  updateBuilderProgress(data);
 
   const defaultSections = [
     "hero",
