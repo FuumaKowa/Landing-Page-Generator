@@ -29,6 +29,8 @@ const submitRequestBtn = document.getElementById("submitRequestBtn");
 const exportJsonBtn = document.getElementById("exportJsonBtn");
 const exportHtmlBtn = document.getElementById("exportHtmlBtn");
 const clearDraftBtn = document.getElementById("clearDraftBtn");
+const scrollToPreviewBtn = document.getElementById("scrollToPreviewBtn");
+
 const importJsonInput = document.getElementById("importJsonInput");
 const validationStatus = document.getElementById("validationStatus");
 
@@ -828,6 +830,17 @@ function syncSectionCheckboxes(sections) {
   });
 }
 
+function setupScrollToPreviewControl() {
+  if (!scrollToPreviewBtn) return;
+
+  scrollToPreviewBtn.addEventListener("click", () => {
+    landingPage.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  });
+}
+
 function setupPreviewControls(data) {
   if (
     !themeSelect ||
@@ -1262,6 +1275,8 @@ async function init() {
     currentAgentData = normalizeAgentData(savedDraft || agentData);
 
     renderLandingPage(currentAgentData);
+    setupScrollToPreviewControl();
+    setupPreviewModeControls();
     setupPreviewControls(currentAgentData);
     setupContentControls(currentAgentData);
     setupPreviewModeControls();

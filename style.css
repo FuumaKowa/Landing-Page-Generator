@@ -73,6 +73,10 @@ body.theme-soft-pink {
   --shadow: 0 20px 60px rgba(214, 51, 108, 0.12);
 }
 
+body.customer-preview .builder-preview-divider {
+  display: none;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -111,23 +115,61 @@ section {
   background: var(--section-alt);
 }
 
+.builder-preview-divider {
+  padding: 18px 8%;
+  background: #111111;
+  color: #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.builder-preview-divider h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.builder-preview-divider p {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.85rem;
+}
+
 .container {
   width: min(1120px, 100%);
   margin: 0 auto;
 }
 
 .preview-panel {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 1000;
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   align-items: center;
-  padding: 14px 8%;
+  max-height: 78vh;
+  overflow-y: auto;
+  padding: 18px 8%;
   background: #111111;
   color: #ffffff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.preview-panel::-webkit-scrollbar {
+  width: 10px;
+}
+
+.preview-panel::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+.preview-panel::-webkit-scrollbar-thumb {
+  background: #555555;
+  border-radius: 999px;
+}
+
+.preview-panel::-webkit-scrollbar-thumb:hover {
+  background: #777777;
 }
 
 .preview-panel strong {
