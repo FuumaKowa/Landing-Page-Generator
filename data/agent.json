@@ -1,7 +1,7 @@
 {
-  "slug": "agent-daniel",
-  "agentName": "Daniel",
-  "whatsappNumber": "601123456789",
+  "slug": "agent",
+  "agentName": "agent",
+  "whatsappNumber": "60123456789",
   "theme": "premium-dark",
   "language": "en",
   "sections": [
