@@ -7,6 +7,7 @@ const languageSelect = document.getElementById("languageSelect");
 const sectionCheckboxes = document.querySelectorAll(".section-controls input[type='checkbox']");
 const agentNameInput = document.getElementById("agentNameInput");
 const whatsappInput = document.getElementById("whatsappInput");
+const productNameInput = document.getElementById("productNameInput");
 const packageNameInput = document.getElementById("packageNameInput");
 const packagePriceInput = document.getElementById("packagePriceInput");
 const shortMessageInput = document.getElementById("shortMessageInput");
@@ -20,6 +21,7 @@ const validationStatus = document.getElementById("validationStatus");
 const packageDetailsInput = document.getElementById("packageDetailsInput");
 const productImageInput = document.getElementById("productImageInput");
 const agentPhotoInput = document.getElementById("agentPhotoInput");
+const whatsappMessageInput = document.getElementById("whatsappMessageInput");
 
 let currentAgentData = null;
 
@@ -155,11 +157,20 @@ function getText(language = "en") {
   return texts[language] || texts.en;
 }
 
+function getWhatsAppMessage(data, fallbackMessage) {
+  return data.whatsappMessage && data.whatsappMessage.trim()
+    ? data.whatsappMessage.trim()
+    : fallbackMessage;
+}
+
 function HeaderSection(data) {
   const text = getText(data.language);
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
-    `Hi ${data.agentName}, I want to know more about ${data.productName}.`
+    getWhatsAppMessage(
+      data,
+      `Hi ${data.agentName}, I want to know more about ${data.productName}.`
+    )
   );
 
   const selectedSections = Array.isArray(data.sections) ? data.sections : [];
@@ -253,7 +264,10 @@ function HeroSection(data) {
 
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
-    `Hi ${data.agentName}, I want to know more about ${data.productName}.`
+    getWhatsAppMessage(
+      data,
+      `Hi ${data.agentName}, I want to know more about ${data.productName}.`
+    )
   );
 
   return `
@@ -451,7 +465,10 @@ function PackageSection(data) {
   const text = getText(data.language);
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
-    `Hi ${data.agentName}, I want to ask about the ${data.packageName}.`
+    getWhatsAppMessage(
+      data,
+      `Hi ${data.agentName}, I want to ask about the ${data.packageName}.`
+    )
   );
 
   return `
@@ -478,7 +495,10 @@ function AgentSection(data) {
   const text = getText(data.language);
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
-    `Hi ${data.agentName}, I need guidance before starting Do Good.`
+    getWhatsAppMessage(
+      data,
+      `Hi ${data.agentName}, I need guidance before starting Do Good.`
+    )
   );
 
   return `
@@ -533,7 +553,10 @@ function FinalCTASection(data) {
   const text = getText(data.language);
   const whatsappLink = createWhatsAppLink(
     data.whatsappNumber,
-    `Hi ${data.agentName}, I am ready to start my wellness routine with Do Good.`
+    getWhatsAppMessage(
+      data,
+      `Hi ${data.agentName}, I am ready to start my wellness routine with Do Good.`
+    )
   );
 
   return `
@@ -882,7 +905,8 @@ function normalizeAgentData(data) {
     shortMessage: data.shortMessage || "Start your simple daily wellness routine with guidance from your Do Good agent.",
     productName: data.productName || "Do Good Premium Natural Complex Enzyme 131",
     productImage: data.productImage || "https://via.placeholder.com/600x600?text=Do+Good+Product",
-    agentPhoto: data.agentPhoto || "https://via.placeholder.com/400x400?text=Agent+Photo"
+    agentPhoto: data.agentPhoto || "https://via.placeholder.com/400x400?text=Agent+Photo",
+    whatsappMessage: data.whatsappMessage || ""
   };
 }
 
@@ -964,6 +988,7 @@ function setupContentControls(data) {
   if (
     !agentNameInput ||
     !whatsappInput ||
+    !productNameInput ||
     !packageNameInput ||
     !packagePriceInput ||
     !shortMessageInput ||
@@ -971,13 +996,15 @@ function setupContentControls(data) {
     !heroSubtitleInput ||
     !packageDetailsInput ||
     !productImageInput ||
-    !agentPhotoInput
+    !agentPhotoInput ||
+    !whatsappMessageInput
   ) {
     return;
   }
 
   agentNameInput.value = data.agentName || "";
   whatsappInput.value = data.whatsappNumber || "";
+  productNameInput.value = data.productName || "";
   packageNameInput.value = data.packageName || "";
   packagePriceInput.value = data.packagePrice || "";
   shortMessageInput.value = data.shortMessage || "";
@@ -986,11 +1013,13 @@ function setupContentControls(data) {
   packageDetailsInput.value = data.packageDetails || "";
   productImageInput.value = data.productImage || "";
   agentPhotoInput.value = data.agentPhoto || "";
+  whatsappMessageInput.value = data.whatsappMessage || "";
 
   const updateContent = () => {
   currentAgentData.agentName = agentNameInput.value.trim();
   currentAgentData.slug = createSlug(currentAgentData.agentName);
   currentAgentData.whatsappNumber = whatsappInput.value.trim();
+  currentAgentData.productName = productNameInput.value.trim();
   currentAgentData.packageName = packageNameInput.value.trim();
   currentAgentData.packagePrice = packagePriceInput.value.trim();
   currentAgentData.shortMessage = shortMessageInput.value.trim();
@@ -999,6 +1028,7 @@ function setupContentControls(data) {
   currentAgentData.packageDetails = packageDetailsInput.value.trim();
   currentAgentData.productImage = productImageInput.value.trim();
   currentAgentData.agentPhoto = agentPhotoInput.value.trim();
+  productNameInput.addEventListener("input", updateContent);
 
   renderLandingPage(currentAgentData);
   saveDraftToBrowser();

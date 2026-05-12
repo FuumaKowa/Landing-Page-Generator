@@ -5,6 +5,8 @@
   "theme": "soft-pink",
   "language": "en",
   "heroStyle": "agent-focus",
+  "heroTitle": "Lorem Ipsum Dolor Sit Amet",
+  "heroSubtitle": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit",
   "structure": "standard",
   "sections": [
     "hero",
@@ -23,5 +25,6 @@
   "shortMessage": "Start your premium daily life with guidance from your Do Good agent.",
   "productName": "Do Good Premium Natural Complex Enzyme 131",
   "productImage": "assets/product.png",
-  "agentPhoto": "assets/agent.jpg"
+  "agentPhoto": "assets/agent.jpg",
+  "whatsappMessage": ""
 }
