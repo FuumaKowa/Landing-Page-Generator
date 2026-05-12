@@ -1016,26 +1016,27 @@ function setupContentControls(data) {
   whatsappMessageInput.value = data.whatsappMessage || "";
 
   const updateContent = () => {
-  currentAgentData.agentName = agentNameInput.value.trim();
-  currentAgentData.slug = createSlug(currentAgentData.agentName);
-  currentAgentData.whatsappNumber = whatsappInput.value.trim();
-  currentAgentData.productName = productNameInput.value.trim();
-  currentAgentData.packageName = packageNameInput.value.trim();
-  currentAgentData.packagePrice = packagePriceInput.value.trim();
-  currentAgentData.shortMessage = shortMessageInput.value.trim();
-  currentAgentData.heroTitle = heroTitleInput.value.trim();
-  currentAgentData.heroSubtitle = heroSubtitleInput.value.trim();
-  currentAgentData.packageDetails = packageDetailsInput.value.trim();
-  currentAgentData.productImage = productImageInput.value.trim();
-  currentAgentData.agentPhoto = agentPhotoInput.value.trim();
-  productNameInput.addEventListener("input", updateContent);
+    currentAgentData.agentName = agentNameInput.value.trim();
+    currentAgentData.slug = createSlug(currentAgentData.agentName);
+    currentAgentData.whatsappNumber = whatsappInput.value.trim();
+    currentAgentData.productName = productNameInput.value.trim();
+    currentAgentData.packageName = packageNameInput.value.trim();
+    currentAgentData.packagePrice = packagePriceInput.value.trim();
+    currentAgentData.shortMessage = shortMessageInput.value.trim();
+    currentAgentData.heroTitle = heroTitleInput.value.trim();
+    currentAgentData.heroSubtitle = heroSubtitleInput.value.trim();
+    currentAgentData.packageDetails = packageDetailsInput.value.trim();
+    currentAgentData.productImage = productImageInput.value.trim();
+    currentAgentData.agentPhoto = agentPhotoInput.value.trim();
+    currentAgentData.whatsappMessage = whatsappMessageInput.value.trim();
 
-  renderLandingPage(currentAgentData);
-  saveDraftToBrowser();
-};
+    renderLandingPage(currentAgentData);
+    saveDraftToBrowser();
+  };
 
   agentNameInput.addEventListener("input", updateContent);
   whatsappInput.addEventListener("input", updateContent);
+  productNameInput.addEventListener("input", updateContent);
   packageNameInput.addEventListener("input", updateContent);
   packagePriceInput.addEventListener("input", updateContent);
   shortMessageInput.addEventListener("input", updateContent);
@@ -1044,6 +1045,7 @@ function setupContentControls(data) {
   packageDetailsInput.addEventListener("input", updateContent);
   productImageInput.addEventListener("input", updateContent);
   agentPhotoInput.addEventListener("input", updateContent);
+  whatsappMessageInput.addEventListener("input", updateContent);
 }
 
 function setupExportControls() {
