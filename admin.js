@@ -150,6 +150,36 @@ function getStoredPublishedPages() {
   function saveStoredPublishedPages(pages) {
     localStorage.setItem("dogoodPublishedLandingPages", JSON.stringify(pages));
   }
+
+  function approveSubmission(id) {
+    const submissions = getStoredSubmissions();
+    const submission = submissions.find((item) => item.id === id);
+  
+    if (!submission) {
+      alert("Submission not found.");
+      return;
+    }
+  
+    if (submission.paymentStatus !== "payment_confirmed") {
+      alert("Payment must be confirmed before this landing page can be approved.");
+      return;
+    }
+  
+    if (submission.status === "needs_changes") {
+      alert("This request still needs changes. It must be resubmitted before approval.");
+      return;
+    }
+  
+    if (submission.status === "rejected") {
+      alert("This request has been rejected and cannot be approved.");
+      return;
+    }
+  
+    updateSubmission(id, {
+      approvalStatus: "approved",
+      status: "approved"
+    });
+  }
   
   function publishSubmission(id) {
     const submissions = getStoredSubmissions();
@@ -167,6 +197,16 @@ function getStoredPublishedPages() {
   
     if (submission.approvalStatus !== "approved") {
       alert("Landing page must be approved before publishing.");
+      return;
+    }
+  
+    if (submission.status === "needs_changes") {
+      alert("This request still needs changes. It must be resubmitted before publishing.");
+      return;
+    }
+  
+    if (submission.status === "rejected") {
+      alert("This request has been rejected and cannot be published.");
       return;
     }
   
@@ -549,7 +589,7 @@ function renderRequests() {
             Confirm Payment
           </button>
 
-          <button class="approve-btn" type="button" onclick="updateSubmission('${submission.id}', { approvalStatus: 'approved', status: 'approved' })">
+          <button class="approve-btn" type="button" onclick="approveSubmission('${submission.id}')">
             Approve
           </button>
 
