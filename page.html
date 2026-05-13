@@ -9,7 +9,12 @@
 <body>
   <main id="landingPage"></main>
 
+  <script>
+    window.DO_GOOD_PUBLIC_VIEWER = true;
+  </script>
+
   <script src="script.js"></script>
+
   <script>
     function getPublishedPageBySlug(slug) {
       const savedPages = localStorage.getItem("dogoodPublishedLandingPages");
@@ -32,32 +37,31 @@
       return params.get("slug");
     }
 
-    window.addEventListener("load", () => {
+    function renderNotFound(message) {
+      const landingPage = document.getElementById("landingPage");
+
+      landingPage.innerHTML = `
+        <section>
+          <div class="container">
+            <h1>Published page not found</h1>
+            <p>${message}</p>
+          </div>
+        </section>
+      `;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
       const slug = getSlugFromUrl();
 
       if (!slug) {
-        document.getElementById("landingPage").innerHTML = `
-          <section>
-            <div class="container">
-              <h1>Published page not found</h1>
-              <p>No slug was provided.</p>
-            </div>
-          </section>
-        `;
+        renderNotFound("No slug was provided.");
         return;
       }
 
       const publishedPage = getPublishedPageBySlug(slug);
 
       if (!publishedPage) {
-        document.getElementById("landingPage").innerHTML = `
-          <section>
-            <div class="container">
-              <h1>Published page not found</h1>
-              <p>No published landing page exists for this slug.</p>
-            </div>
-          </section>
-        `;
+        renderNotFound("No published landing page exists for this slug.");
         return;
       }
 

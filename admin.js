@@ -216,7 +216,7 @@ function getStoredPublishedPages() {
       JSON.stringify(page.agentData)
     );
   
-    window.open("index.html", "_blank");
+    window.open(`page.html?slug=${encodeURIComponent(page.slug)}`, "_blank");
   }
   
   function renderPublishedPages() {

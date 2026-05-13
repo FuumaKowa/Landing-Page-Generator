@@ -1372,4 +1372,6 @@ async function init() {
   }
 }
 
-init();
+if (!window.DO_GOOD_PUBLIC_VIEWER) {
+  init();
+}
