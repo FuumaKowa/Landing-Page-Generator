@@ -41,12 +41,12 @@
         <span>Approved</span>
         <strong id="approvedRequests">0</strong>
       </div>
-    </section>
     
-    <div class="stat-card">
+      <div class="stat-card">
         <span>Published</span>
         <strong id="publishedRequests">0</strong>
-      </div>
+    </div>
+    </section>
 
     <section class="admin-panel">
       <div class="panel-header">
@@ -64,6 +64,24 @@
 
       <div id="requestsList" class="requests-list"></div>
     </section>
+
+    <section class="admin-panel published-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Published Pages</h2>
+            <p>These are locally published pages. Later, these will become live routes such as landing.dogood.asia/a/agent-slug.</p>
+          </div>
+      
+          <button id="refreshPublishedBtn" type="button">Refresh Published</button>
+        </div>
+      
+        <div id="publishedEmptyState" class="empty-state">
+          No published landing pages yet.
+        </div>
+      
+        <div id="publishedList" class="requests-list"></div>
+      </section>
+
   </main>
 
   <script src="admin.js"></script>

@@ -117,6 +117,10 @@
     border: 1px solid #e4dacd;
     box-shadow: 0 16px 40px rgba(36, 31, 27, 0.06);
   }
+
+  .published-panel {
+    margin-top: 24px;
+  }
   
   .panel-header {
     display: flex;
@@ -135,10 +139,11 @@
     color: #6c6258;
   }
   
-  #refreshBtn {
-    background: #111111;
-    color: #ffffff;
-  }
+  #refreshBtn,
+  #refreshPublishedBtn {
+  background: #111111;
+  color: #ffffff;
+}
   
   .empty-state {
     display: none;

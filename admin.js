@@ -2,6 +2,9 @@ const requestsList = document.getElementById("requestsList");
 const emptyState = document.getElementById("emptyState");
 const refreshBtn = document.getElementById("refreshBtn");
 const clearAllBtn = document.getElementById("clearAllBtn");
+const refreshPublishedBtn = document.getElementById("refreshPublishedBtn");
+const publishedEmptyState = document.getElementById("publishedEmptyState");
+const publishedList = document.getElementById("publishedList");
 
 const totalRequests = document.getElementById("totalRequests");
 const pendingRequests = document.getElementById("pendingRequests");
@@ -187,10 +190,108 @@ function getStoredPublishedPages() {
     alert(`Page published locally.\n\nPublic path: ${publishedPage.publicPath}`);
   }
 
+  function deletePublishedPage(id) {
+    const confirmDelete = confirm("Delete this locally published page?");
+  
+    if (!confirmDelete) return;
+  
+    const publishedPages = getStoredPublishedPages();
+    const updatedPages = publishedPages.filter((page) => page.id !== id);
+  
+    saveStoredPublishedPages(updatedPages);
+    renderPublishedPages();
+  }
+  
+  function previewPublishedPage(id) {
+    const publishedPages = getStoredPublishedPages();
+    const page = publishedPages.find((item) => item.id === id);
+  
+    if (!page) {
+      alert("Published page not found.");
+      return;
+    }
+  
+    localStorage.setItem(
+      "dogoodAgentLandingDraft",
+      JSON.stringify(page.agentData)
+    );
+  
+    window.open("index.html", "_blank");
+  }
+  
+  function renderPublishedPages() {
+    if (!publishedList || !publishedEmptyState) return;
+  
+    const publishedPages = getStoredPublishedPages();
+  
+    if (!publishedPages.length) {
+      publishedEmptyState.style.display = "block";
+      publishedList.innerHTML = "";
+      return;
+    }
+  
+    publishedEmptyState.style.display = "none";
+  
+    publishedList.innerHTML = publishedPages.map((page) => {
+      const data = page.agentData || {};
+  
+      return `
+        <article class="request-card">
+          <div class="request-top">
+            <div class="request-title">
+              <h3>${data.agentName || "Unnamed Agent"}</h3>
+              <p>${page.publicPath || "-"}</p>
+              <p>Published: ${formatDate(page.publishedAt)}</p>
+            </div>
+  
+            <div class="badges">
+              <span class="badge approved">${page.status || "published"}</span>
+              <span class="badge review">${data.theme || "-"}</span>
+              <span class="badge payment">${data.language || "-"}</span>
+            </div>
+          </div>
+  
+          <div class="request-details">
+            <div class="detail-box">
+              <span>Slug</span>
+              <strong>${page.slug || "-"}</strong>
+            </div>
+  
+            <div class="detail-box">
+              <span>WhatsApp</span>
+              <strong>${data.whatsappNumber || "-"}</strong>
+            </div>
+  
+            <div class="detail-box">
+              <span>Package</span>
+              <strong>${data.packageName || "-"}</strong>
+            </div>
+  
+            <div class="detail-box">
+              <span>Public Path</span>
+              <strong>${page.publicPath || "-"}</strong>
+            </div>
+          </div>
+  
+          <div class="request-actions">
+            <button type="button" onclick="previewPublishedPage('${page.id}')">
+              Preview Published Page
+            </button>
+  
+            <button class="delete-btn" type="button" onclick="deletePublishedPage('${page.id}')">
+              Delete Published Page
+            </button>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
 function renderRequests() {
   const submissions = getStoredSubmissions();
 
   updateStats(submissions);
+  renderPublishedPages();
 
   if (!submissions.length) {
     emptyState.style.display = "block";
@@ -277,6 +378,10 @@ if (refreshBtn) {
   refreshBtn.addEventListener("click", renderRequests);
 }
 
+if (refreshPublishedBtn) {
+    refreshPublishedBtn.addEventListener("click", renderPublishedPages);
+  }
+
 if (clearAllBtn) {
   clearAllBtn.addEventListener("click", () => {
     const confirmClear = confirm("Clear all local test submissions?");
@@ -289,3 +394,4 @@ if (clearAllBtn) {
 }
 
 renderRequests();
+renderPublishedPages();
