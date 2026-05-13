@@ -100,6 +100,12 @@ function updateAdminNote(id, note) {
     });
   }
 
+  function updateRevisionMessage(id, message) {
+    updateSubmission(id, {
+      revisionMessage: message
+    });
+  }
+
 function deleteSubmission(id) {
   const confirmDelete = confirm("Delete this test submission?");
 
@@ -288,6 +294,29 @@ function getStoredPublishedPages() {
     }).join("");
   }
 
+  function markNeedsChanges(id) {
+    const submissions = getStoredSubmissions();
+    const submission = submissions.find((item) => item.id === id);
+  
+    if (!submission) {
+      alert("Submission not found.");
+      return;
+    }
+  
+    if (!submission.revisionMessage || !submission.revisionMessage.trim()) {
+      const confirmWithoutMessage = confirm(
+        "No revision message was written for the agent. Mark as needs changes anyway?"
+      );
+  
+      if (!confirmWithoutMessage) return;
+    }
+  
+    updateSubmission(id, {
+      status: "needs_changes",
+      approvalStatus: "not_approved"
+    });
+  }
+
 function renderRequests() {
   const submissions = getStoredSubmissions();
 
@@ -343,15 +372,27 @@ function renderRequests() {
           </div>
         </div>
 
-        <div class="admin-note-box">
-        <label>
-            Admin Note
-            <textarea 
-            placeholder="Write internal admin note..."
-            onchange="updateAdminNote('${submission.id}', this.value)"
-            >${submission.adminNote || ""}</textarea>
-        </label>
-        </div>
+        <div class="admin-note-grid">
+  <div class="admin-note-box">
+    <label>
+      Internal Admin Note
+      <textarea 
+        placeholder="Write internal admin note..."
+        onchange="updateAdminNote('${submission.id}', this.value)"
+      >${submission.adminNote || ""}</textarea>
+    </label>
+  </div>
+
+  <div class="admin-note-box">
+    <label>
+      Agent Revision Message
+      <textarea 
+        placeholder="Write what the agent needs to change..."
+        onchange="updateRevisionMessage('${submission.id}', this.value)"
+      >${submission.revisionMessage || ""}</textarea>
+    </label>
+  </div>
+</div>
 
         <div class="request-actions">
           <button type="button" onclick="previewSubmission('${submission.id}')">Preview Page</button>
@@ -368,7 +409,7 @@ function renderRequests() {
             Publish
           </button>
 
-          <button class="changes-btn" type="button" onclick="updateSubmission('${submission.id}', { status: 'needs_changes', approvalStatus: 'not_approved' })">
+          <button class="changes-btn" type="button" onclick="markNeedsChanges('${submission.id}')">
             Needs Changes
           </button>
 

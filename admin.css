@@ -250,8 +250,15 @@
     word-break: break-word;
   }
 
-  .admin-note-box {
+  .admin-note-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
     margin-bottom: 18px;
+  }
+  
+  .admin-note-box {
+    min-width: 0;
   }
   
   .admin-note-box label {
@@ -329,6 +336,10 @@
     .request-details {
       grid-template-columns: repeat(2, 1fr);
     }
+
+    .admin-note-grid {
+        grid-template-columns: 1fr;
+      }
   
     .admin-header,
     .panel-header,
