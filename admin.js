@@ -686,14 +686,24 @@ function downloadJsonFile(data, filename) {
   }
   
   function exportAdminBackup() {
+    const submissions = getStoredSubmissions();
+    const publishedPages = getStoredPublishedPages();
+  
     const backupData = {
       exportedAt: new Date().toISOString(),
-      dogoodLandingSubmissions: getStoredSubmissions(),
-      dogoodPublishedLandingPages: getStoredPublishedPages()
+      version: "local-prototype-v1",
+      counts: {
+        submissions: submissions.length,
+        publishedPages: publishedPages.length
+      },
+      dogoodLandingSubmissions: submissions,
+      dogoodPublishedLandingPages: publishedPages
     };
   
     const dateStamp = new Date().toISOString().slice(0, 10);
-    downloadJsonFile(backupData, `dogood-landing-backup-${dateStamp}.json`);
+    const filename = `dogood-landing-backup-${dateStamp}-requests-${submissions.length}-published-${publishedPages.length}.json`;
+  
+    downloadJsonFile(backupData, filename);
   }
   
   function importAdminBackup(file) {
