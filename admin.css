@@ -84,7 +84,7 @@
   
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 18px;
     margin-bottom: 24px;
   }
@@ -264,6 +264,11 @@
   .request-actions .approve-btn {
     background: #dcfce7;
     color: #14532d;
+  }
+
+  .request-actions .publish-btn {
+    background: #d4af37;
+    color: #111111;
   }
   
   .request-actions .changes-btn {

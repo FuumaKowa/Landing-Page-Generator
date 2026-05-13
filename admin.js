@@ -7,6 +7,7 @@ const totalRequests = document.getElementById("totalRequests");
 const pendingRequests = document.getElementById("pendingRequests");
 const paidRequests = document.getElementById("paidRequests");
 const approvedRequests = document.getElementById("approvedRequests");
+const publishedRequests = document.getElementById("publishedRequests");
 
 function getStoredSubmissions() {
   const savedSubmissions = localStorage.getItem("dogoodLandingSubmissions");
@@ -52,20 +53,26 @@ function getStatusBadgeClass(value) {
 }
 
 function updateStats(submissions) {
-  totalRequests.textContent = submissions.length;
-
-  pendingRequests.textContent = submissions.filter(
-    (item) => item.status === "pending_review"
-  ).length;
-
-  paidRequests.textContent = submissions.filter(
-    (item) => item.paymentStatus === "payment_confirmed"
-  ).length;
-
-  approvedRequests.textContent = submissions.filter(
-    (item) => item.approvalStatus === "approved"
-  ).length;
-}
+    totalRequests.textContent = submissions.length;
+  
+    pendingRequests.textContent = submissions.filter(
+      (item) => item.status === "pending_review"
+    ).length;
+  
+    paidRequests.textContent = submissions.filter(
+      (item) => item.paymentStatus === "payment_confirmed"
+    ).length;
+  
+    approvedRequests.textContent = submissions.filter(
+      (item) => item.approvalStatus === "approved"
+    ).length;
+  
+    if (publishedRequests) {
+      publishedRequests.textContent = submissions.filter(
+        (item) => item.status === "published"
+      ).length;
+    }
+  }
 
 function updateSubmission(id, updates) {
   const submissions = getStoredSubmissions();
@@ -112,6 +119,73 @@ function previewSubmission(id) {
 
   window.open("index.html", "_blank");
 }
+
+function getStoredPublishedPages() {
+    const savedPages = localStorage.getItem("dogoodPublishedLandingPages");
+  
+    if (!savedPages) return [];
+  
+    try {
+      const parsedPages = JSON.parse(savedPages);
+      return Array.isArray(parsedPages) ? parsedPages : [];
+    } catch (error) {
+      console.warn("Invalid published pages list found.", error);
+      return [];
+    }
+  }
+  
+  function saveStoredPublishedPages(pages) {
+    localStorage.setItem("dogoodPublishedLandingPages", JSON.stringify(pages));
+  }
+  
+  function publishSubmission(id) {
+    const submissions = getStoredSubmissions();
+    const submission = submissions.find((item) => item.id === id);
+  
+    if (!submission) {
+      alert("Submission not found.");
+      return;
+    }
+  
+    if (submission.paymentStatus !== "payment_confirmed") {
+      alert("Payment must be confirmed before publishing.");
+      return;
+    }
+  
+    if (submission.approvalStatus !== "approved") {
+      alert("Landing page must be approved before publishing.");
+      return;
+    }
+  
+    const agentData = submission.agentData || {};
+    const slug = agentData.slug || `agent-${Date.now()}`;
+  
+    const publishedPages = getStoredPublishedPages();
+  
+    const publishedPage = {
+      id: `published-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      submissionId: submission.id,
+      slug,
+      publicPath: `/a/${slug}`,
+      publishedAt: new Date().toISOString(),
+      status: "published",
+      agentData
+    };
+  
+    const filteredPages = publishedPages.filter((page) => page.slug !== slug);
+    filteredPages.unshift(publishedPage);
+  
+    saveStoredPublishedPages(filteredPages);
+  
+    updateSubmission(id, {
+      status: "published",
+      approvalStatus: "published",
+      publishedAt: publishedPage.publishedAt,
+      publicPath: publishedPage.publicPath
+    });
+  
+    alert(`Page published locally.\n\nPublic path: ${publishedPage.publicPath}`);
+  }
 
 function renderRequests() {
   const submissions = getStoredSubmissions();
@@ -176,6 +250,10 @@ function renderRequests() {
 
           <button class="approve-btn" type="button" onclick="updateSubmission('${submission.id}', { approvalStatus: 'approved', status: 'approved' })">
             Approve
+          </button>
+
+          <button class="publish-btn" type="button" onclick="publishSubmission('${submission.id}')">
+            Publish
           </button>
 
           <button class="changes-btn" type="button" onclick="updateSubmission('${submission.id}', { status: 'needs_changes', approvalStatus: 'not_approved' })">
