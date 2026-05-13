@@ -4,6 +4,7 @@ const refreshBtn = document.getElementById("refreshBtn");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const exportBackupBtn = document.getElementById("exportBackupBtn");
 const importBackupInput = document.getElementById("importBackupInput");
+const quickBackupBtn = document.getElementById("quickBackupBtn");
 const statusFilter = document.getElementById("statusFilter");
 const requestSearchInput = document.getElementById("requestSearchInput");
 const sortFilter = document.getElementById("sortFilter");
@@ -770,6 +771,10 @@ if (refreshPublishedBtn) {
 
   if (exportBackupBtn) {
     exportBackupBtn.addEventListener("click", exportAdminBackup);
+  }
+
+  if (quickBackupBtn) {
+    quickBackupBtn.addEventListener("click", exportAdminBackup);
   }
   
   if (importBackupInput) {

@@ -89,6 +89,35 @@
   .admin-main {
     padding: 34px 8% 60px;
   }
+
+  .backup-reminder {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 20px 22px;
+    border-radius: 24px;
+    background: #fff7d6;
+    color: #6b4e00;
+    border: 1px solid #f1d98a;
+  }
+  
+  .backup-reminder h2 {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+    color: #6b4e00;
+  }
+  
+  .backup-reminder p {
+    color: #6b4e00;
+  }
+  
+  .backup-reminder button {
+    flex: 0 0 auto;
+    background: #111111;
+    color: #ffffff;
+  }
   
   .stats-grid {
     display: grid;
@@ -372,6 +401,15 @@
     .request-details {
       grid-template-columns: repeat(2, 1fr);
     }
+
+    .backup-reminder {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      
+      .backup-reminder button {
+        width: 100%;
+      }
 
     .admin-note-grid {
         grid-template-columns: 1fr;
