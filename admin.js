@@ -2,6 +2,7 @@ const requestsList = document.getElementById("requestsList");
 const emptyState = document.getElementById("emptyState");
 const refreshBtn = document.getElementById("refreshBtn");
 const clearAllBtn = document.getElementById("clearAllBtn");
+const statusFilter = document.getElementById("statusFilter");
 const refreshPublishedBtn = document.getElementById("refreshPublishedBtn");
 const publishedEmptyState = document.getElementById("publishedEmptyState");
 const publishedList = document.getElementById("publishedList");
@@ -357,21 +358,49 @@ function getStoredPublishedPages() {
       });
   }
 
-function renderRequests() {
-  const submissions = getStoredSubmissions();
-
-  updateStats(submissions);
-  renderPublishedPages();
-
-  if (!submissions.length) {
-    emptyState.style.display = "block";
-    requestsList.innerHTML = "";
-    return;
+  function getFilteredSubmissions(submissions) {
+    const selectedFilter = statusFilter ? statusFilter.value : "all";
+  
+    if (selectedFilter === "all") {
+      return submissions;
+    }
+  
+    if (selectedFilter === "payment_confirmed") {
+      return submissions.filter(
+        (submission) => submission.paymentStatus === "payment_confirmed"
+      );
+    }
+  
+    if (selectedFilter === "approved") {
+      return submissions.filter(
+        (submission) => submission.approvalStatus === "approved"
+      );
+    }
+  
+    return submissions.filter(
+      (submission) => submission.status === selectedFilter
+    );
   }
 
-  emptyState.style.display = "none";
-
-  requestsList.innerHTML = submissions.map((submission) => {
+function renderRequests() {
+    const submissions = getStoredSubmissions();
+    const filteredSubmissions = getFilteredSubmissions(submissions);
+    
+    updateStats(submissions);
+    renderPublishedPages();
+    
+    if (!filteredSubmissions.length) {
+      emptyState.style.display = "block";
+      requestsList.innerHTML = "";
+      emptyState.textContent = submissions.length
+        ? "No requests match the selected filter."
+        : "No landing page requests submitted yet.";
+      return;
+    }
+    
+    emptyState.style.display = "none";
+    
+    requestsList.innerHTML = filteredSubmissions.map((submission) => {
     const data = submission.agentData || {};
 
     return `
@@ -479,6 +508,10 @@ function renderRequests() {
 if (refreshBtn) {
   refreshBtn.addEventListener("click", renderRequests);
 }
+
+if (statusFilter) {
+    statusFilter.addEventListener("change", renderRequests);
+  }
 
 if (refreshPublishedBtn) {
     refreshPublishedBtn.addEventListener("click", renderPublishedPages);

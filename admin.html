@@ -55,7 +55,19 @@
           <p>These requests are saved locally for now. Later, this will come from Supabase.</p>
         </div>
 
-        <button id="refreshBtn" type="button">Refresh</button>
+        <div class="panel-actions">
+            <select id="statusFilter">
+              <option value="all">All Requests</option>
+              <option value="pending_review">Pending Review</option>
+              <option value="needs_changes">Needs Changes</option>
+              <option value="payment_confirmed">Payment Confirmed</option>
+              <option value="approved">Approved</option>
+              <option value="published">Published</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          
+            <button id="refreshBtn" type="button">Refresh</button>
+          </div>
       </div>
 
       <div id="emptyState" class="empty-state">

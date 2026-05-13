@@ -138,6 +138,28 @@
   .panel-header p {
     color: #6c6258;
   }
+
+  .panel-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .panel-actions select {
+    padding: 11px 14px;
+    border: 1px solid #e4dacd;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #241f1b;
+    font: inherit;
+    font-weight: 700;
+    outline: none;
+  }
+  
+  .panel-actions select:focus {
+    border-color: #d4af37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+  }
   
   #refreshBtn,
   #refreshPublishedBtn {
@@ -351,6 +373,17 @@
     .badges {
       justify-content: flex-start;
     }
+
+    .panel-actions {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+      }
+      
+      .panel-actions select,
+      .panel-actions button {
+        width: 100%;
+      }
   }
   
   @media (max-width: 620px) {
