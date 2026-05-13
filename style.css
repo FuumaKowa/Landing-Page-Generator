@@ -180,6 +180,37 @@ section {
   color: #6b4e00;
 }
 
+.revision-notice {
+  display: none;
+  width: 100%;
+  margin: 18px 0 26px;
+  padding: 18px 20px;
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 20px;
+  background: #fff7d6;
+  color: #6b4e00;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.revision-notice strong {
+  width: auto;
+  display: block;
+  margin: 0 0 8px;
+  color: #6b4e00;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.revision-notice strong::after {
+  content: "";
+}
+
+.revision-notice p {
+  margin: 0;
+  color: #6b4e00;
+}
+
 @media (max-width: 650px) {
   .builder-progress {
     align-items: flex-start;
@@ -253,8 +284,8 @@ section {
   letter-spacing: -0.02em;
 }
 
-.preview-panel strong::after {
-  content: " Builder";
+.preview-panel > strong::after {
+  content: "";
 }
 
 .preview-panel > label,

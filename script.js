@@ -33,9 +33,59 @@ const scrollToPreviewBtn = document.getElementById("scrollToPreviewBtn");
 
 const importJsonInput = document.getElementById("importJsonInput");
 const validationStatus = document.getElementById("validationStatus");
+const revisionNotice = document.getElementById("revisionNotice");
 const builderProgress = document.getElementById("builderProgress");
 
 let currentAgentData = null;
+
+function getUrlParam(name) {
+  const params = new URLSearchParams(window.location.search);
+  return params.get(name);
+}
+
+function getStoredSubmissions() {
+  const savedSubmissions = localStorage.getItem("dogoodLandingSubmissions");
+
+  if (!savedSubmissions) return [];
+
+  try {
+    const parsedSubmissions = JSON.parse(savedSubmissions);
+    return Array.isArray(parsedSubmissions) ? parsedSubmissions : [];
+  } catch (error) {
+    console.warn("Invalid submission list found.", error);
+    return [];
+  }
+}
+
+function getSubmissionFromUrl() {
+  const submissionId = getUrlParam("submission");
+
+  if (!submissionId) return null;
+
+  const submissions = getStoredSubmissions();
+  return submissions.find((submission) => submission.id === submissionId) || null;
+}
+
+function updateRevisionNotice(submission) {
+  if (!revisionNotice) return;
+
+  if (
+    !submission ||
+    submission.status !== "needs_changes" ||
+    !submission.revisionMessage ||
+    !submission.revisionMessage.trim()
+  ) {
+    revisionNotice.style.display = "none";
+    revisionNotice.innerHTML = "";
+    return;
+  }
+
+  revisionNotice.style.display = "block";
+  revisionNotice.innerHTML = `
+  <strong>Revision needed</strong>
+  <p>${submission.revisionMessage}</p>
+`;
+}
 
 async function loadAgentData() {
   const response = await fetch("data/agent.json");
@@ -1348,8 +1398,15 @@ async function init() {
   try {
     const agentData = await loadAgentData();
     const savedDraft = loadDraftFromBrowser();
+    const urlSubmission = getSubmissionFromUrl();
 
-    currentAgentData = normalizeAgentData(savedDraft || agentData);
+    if (urlSubmission) {
+      currentAgentData = normalizeAgentData(urlSubmission.agentData);
+      updateRevisionNotice(urlSubmission);
+    } else {
+      currentAgentData = normalizeAgentData(savedDraft || agentData);
+      updateRevisionNotice(null);
+    }
 
     renderLandingPage(currentAgentData);
     setupScrollToPreviewControl();

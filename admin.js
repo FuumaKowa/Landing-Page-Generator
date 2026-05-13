@@ -317,6 +317,18 @@ function getStoredPublishedPages() {
     });
   }
 
+  function openBuilderForRevision(id) {
+    const submissions = getStoredSubmissions();
+    const submission = submissions.find((item) => item.id === id);
+  
+    if (!submission) {
+      alert("Submission not found.");
+      return;
+    }
+  
+    window.open(`index.html?submission=${encodeURIComponent(submission.id)}`, "_blank");
+  }
+
 function renderRequests() {
   const submissions = getStoredSubmissions();
 
@@ -395,7 +407,13 @@ function renderRequests() {
 </div>
 
         <div class="request-actions">
-          <button type="button" onclick="previewSubmission('${submission.id}')">Preview Page</button>
+          <button type="button" onclick="previewSubmission('${submission.id}')">
+            Preview Page
+          </button>
+
+          <button class="changes-btn" type="button" onclick="openBuilderForRevision('${submission.id}')">
+            Open Builder
+          </button>
 
           <button class="payment-btn" type="button" onclick="updateSubmission('${submission.id}', { paymentStatus: 'payment_confirmed', status: 'pending_review' })">
             Confirm Payment
