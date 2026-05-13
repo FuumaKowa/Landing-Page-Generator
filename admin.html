@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Do Good Landing Page Admin</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header class="admin-header">
+    <div>
+      <p class="eyebrow">Do Good Admin</p>
+      <h1>Landing Page Requests</h1>
+      <p class="header-text">Review agent submissions, confirm payment, and approve landing pages before publishing.</p>
+    </div>
+
+    <div class="header-actions">
+      <a href="index.html" class="secondary-btn">Open Builder</a>
+      <button id="clearAllBtn" class="danger-btn" type="button">Clear All Test Data</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span>Total Requests</span>
+        <strong id="totalRequests">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Pending Review</span>
+        <strong id="pendingRequests">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Payment Confirmed</span>
+        <strong id="paidRequests">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Approved</span>
+        <strong id="approvedRequests">0</strong>
+      </div>
+    </section>
+
+    <section class="admin-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Submitted Requests</h2>
+          <p>These requests are saved locally for now. Later, this will come from Supabase.</p>
+        </div>
+
+        <button id="refreshBtn" type="button">Refresh</button>
+      </div>
+
+      <div id="emptyState" class="empty-state">
+        No landing page requests submitted yet.
+      </div>
+
+      <div id="requestsList" class="requests-list"></div>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>
