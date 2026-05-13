@@ -225,7 +225,19 @@ function getStoredPublishedPages() {
   
     window.open(`page.html?slug=${encodeURIComponent(page.slug)}`, "_blank");
   }
+
+  function copyPublishedLink(slug) {
+    const localLink = `${window.location.origin}${window.location.pathname.replace("admin.html", "")}page.html?slug=${encodeURIComponent(slug)}`;
   
+    navigator.clipboard.writeText(localLink)
+      .then(() => {
+        alert(`Published page link copied:\n\n${localLink}`);
+      })
+      .catch(() => {
+        prompt("Copy this published page link:", localLink);
+      });
+  }
+
   function renderPublishedPages() {
     if (!publishedList || !publishedEmptyState) return;
   
@@ -282,13 +294,17 @@ function getStoredPublishedPages() {
   
           <div class="request-actions">
             <button type="button" onclick="previewPublishedPage('${page.id}')">
-              Preview Published Page
+                Preview Published Page
             </button>
-  
+
+            <button class="publish-btn" type="button" onclick="copyPublishedLink('${page.slug}')">
+                Copy Local Link
+            </button>
+
             <button class="delete-btn" type="button" onclick="deletePublishedPage('${page.id}')">
-              Delete Published Page
+                Delete Published Page
             </button>
-          </div>
+            </div>
         </article>
       `;
     }).join("");
