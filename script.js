@@ -37,6 +37,7 @@ const revisionNotice = document.getElementById("revisionNotice");
 const builderProgress = document.getElementById("builderProgress");
 
 let currentAgentData = null;
+let currentRevisionSubmissionId = null;
 
 function getUrlParam(name) {
   const params = new URLSearchParams(window.location.search);
@@ -1265,6 +1266,31 @@ function getStoredSubmissions() {
   }
 }
 
+function updateExistingSubmission(id, data) {
+  const submissions = getStoredSubmissions();
+
+  const updatedSubmissions = submissions.map((submission) => {
+    if (submission.id !== id) return submission;
+
+    return {
+      ...submission,
+      status: "pending_review",
+      approvalStatus: "not_approved",
+      revisionMessage: "",
+      resubmittedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      agentData: normalizeAgentData(data)
+    };
+  });
+
+  localStorage.setItem(
+    "dogoodLandingSubmissions",
+    JSON.stringify(updatedSubmissions)
+  );
+
+  return updatedSubmissions.find((submission) => submission.id === id);
+}
+
 function saveSubmission(data) {
   const submissions = getStoredSubmissions();
 
@@ -1324,11 +1350,19 @@ function setupSubmitRequestControls() {
 
     if (!confirmSubmit) return;
 
-    const submission = saveSubmission(currentAgentData);
+    const submission = currentRevisionSubmissionId
+  ? updateExistingSubmission(currentRevisionSubmissionId, currentAgentData)
+  : saveSubmission(currentAgentData);
 
-    alert(
-      `Your landing page request has been submitted for review.\n\nSubmission ID: ${submission.id}\n\nPlease send your payment confirmation to the admin.`
-    );
+alert(
+  currentRevisionSubmissionId
+    ? `Your revised landing page has been resubmitted for review.\n\nSubmission ID: ${submission.id}`
+    : `Your landing page request has been submitted for review.\n\nSubmission ID: ${submission.id}\n\nPlease send your payment confirmation to the admin.`
+);
+
+if (currentRevisionSubmissionId) {
+  window.location.href = "index.html";
+}
   });
 }
 
@@ -1401,9 +1435,11 @@ async function init() {
     const urlSubmission = getSubmissionFromUrl();
 
     if (urlSubmission) {
+      currentRevisionSubmissionId = urlSubmission.id;
       currentAgentData = normalizeAgentData(urlSubmission.agentData);
       updateRevisionNotice(urlSubmission);
     } else {
+      currentRevisionSubmissionId = null;
       currentAgentData = normalizeAgentData(savedDraft || agentData);
       updateRevisionNotice(null);
     }
