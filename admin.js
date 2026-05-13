@@ -345,6 +345,18 @@ function getStoredPublishedPages() {
     window.open(`index.html?submission=${encodeURIComponent(submission.id)}`, "_blank");
   }
 
+  function copyRevisionLink(id) {
+    const localLink = `${window.location.origin}${window.location.pathname.replace("admin.html", "")}index.html?submission=${encodeURIComponent(id)}`;
+  
+    navigator.clipboard.writeText(localLink)
+      .then(() => {
+        alert(`Agent revision link copied:\n\n${localLink}`);
+      })
+      .catch(() => {
+        prompt("Copy this agent revision link:", localLink);
+      });
+  }
+
 function renderRequests() {
   const submissions = getStoredSubmissions();
 
@@ -429,6 +441,10 @@ function renderRequests() {
 
           <button class="changes-btn" type="button" onclick="openBuilderForRevision('${submission.id}')">
             Open Builder
+          </button>
+
+          <button class="changes-btn" type="button" onclick="copyRevisionLink('${submission.id}')">
+            Copy Revision Link
           </button>
 
           <button class="payment-btn" type="button" onclick="updateSubmission('${submission.id}', { paymentStatus: 'payment_confirmed', status: 'pending_review' })">
