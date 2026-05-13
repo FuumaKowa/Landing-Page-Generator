@@ -94,6 +94,12 @@ function updateSubmission(id, updates) {
   renderRequests();
 }
 
+function updateAdminNote(id, note) {
+    updateSubmission(id, {
+      adminNote: note
+    });
+  }
+
 function deleteSubmission(id) {
   const confirmDelete = confirm("Delete this test submission?");
 
@@ -335,6 +341,16 @@ function renderRequests() {
             <span>Package</span>
             <strong>${data.packageName || "-"}</strong>
           </div>
+        </div>
+
+        <div class="admin-note-box">
+        <label>
+            Admin Note
+            <textarea 
+            placeholder="Write internal admin note..."
+            onchange="updateAdminNote('${submission.id}', this.value)"
+            >${submission.adminNote || ""}</textarea>
+        </label>
         </div>
 
         <div class="request-actions">

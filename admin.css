@@ -249,6 +249,39 @@
     font-size: 0.94rem;
     word-break: break-word;
   }
+
+  .admin-note-box {
+    margin-bottom: 18px;
+  }
+  
+  .admin-note-box label {
+    display: grid;
+    gap: 8px;
+    color: #6c6258;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  
+  .admin-note-box textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 13px 14px;
+    border: 1px solid #eadfd2;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #241f1b;
+    font: inherit;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+  }
+  
+  .admin-note-box textarea:focus {
+    border-color: #d4af37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+  }
   
   .request-actions {
     display: flex;
