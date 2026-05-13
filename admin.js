@@ -159,6 +159,11 @@ function getStoredPublishedPages() {
       alert("Submission not found.");
       return;
     }
+
+    if (submission.status === "published") {
+        alert("This landing page is already published.");
+        return;
+      }
   
     if (submission.paymentStatus !== "payment_confirmed") {
       alert("Payment must be confirmed before this landing page can be approved.");
@@ -361,6 +366,11 @@ function getStoredPublishedPages() {
       alert("Submission not found.");
       return;
     }
+
+    if (submission.status === "published") {
+        alert("This landing page is already published. Published pages should be edited through a separate update workflow.");
+        return;
+      }
   
     if (!submission.revisionMessage || !submission.revisionMessage.trim()) {
       const confirmWithoutMessage = confirm(
@@ -467,10 +477,6 @@ function getStoredPublishedPages() {
     if (!searchTerm) {
         return sortSubmissions(filteredSubmissions);
       }
-  
-    if (!searchTerm) {
-        return sortSubmissions(filteredSubmissions);
-      }
       
       const searchedSubmissions = filteredSubmissions.filter((submission) => {
         const data = submission.agentData || {};
@@ -489,6 +495,55 @@ function getStoredPublishedPages() {
       });
       
       return sortSubmissions(searchedSubmissions);
+  }
+
+  function rejectSubmission(id) {
+    const submissions = getStoredSubmissions();
+    const submission = submissions.find((item) => item.id === id);
+  
+    if (!submission) {
+      alert("Submission not found.");
+      return;
+    }
+  
+    if (submission.status === "published") {
+      alert("This landing page is already published and cannot be rejected.");
+      return;
+    }
+  
+    const confirmReject = confirm("Reject this landing page request?");
+  
+    if (!confirmReject) return;
+  
+    updateSubmission(id, {
+      status: "rejected",
+      approvalStatus: "not_approved"
+    });
+  }
+
+  function confirmPayment(id) {
+    const submissions = getStoredSubmissions();
+    const submission = submissions.find((item) => item.id === id);
+  
+    if (!submission) {
+      alert("Submission not found.");
+      return;
+    }
+  
+    if (submission.status === "published") {
+      alert("This landing page is already published.");
+      return;
+    }
+  
+    if (submission.paymentStatus === "payment_confirmed") {
+      alert("Payment is already confirmed.");
+      return;
+    }
+  
+    updateSubmission(id, {
+      paymentStatus: "payment_confirmed",
+      status: "pending_review"
+    });
   }
 
 function renderRequests() {
@@ -585,7 +640,7 @@ function renderRequests() {
             Copy Revision Link
           </button>
 
-          <button class="payment-btn" type="button" onclick="updateSubmission('${submission.id}', { paymentStatus: 'payment_confirmed', status: 'pending_review' })">
+          <button class="payment-btn" type="button" onclick="confirmPayment('${submission.id}')">
             Confirm Payment
           </button>
 
@@ -601,7 +656,7 @@ function renderRequests() {
             Needs Changes
           </button>
 
-          <button class="reject-btn" type="button" onclick="updateSubmission('${submission.id}', { status: 'rejected', approvalStatus: 'not_approved' })">
+          <button class="reject-btn" type="button" onclick="rejectSubmission('${submission.id}')">
             Reject
           </button>
 
@@ -634,16 +689,21 @@ if (refreshPublishedBtn) {
     refreshPublishedBtn.addEventListener("click", renderPublishedPages);
   }
 
-if (clearAllBtn) {
-  clearAllBtn.addEventListener("click", () => {
-    const confirmClear = confirm("Clear all local test submissions?");
-
-    if (!confirmClear) return;
-
-    localStorage.removeItem("dogoodLandingSubmissions");
-    renderRequests();
-  });
-}
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener("click", () => {
+      const typedConfirmation = prompt(
+        "This will permanently clear all local submitted requests.\n\nType CLEAR SUBMISSIONS to confirm."
+      );
+  
+      if (typedConfirmation !== "CLEAR SUBMISSIONS") {
+        alert("Clear cancelled.");
+        return;
+      }
+  
+      localStorage.removeItem("dogoodLandingSubmissions");
+      renderRequests();
+    });
+  }
 
 renderRequests();
 renderPublishedPages();
