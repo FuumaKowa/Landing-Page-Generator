@@ -2,6 +2,8 @@ const requestsList = document.getElementById("requestsList");
 const emptyState = document.getElementById("emptyState");
 const refreshBtn = document.getElementById("refreshBtn");
 const clearAllBtn = document.getElementById("clearAllBtn");
+const exportBackupBtn = document.getElementById("exportBackupBtn");
+const importBackupInput = document.getElementById("importBackupInput");
 const statusFilter = document.getElementById("statusFilter");
 const requestSearchInput = document.getElementById("requestSearchInput");
 const sortFilter = document.getElementById("sortFilter");
@@ -669,6 +671,67 @@ function renderRequests() {
   }).join("");
 }
 
+function downloadJsonFile(data, filename) {
+    const jsonText = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonText], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+  
+    const downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = filename;
+    downloadLink.click();
+  
+    URL.revokeObjectURL(url);
+  }
+  
+  function exportAdminBackup() {
+    const backupData = {
+      exportedAt: new Date().toISOString(),
+      dogoodLandingSubmissions: getStoredSubmissions(),
+      dogoodPublishedLandingPages: getStoredPublishedPages()
+    };
+  
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    downloadJsonFile(backupData, `dogood-landing-backup-${dateStamp}.json`);
+  }
+  
+  function importAdminBackup(file) {
+    const reader = new FileReader();
+  
+    reader.onload = () => {
+      try {
+        const backupData = JSON.parse(reader.result);
+  
+        const submissions = Array.isArray(backupData.dogoodLandingSubmissions)
+          ? backupData.dogoodLandingSubmissions
+          : [];
+  
+        const publishedPages = Array.isArray(backupData.dogoodPublishedLandingPages)
+          ? backupData.dogoodPublishedLandingPages
+          : [];
+  
+        const confirmImport = confirm(
+          "Importing this backup will replace current local admin data. Continue?"
+        );
+  
+        if (!confirmImport) return;
+  
+        saveStoredSubmissions(submissions);
+        saveStoredPublishedPages(publishedPages);
+  
+        renderRequests();
+        renderPublishedPages();
+  
+        alert("Backup imported successfully.");
+      } catch (error) {
+        alert("Invalid backup file. Please import a valid Do Good admin backup JSON file.");
+        console.error(error);
+      }
+    };
+  
+    reader.readAsText(file);
+  }
+
 if (refreshBtn) {
   refreshBtn.addEventListener("click", renderRequests);
 }
@@ -702,6 +765,20 @@ if (refreshPublishedBtn) {
   
       localStorage.removeItem("dogoodLandingSubmissions");
       renderRequests();
+    });
+  }
+
+  if (exportBackupBtn) {
+    exportBackupBtn.addEventListener("click", exportAdminBackup);
+  }
+  
+  if (importBackupInput) {
+    importBackupInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+  
+      if (!file) return;
+  
+      importAdminBackup(file);
     });
   }
 

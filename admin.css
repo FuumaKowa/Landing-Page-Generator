@@ -17,6 +17,14 @@
     font: inherit;
   }
   
+  .import-backup-label {
+    cursor: pointer;
+  }
+  
+  .import-backup-label input {
+    display: none;
+  }
+
   .admin-header {
     display: flex;
     justify-content: space-between;
