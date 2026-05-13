@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Published Do Good Landing Page</title>
+  <title>Do Good Landing Page Preview</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -16,25 +16,33 @@
   <script src="script.js"></script>
 
   <script>
-    function getPublishedPageBySlug(slug) {
-      const savedPages = localStorage.getItem("dogoodPublishedLandingPages");
+    function getStoredList(key) {
+      const savedData = localStorage.getItem(key);
 
-      if (!savedPages) return null;
+      if (!savedData) return [];
 
       try {
-        const pages = JSON.parse(savedPages);
-        return Array.isArray(pages)
-          ? pages.find((page) => page.slug === slug)
-          : null;
+        const parsedData = JSON.parse(savedData);
+        return Array.isArray(parsedData) ? parsedData : [];
       } catch (error) {
-        console.error("Invalid published pages data.", error);
-        return null;
+        console.error(`Invalid localStorage data for ${key}.`, error);
+        return [];
       }
     }
 
-    function getSlugFromUrl() {
+    function getPublishedPageBySlug(slug) {
+      const pages = getStoredList("dogoodPublishedLandingPages");
+      return pages.find((page) => page.slug === slug) || null;
+    }
+
+    function getSubmissionById(id) {
+      const submissions = getStoredList("dogoodLandingSubmissions");
+      return submissions.find((submission) => submission.id === id) || null;
+    }
+
+    function getUrlParam(name) {
       const params = new URLSearchParams(window.location.search);
-      return params.get("slug");
+      return params.get(name);
     }
 
     function renderNotFound(message) {
@@ -43,7 +51,7 @@
       landingPage.innerHTML = `
         <section>
           <div class="container">
-            <h1>Published page not found</h1>
+            <h1>Landing page preview not found</h1>
             <p>${message}</p>
           </div>
         </section>
@@ -51,22 +59,36 @@
     }
 
     window.addEventListener("DOMContentLoaded", () => {
-      const slug = getSlugFromUrl();
+      const slug = getUrlParam("slug");
+      const submissionId = getUrlParam("submission");
 
-      if (!slug) {
-        renderNotFound("No slug was provided.");
+      if (slug) {
+        const publishedPage = getPublishedPageBySlug(slug);
+
+        if (!publishedPage) {
+          renderNotFound("No published landing page exists for this slug.");
+          return;
+        }
+
+        currentAgentData = normalizeAgentData(publishedPage.agentData);
+        renderLandingPage(currentAgentData);
         return;
       }
 
-      const publishedPage = getPublishedPageBySlug(slug);
+      if (submissionId) {
+        const submission = getSubmissionById(submissionId);
 
-      if (!publishedPage) {
-        renderNotFound("No published landing page exists for this slug.");
+        if (!submission) {
+          renderNotFound("No submitted landing page request exists for this ID.");
+          return;
+        }
+
+        currentAgentData = normalizeAgentData(submission.agentData);
+        renderLandingPage(currentAgentData);
         return;
       }
 
-      currentAgentData = normalizeAgentData(publishedPage.agentData);
-      renderLandingPage(currentAgentData);
+      renderNotFound("No slug or submission ID was provided.");
     });
   </script>
 </body>

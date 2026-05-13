@@ -107,21 +107,16 @@ function deleteSubmission(id) {
 }
 
 function previewSubmission(id) {
-  const submissions = getStoredSubmissions();
-  const submission = submissions.find((item) => item.id === id);
-
-  if (!submission) {
-    alert("Submission not found.");
-    return;
+    const submissions = getStoredSubmissions();
+    const submission = submissions.find((item) => item.id === id);
+  
+    if (!submission) {
+      alert("Submission not found.");
+      return;
+    }
+  
+    window.open(`page.html?submission=${encodeURIComponent(submission.id)}`, "_blank");
   }
-
-  localStorage.setItem(
-    "dogoodAgentLandingDraft",
-    JSON.stringify(submission.agentData)
-  );
-
-  window.open(`page.html?slug=${encodeURIComponent(page.slug)}`, "_blank");
-}
 
 function getStoredPublishedPages() {
     const savedPages = localStorage.getItem("dogoodPublishedLandingPages");
