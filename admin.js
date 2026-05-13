@@ -4,6 +4,7 @@ const refreshBtn = document.getElementById("refreshBtn");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const statusFilter = document.getElementById("statusFilter");
 const requestSearchInput = document.getElementById("requestSearchInput");
+const sortFilter = document.getElementById("sortFilter");
 const refreshPublishedBtn = document.getElementById("refreshPublishedBtn");
 const publishedEmptyState = document.getElementById("publishedEmptyState");
 const publishedList = document.getElementById("publishedList");
@@ -359,6 +360,48 @@ function getStoredPublishedPages() {
       });
   }
 
+  function sortSubmissions(submissions) {
+    const selectedSort = sortFilter ? sortFilter.value : "newest";
+    const sortedSubmissions = [...submissions];
+  
+    if (selectedSort === "oldest") {
+      return sortedSubmissions.sort((a, b) => {
+        return new Date(a.submittedAt || 0) - new Date(b.submittedAt || 0);
+      });
+    }
+  
+    if (selectedSort === "agent_az") {
+      return sortedSubmissions.sort((a, b) => {
+        const nameA = (a.agentData?.agentName || "").toLowerCase();
+        const nameB = (b.agentData?.agentName || "").toLowerCase();
+  
+        return nameA.localeCompare(nameB);
+      });
+    }
+  
+    if (selectedSort === "agent_za") {
+      return sortedSubmissions.sort((a, b) => {
+        const nameA = (a.agentData?.agentName || "").toLowerCase();
+        const nameB = (b.agentData?.agentName || "").toLowerCase();
+  
+        return nameB.localeCompare(nameA);
+      });
+    }
+  
+    if (selectedSort === "status") {
+      return sortedSubmissions.sort((a, b) => {
+        const statusA = `${a.status || ""} ${a.paymentStatus || ""} ${a.approvalStatus || ""}`;
+        const statusB = `${b.status || ""} ${b.paymentStatus || ""} ${b.approvalStatus || ""}`;
+  
+        return statusA.localeCompare(statusB);
+      });
+    }
+  
+    return sortedSubmissions.sort((a, b) => {
+      return new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0);
+    });
+  }
+
   function getFilteredSubmissions(submissions) {
     const selectedFilter = statusFilter ? statusFilter.value : "all";
     const searchTerm = requestSearchInput
@@ -382,24 +425,30 @@ function getStoredPublishedPages() {
     }
   
     if (!searchTerm) {
-      return filteredSubmissions;
-    }
+        return sortSubmissions(filteredSubmissions);
+      }
   
-    return filteredSubmissions.filter((submission) => {
-      const data = submission.agentData || {};
-  
-      const searchableText = [
-        data.agentName,
-        data.whatsappNumber,
-        data.packageName,
-        data.productName,
-        submission.id
-      ]
-        .join(" ")
-        .toLowerCase();
-  
-      return searchableText.includes(searchTerm);
-    });
+    if (!searchTerm) {
+        return sortSubmissions(filteredSubmissions);
+      }
+      
+      const searchedSubmissions = filteredSubmissions.filter((submission) => {
+        const data = submission.agentData || {};
+      
+        const searchableText = [
+          data.agentName,
+          data.whatsappNumber,
+          data.packageName,
+          data.productName,
+          submission.id
+        ]
+          .join(" ")
+          .toLowerCase();
+      
+        return searchableText.includes(searchTerm);
+      });
+      
+      return sortSubmissions(searchedSubmissions);
   }
 
 function renderRequests() {
@@ -535,6 +584,10 @@ if (statusFilter) {
 
   if (requestSearchInput) {
     requestSearchInput.addEventListener("input", renderRequests);
+  }
+
+  if (sortFilter) {
+    sortFilter.addEventListener("change", renderRequests);
   }
 
 if (refreshPublishedBtn) {

@@ -57,7 +57,7 @@
 
         <div class="panel-actions">
             <input type="search" id="requestSearchInput" placeholder="Search agent or WhatsApp">
-            
+
             <select id="statusFilter">
               <option value="all">All Requests</option>
               <option value="pending_review">Pending Review</option>
@@ -67,6 +67,14 @@
               <option value="published">Published</option>
               <option value="rejected">Rejected</option>
             </select>
+
+            <select id="sortFilter">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="agent_az">Agent Name A-Z</option>
+                <option value="agent_za">Agent Name Z-A</option>
+                <option value="status">Status</option>
+              </select>
           
             <button id="refreshBtn" type="button">Refresh</button>
           </div>
