@@ -120,7 +120,7 @@ function previewSubmission(id) {
     JSON.stringify(submission.agentData)
   );
 
-  window.open("index.html", "_blank");
+  window.open(`page.html?slug=${encodeURIComponent(page.slug)}`, "_blank");
 }
 
 function getStoredPublishedPages() {
@@ -240,7 +240,7 @@ function getStoredPublishedPages() {
           <div class="request-top">
             <div class="request-title">
               <h3>${data.agentName || "Unnamed Agent"}</h3>
-              <p>${page.publicPath || "-"}</p>
+              <p>Local preview: page.html?slug=${page.slug || "-"}</p>
               <p>Published: ${formatDate(page.publishedAt)}</p>
             </div>
   
