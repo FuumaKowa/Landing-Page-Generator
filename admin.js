@@ -3,6 +3,7 @@ const emptyState = document.getElementById("emptyState");
 const refreshBtn = document.getElementById("refreshBtn");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const statusFilter = document.getElementById("statusFilter");
+const requestSearchInput = document.getElementById("requestSearchInput");
 const refreshPublishedBtn = document.getElementById("refreshPublishedBtn");
 const publishedEmptyState = document.getElementById("publishedEmptyState");
 const publishedList = document.getElementById("publishedList");
@@ -360,26 +361,45 @@ function getStoredPublishedPages() {
 
   function getFilteredSubmissions(submissions) {
     const selectedFilter = statusFilter ? statusFilter.value : "all";
+    const searchTerm = requestSearchInput
+      ? requestSearchInput.value.trim().toLowerCase()
+      : "";
   
-    if (selectedFilter === "all") {
-      return submissions;
-    }
+    let filteredSubmissions = submissions;
   
     if (selectedFilter === "payment_confirmed") {
-      return submissions.filter(
+      filteredSubmissions = filteredSubmissions.filter(
         (submission) => submission.paymentStatus === "payment_confirmed"
       );
-    }
-  
-    if (selectedFilter === "approved") {
-      return submissions.filter(
+    } else if (selectedFilter === "approved") {
+      filteredSubmissions = filteredSubmissions.filter(
         (submission) => submission.approvalStatus === "approved"
+      );
+    } else if (selectedFilter !== "all") {
+      filteredSubmissions = filteredSubmissions.filter(
+        (submission) => submission.status === selectedFilter
       );
     }
   
-    return submissions.filter(
-      (submission) => submission.status === selectedFilter
-    );
+    if (!searchTerm) {
+      return filteredSubmissions;
+    }
+  
+    return filteredSubmissions.filter((submission) => {
+      const data = submission.agentData || {};
+  
+      const searchableText = [
+        data.agentName,
+        data.whatsappNumber,
+        data.packageName,
+        data.productName,
+        submission.id
+      ]
+        .join(" ")
+        .toLowerCase();
+  
+      return searchableText.includes(searchTerm);
+    });
   }
 
 function renderRequests() {
@@ -511,6 +531,10 @@ if (refreshBtn) {
 
 if (statusFilter) {
     statusFilter.addEventListener("change", renderRequests);
+  }
+
+  if (requestSearchInput) {
+    requestSearchInput.addEventListener("input", renderRequests);
   }
 
 if (refreshPublishedBtn) {
