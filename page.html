@@ -13,32 +13,19 @@
     window.DO_GOOD_PUBLIC_VIEWER = true;
   </script>
 
+  <script src="storage.js"></script>
   <script src="script.js"></script>
 
   <script>
-    function getStoredList(key) {
-      const savedData = localStorage.getItem(key);
-
-      if (!savedData) return [];
-
-      try {
-        const parsedData = JSON.parse(savedData);
-        return Array.isArray(parsedData) ? parsedData : [];
-      } catch (error) {
-        console.error(`Invalid localStorage data for ${key}.`, error);
-        return [];
-      }
-    }
-
     function getPublishedPageBySlug(slug) {
-      const pages = getStoredList("dogoodPublishedLandingPages");
-      return pages.find((page) => page.slug === slug) || null;
-    }
+  const pages = DoGoodStorage.getPublishedPages();
+  return pages.find((page) => page.slug === slug) || null;
+}
 
-    function getSubmissionById(id) {
-      const submissions = getStoredList("dogoodLandingSubmissions");
-      return submissions.find((submission) => submission.id === id) || null;
-    }
+function getSubmissionById(id) {
+  const submissions = DoGoodStorage.getSubmissions();
+  return submissions.find((submission) => submission.id === id) || null;
+}
 
     function getUrlParam(name) {
       const params = new URLSearchParams(window.location.search);

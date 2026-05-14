@@ -19,21 +19,11 @@ const approvedRequests = document.getElementById("approvedRequests");
 const publishedRequests = document.getElementById("publishedRequests");
 
 function getStoredSubmissions() {
-  const savedSubmissions = localStorage.getItem("dogoodLandingSubmissions");
-
-  if (!savedSubmissions) return [];
-
-  try {
-    const parsedSubmissions = JSON.parse(savedSubmissions);
-    return Array.isArray(parsedSubmissions) ? parsedSubmissions : [];
-  } catch (error) {
-    console.warn("Invalid submission list found.", error);
-    return [];
-  }
+  return DoGoodStorage.getSubmissions();
 }
 
 function saveStoredSubmissions(submissions) {
-  localStorage.setItem("dogoodLandingSubmissions", JSON.stringify(submissions));
+  DoGoodStorage.saveSubmissions(submissions);
 }
 
 function formatDate(value) {
@@ -136,22 +126,12 @@ function previewSubmission(id) {
     window.open(`page.html?submission=${encodeURIComponent(submission.id)}`, "_blank");
   }
 
-function getStoredPublishedPages() {
-    const savedPages = localStorage.getItem("dogoodPublishedLandingPages");
-  
-    if (!savedPages) return [];
-  
-    try {
-      const parsedPages = JSON.parse(savedPages);
-      return Array.isArray(parsedPages) ? parsedPages : [];
-    } catch (error) {
-      console.warn("Invalid published pages list found.", error);
-      return [];
-    }
+  function getStoredPublishedPages() {
+    return DoGoodStorage.getPublishedPages();
   }
   
   function saveStoredPublishedPages(pages) {
-    localStorage.setItem("dogoodPublishedLandingPages", JSON.stringify(pages));
+    DoGoodStorage.savePublishedPages(pages);
   }
 
   function approveSubmission(id) {
@@ -268,11 +248,6 @@ function getStoredPublishedPages() {
       alert("Published page not found.");
       return;
     }
-  
-    localStorage.setItem(
-      "dogoodAgentLandingDraft",
-      JSON.stringify(page.agentData)
-    );
   
     window.open(`page.html?slug=${encodeURIComponent(page.slug)}`, "_blank");
   }
@@ -686,22 +661,10 @@ function downloadJsonFile(data, filename) {
   }
   
   function exportAdminBackup() {
-    const submissions = getStoredSubmissions();
-    const publishedPages = getStoredPublishedPages();
-  
-    const backupData = {
-      exportedAt: new Date().toISOString(),
-      version: "local-prototype-v1",
-      counts: {
-        submissions: submissions.length,
-        publishedPages: publishedPages.length
-      },
-      dogoodLandingSubmissions: submissions,
-      dogoodPublishedLandingPages: publishedPages
-    };
+    const backupData = DoGoodStorage.getBackupData();
   
     const dateStamp = new Date().toISOString().slice(0, 10);
-    const filename = `dogood-landing-backup-${dateStamp}-requests-${submissions.length}-published-${publishedPages.length}.json`;
+    const filename = `dogood-landing-backup-${dateStamp}-requests-${backupData.counts.submissions}-published-${backupData.counts.publishedPages}.json`;
   
     downloadJsonFile(backupData, filename);
   }
@@ -713,22 +676,13 @@ function downloadJsonFile(data, filename) {
       try {
         const backupData = JSON.parse(reader.result);
   
-        const submissions = Array.isArray(backupData.dogoodLandingSubmissions)
-          ? backupData.dogoodLandingSubmissions
-          : [];
-  
-        const publishedPages = Array.isArray(backupData.dogoodPublishedLandingPages)
-          ? backupData.dogoodPublishedLandingPages
-          : [];
-  
         const confirmImport = confirm(
           "Importing this backup will replace current local admin data. Continue?"
         );
-  
+        
         if (!confirmImport) return;
-  
-        saveStoredSubmissions(submissions);
-        saveStoredPublishedPages(publishedPages);
+        
+        DoGoodStorage.importBackupData(backupData);
   
         renderRequests();
         renderPublishedPages();
@@ -774,7 +728,7 @@ if (refreshPublishedBtn) {
         return;
       }
   
-      localStorage.removeItem("dogoodLandingSubmissions");
+      DoGoodStorage.clearSubmissions();
       renderRequests();
     });
   }

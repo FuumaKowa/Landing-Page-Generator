@@ -45,17 +45,7 @@ function getUrlParam(name) {
 }
 
 function getStoredSubmissions() {
-  const savedSubmissions = localStorage.getItem("dogoodLandingSubmissions");
-
-  if (!savedSubmissions) return [];
-
-  try {
-    const parsedSubmissions = JSON.parse(savedSubmissions);
-    return Array.isArray(parsedSubmissions) ? parsedSubmissions : [];
-  } catch (error) {
-    console.warn("Invalid submission list found.", error);
-    return [];
-  }
+  return DoGoodStorage.getSubmissions();
 }
 
 function getSubmissionFromUrl() {
@@ -875,23 +865,11 @@ function renderLandingPage(data) {
 function saveDraftToBrowser() {
   if (!currentAgentData) return;
 
-  localStorage.setItem(
-    "dogoodAgentLandingDraft",
-    JSON.stringify(currentAgentData)
-  );
+  DoGoodStorage.saveDraft(currentAgentData);
 }
 
 function loadDraftFromBrowser() {
-  const savedDraft = localStorage.getItem("dogoodAgentLandingDraft");
-
-  if (!savedDraft) return null;
-
-  try {
-    return JSON.parse(savedDraft);
-  } catch (error) {
-    console.warn("Invalid saved draft found. Ignoring draft.", error);
-    return null;
-  }
+  return DoGoodStorage.getDraft();
 }
 
 function getStructureSections(structure) {
@@ -1283,10 +1261,7 @@ function updateExistingSubmission(id, data) {
     };
   });
 
-  localStorage.setItem(
-    "dogoodLandingSubmissions",
-    JSON.stringify(updatedSubmissions)
-  );
+  DoGoodStorage.saveSubmissions(updatedSubmissions);
 
   return updatedSubmissions.find((submission) => submission.id === id);
 }
@@ -1305,10 +1280,7 @@ function saveSubmission(data) {
 
   submissions.unshift(submission);
 
-  localStorage.setItem(
-    "dogoodLandingSubmissions",
-    JSON.stringify(submissions)
-  );
+  DoGoodStorage.saveSubmissions(submissions);
 
   return submission;
 }
@@ -1395,7 +1367,7 @@ function setupExportControls() {
 
       if (!confirmClear) return;
 
-      localStorage.removeItem("dogoodAgentLandingDraft");
+      DoGoodStorage.clearDraft();
       window.location.reload();
     });
   }
