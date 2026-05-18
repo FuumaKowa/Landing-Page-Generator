@@ -897,43 +897,9 @@ async function renderRequests() {
   </div>
 </div>
 
-        <div class="request-actions">
-          <button type="button" onclick="previewSubmission('${submission.id}')">
-            Preview Page
-          </button>
-
-          <button class="changes-btn" type="button" onclick="openBuilderForRevision('${submission.id}')">
-            Open Builder
-          </button>
-
-          <button class="changes-btn" type="button" onclick="copyRevisionLink('${submission.id}')">
-            Copy Revision Link
-          </button>
-
-          <button class="payment-btn" type="button" onclick="confirmPayment('${submission.id}')">
-            Confirm Payment
-          </button>
-
-          <button class="approve-btn" type="button" onclick="approveSubmission('${submission.id}')">
-            Approve
-          </button>
-
-          <button class="publish-btn" type="button" onclick="publishSubmission('${submission.id}')">
-            Publish
-          </button>
-
-          <button class="changes-btn" type="button" onclick="markNeedsChanges('${submission.id}')">
-            Needs Changes
-          </button>
-
-          <button class="reject-btn" type="button" onclick="rejectSubmission('${submission.id}')">
-            Reject
-          </button>
-
-          <button class="delete-btn" type="button" onclick="deleteSubmission('${submission.id}')">
-            Delete
-          </button>
-        </div>
+  <div class="request-actions">
+  ${getRequestActions(submission)}
+  </div>
       </article>
     `;
   }).join("");
