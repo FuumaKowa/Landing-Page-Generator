@@ -458,16 +458,13 @@ function previewSubmission(id) {
     renderPublishedPages();
   }
   
-  function previewPublishedPage(id) {
-    const publishedPages = getStoredPublishedPages();
-    const page = publishedPages.find((item) => item.id === id);
-  
-    if (!page) {
-      alert("Published page not found.");
+  function previewPublishedPage(slug) {
+    if (!slug) {
+      alert("Published page slug not found.");
       return;
     }
   
-    window.open(`page.html?slug=${encodeURIComponent(page.slug)}`, "_blank");
+    window.open(`page.html?slug=${encodeURIComponent(slug)}`, "_blank");
   }
 
   function copyPublishedLink(slug) {
@@ -538,9 +535,9 @@ function previewSubmission(id) {
           </div>
   
           <div class="request-actions">
-            <button type="button" onclick="previewPublishedPage('${page.id}')">
-                Preview Published Page
-            </button>
+          <button type="button" onclick="previewPublishedPage('${page.slug}')">
+          Preview Published Page
+      </button>
 
             <button class="publish-btn" type="button" onclick="copyPublishedLink('${page.slug}')">
                 Copy Local Link
@@ -737,6 +734,82 @@ function previewSubmission(id) {
       paymentStatus: "payment_confirmed",
       status: "pending_review"
     });
+  }
+
+  function getRequestActions(submission) {
+    const isPublished = submission.status === "published";
+    const isRejected = submission.status === "rejected";
+    const needsChanges = submission.status === "needs_changes";
+    const paymentConfirmed = submission.paymentStatus === "payment_confirmed";
+    const approved = submission.approvalStatus === "approved";
+  
+    const actions = [];
+  
+    actions.push(`
+      <button type="button" onclick="previewSubmission('${submission.id}')">
+        Preview Page
+      </button>
+    `);
+  
+    if (!isPublished && !isRejected) {
+      actions.push(`
+        <button class="changes-btn" type="button" onclick="openBuilderForRevision('${submission.id}')">
+          Open Builder
+        </button>
+      `);
+  
+      actions.push(`
+        <button class="changes-btn" type="button" onclick="copyRevisionLink('${submission.id}')">
+          Copy Revision Link
+        </button>
+      `);
+    }
+  
+    if (!paymentConfirmed && !isPublished && !isRejected) {
+      actions.push(`
+        <button class="payment-btn" type="button" onclick="confirmPayment('${submission.id}')">
+          Confirm Payment
+        </button>
+      `);
+    }
+  
+    if (paymentConfirmed && !approved && !needsChanges && !isPublished && !isRejected) {
+      actions.push(`
+        <button class="approve-btn" type="button" onclick="approveSubmission('${submission.id}')">
+          Approve
+        </button>
+      `);
+    }
+  
+    if (paymentConfirmed && approved && !isPublished && !isRejected) {
+      actions.push(`
+        <button class="publish-btn" type="button" onclick="publishSubmission('${submission.id}')">
+          Publish
+        </button>
+      `);
+    }
+  
+    if (!isPublished && !isRejected) {
+      actions.push(`
+        <button class="changes-btn" type="button" onclick="markNeedsChanges('${submission.id}')">
+          Needs Changes
+        </button>
+      `);
+  
+      actions.push(`
+        <button class="reject-btn" type="button" onclick="rejectSubmission('${submission.id}')">
+          Reject
+        </button>
+      `);
+    }
+  
+    actions.push(`
+      <button class="delete-btn" type="button" onclick="deleteSubmission('${submission.id}')">
+        Delete
+      </button>
+    `);
+  
+    return actions.join("");
   }
 
 async function renderRequests() {
