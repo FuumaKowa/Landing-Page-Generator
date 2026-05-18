@@ -51,6 +51,8 @@ async function getSubmissionsFromSupabase() {
     supabaseId: item.id,
     status: item.status,
     paymentStatus: item.payment_status,
+    paymentProofUrl: item.payment_proof_url || item.page_data?.paymentProofUrl || "",
+    paymentSubmittedAt: item.payment_submitted_at,
     approvalStatus: item.approval_status,
     revisionMessage: item.revision_message || "",
     revisionToken: item.revision_token || "",
@@ -1055,6 +1057,16 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     return actions.join("");
   }
 
+  function getPaymentProofHtml(url) {
+    if (!url) return "-";
+  
+    return `
+      <a href="${url}" target="_blank" rel="noopener">
+        View Proof
+      </a>
+    `;
+  }
+
 async function renderRequests() {
     const supabaseSubmissions = await getSubmissionsFromSupabase();
     const submissions = supabaseSubmissions || getStoredSubmissions();
@@ -1117,6 +1129,11 @@ async function renderRequests() {
             <strong>${data.packageName || "-"}</strong>
           </div>
         </div>
+
+        <div class="detail-box">
+  <span>Payment Proof</span>
+  <strong>${getPaymentProofHtml(submission.paymentProofUrl || data.paymentProofUrl)}</strong>
+</div>
 
         <div class="admin-note-grid">
   <div class="admin-note-box">

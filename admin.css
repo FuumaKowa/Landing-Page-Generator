@@ -704,6 +704,16 @@
     background: #dcfce7;
     color: #14532d;
   }
+
+  .detail-box a {
+    color: #8f6237;
+    font-weight: 900;
+    text-decoration: none;
+  }
+  
+  .detail-box a:hover {
+    text-decoration: underline;
+  }
   
   @media (max-width: 1000px) {
     .stats-grid,

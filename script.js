@@ -20,6 +20,9 @@ const heroSubtitleInput = document.getElementById("heroSubtitleInput");
 const packageDetailsInput = document.getElementById("packageDetailsInput");
 const productImageInput = document.getElementById("productImageInput");
 const agentPhotoInput = document.getElementById("agentPhotoInput");
+const paymentProofInput = document.getElementById("paymentProofInput");
+const paymentProofUploadInput = document.getElementById("paymentProofUploadInput");
+const paymentProofUploadStatus = document.getElementById("paymentProofUploadStatus");
 const productImageUploadInput = document.getElementById("productImageUploadInput");
 const agentPhotoUploadInput = document.getElementById("agentPhotoUploadInput");
 const productImageUploadStatus = document.getElementById("productImageUploadStatus");
@@ -1374,6 +1377,9 @@ function setupContentControls(data) {
   packageDetailsInput.value = data.packageDetails || "";
   productImageInput.value = data.productImage || "";
   agentPhotoInput.value = data.agentPhoto || "";
+  if (paymentProofInput) {
+    paymentProofInput.value = data.paymentProofUrl || "";
+  }
   agentDescriptionInput.value = data.agentDescription || "";
   whatsappMessageInput.value = data.whatsappMessage || "";
 
@@ -1393,6 +1399,9 @@ function setupContentControls(data) {
     currentAgentData.packageDetails = packageDetailsInput.value.trim();
     currentAgentData.productImage = productImageInput.value.trim();
     currentAgentData.agentPhoto = agentPhotoInput.value.trim();
+    if (paymentProofInput) {
+      currentAgentData.paymentProofUrl = paymentProofInput.value.trim();
+    }
     currentAgentData.agentDescription = agentDescriptionInput.value.trim();
     currentAgentData.whatsappMessage = whatsappMessageInput.value.trim();
 
@@ -1455,6 +1464,37 @@ function setupContentControls(data) {
   
       agentPhotoInput.value = imageUrl;
       currentAgentData.agentPhoto = imageUrl;
+  
+      renderLandingPage(currentAgentData);
+      saveDraftToBrowser();
+    });
+  }
+
+  if (paymentProofInput) {
+    paymentProofInput.addEventListener("input", () => {
+      currentAgentData.paymentProofUrl = paymentProofInput.value.trim();
+  
+      renderLandingPage(currentAgentData);
+      saveDraftToBrowser();
+    });
+  }
+  
+  if (paymentProofUploadInput) {
+    paymentProofUploadInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+  
+      if (!file) return;
+  
+      const proofUrl = await uploadLandingPageImage(
+        file,
+        "payment-proof",
+        paymentProofUploadStatus
+      );
+  
+      if (!proofUrl) return;
+  
+      paymentProofInput.value = proofUrl;
+      currentAgentData.paymentProofUrl = proofUrl;
   
       renderLandingPage(currentAgentData);
       saveDraftToBrowser();
