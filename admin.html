@@ -16,35 +16,47 @@
   </style>
 </head>
 <body>
-  <header class="admin-header">
-    <div>
-      <p class="eyebrow">Do Good Admin</p>
-      <h1>Landing Page Requests</h1>
-      <p class="header-text">Review agent submissions, confirm payment, and approve landing pages before publishing.</p>
-    </div>
-
-    <div class="header-actions">
-      <a href="index.html" class="secondary-btn">Open Builder</a>
-      <button id="clearAllBtn" class="danger-btn" type="button">
-        Clear All Test Data
-    </button>
-    <button id="exportBackupBtn" class="secondary-btn" type="button">Export Backup</button>
-
-    <label class="secondary-btn import-backup-label">
-    Import Backup
-    <input type="file" id="importBackupInput" accept="application/json">
-    </label>
-    </div>
-    
-    <div class="admin-session">
-      <div class="admin-session-info">
-        <span class="admin-session-label">Logged in as</span>
-        <strong data-admin-email>Admin</strong>
+  <header class="admin-hero">
+    <div class="admin-hero-inner">
+      <div class="admin-hero-copy">
+        <p class="admin-eyebrow">Do Good Admin</p>
+        <h1>Landing Page Requests</h1>
+        <p>
+          Review agent submissions, confirm payment, and approve landing pages before publishing.
+        </p>
       </div>
-    
-      <button type="button" class="admin-logout-btn" data-admin-logout>
-        Logout
-      </button>
+  
+      <div class="admin-hero-panel">
+        <div class="admin-actions">
+          <button type="button" id="openBuilderBtn" class="admin-action-btn">
+            Open Builder
+          </button>
+  
+          <button type="button" id="clearTestDataBtn" class="admin-action-btn danger">
+            Clear All Test Data
+          </button>
+  
+          <button type="button" id="exportBackupBtn" class="admin-action-btn">
+            Export Backup
+          </button>
+  
+          <label for="importBackupInput" class="admin-action-btn import-label">
+            Import Backup
+          </label>
+          <input type="file" id="importBackupInput" accept=".json" hidden />
+        </div>
+  
+        <div class="admin-session">
+          <div class="admin-session-info">
+            <span class="admin-session-label">Logged in as</span>
+            <strong data-admin-email>Admin</strong>
+          </div>
+  
+          <button type="button" class="admin-logout-btn" data-admin-logout>
+            Logout
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -144,6 +156,44 @@
       </section>
 
   </main>
+
+  <div class="danger-modal" id="dangerModal" aria-hidden="true">
+    <div class="danger-modal-backdrop" data-close-danger-modal></div>
+  
+    <div class="danger-modal-card">
+      <p class="danger-modal-eyebrow">Danger Zone</p>
+  
+      <h2>Clear All Test Data?</h2>
+  
+      <p>
+        This action will permanently delete test submissions and published test pages.
+        This cannot be undone.
+      </p>
+  
+      <div class="danger-confirm-box">
+        <label for="dangerConfirmInput">
+          Type <strong>DELETE</strong> to confirm
+        </label>
+  
+        <input
+          type="text"
+          id="dangerConfirmInput"
+          placeholder="Type DELETE"
+          autocomplete="off"
+        />
+      </div>
+  
+      <div class="danger-modal-actions">
+        <button type="button" class="danger-cancel-btn" data-close-danger-modal>
+          Cancel
+        </button>
+  
+        <button type="button" class="danger-confirm-btn" id="dangerConfirmBtn" disabled>
+          Clear Data
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js"></script>

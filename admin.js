@@ -1,7 +1,7 @@
 const requestsList = document.getElementById("requestsList");
 const emptyState = document.getElementById("emptyState");
 const refreshBtn = document.getElementById("refreshBtn");
-const clearAllBtn = document.getElementById("clearAllBtn");
+const clearAllBtn = document.getElementById("clearTestDataBtn");
 const exportBackupBtn = document.getElementById("exportBackupBtn");
 const importBackupInput = document.getElementById("importBackupInput");
 const quickBackupBtn = document.getElementById("quickBackupBtn");
@@ -17,6 +17,11 @@ const pendingRequests = document.getElementById("pendingRequests");
 const paidRequests = document.getElementById("paidRequests");
 const approvedRequests = document.getElementById("approvedRequests");
 const publishedRequests = document.getElementById("publishedRequests");
+
+const dangerModal = document.getElementById("dangerModal");
+const dangerConfirmInput = document.getElementById("dangerConfirmInput");
+const dangerConfirmBtn = document.getElementById("dangerConfirmBtn");
+const closeDangerModalBtns = document.querySelectorAll("[data-close-danger-modal]");
 let currentAdminSubmissions = [];
 
 function getStoredSubmissions() {
@@ -909,6 +914,78 @@ function downloadJsonFile(data, filename) {
     reader.readAsText(file);
   }
 
+  function openDangerModal() {
+    if (!dangerModal || !dangerConfirmInput || !dangerConfirmBtn) {
+      alert("Danger confirmation modal is missing from admin.html.");
+      return;
+    }
+  
+    dangerModal.classList.add("active");
+    dangerModal.setAttribute("aria-hidden", "false");
+  
+    dangerConfirmInput.value = "";
+    dangerConfirmBtn.disabled = true;
+  
+    setTimeout(() => {
+      dangerConfirmInput.focus();
+    }, 50);
+  }
+  
+  function closeDangerModal() {
+    if (!dangerModal || !dangerConfirmInput || !dangerConfirmBtn) return;
+  
+    dangerModal.classList.remove("active");
+    dangerModal.setAttribute("aria-hidden", "true");
+  
+    dangerConfirmInput.value = "";
+    dangerConfirmBtn.disabled = true;
+  }
+  
+  async function deleteAllSupabaseRows(tableName) {
+    if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+      console.warn(`Supabase is not configured. Skipping ${tableName} clear.`);
+      return;
+    }
+  
+    const { data, error: readError } = await supabaseClient
+      .from(tableName)
+      .select("id");
+  
+    if (readError) {
+      throw readError;
+    }
+  
+    const ids = Array.isArray(data) ? data.map((item) => item.id).filter(Boolean) : [];
+  
+    if (!ids.length) {
+      return;
+    }
+  
+    const { error: deleteError } = await supabaseClient
+      .from(tableName)
+      .delete()
+      .in("id", ids);
+  
+    if (deleteError) {
+      throw deleteError;
+    }
+  }
+  
+  async function clearAllTestData() {
+    await deleteAllSupabaseRows("landing_page_submissions");
+    await deleteAllSupabaseRows("published_landing_pages");
+  
+    DoGoodStorage.clearSubmissions();
+    saveStoredPublishedPages([]);
+  
+    currentAdminSubmissions = [];
+  
+    await renderRequests();
+    await renderPublishedPages();
+  
+    alert("All test submissions and published pages have been cleared.");
+  }
+
 if (refreshBtn) {
   refreshBtn.addEventListener("click", renderRequests);
 }
@@ -930,20 +1007,44 @@ if (refreshPublishedBtn) {
   }
 
   if (clearAllBtn) {
-    clearAllBtn.addEventListener("click", () => {
-      const typedConfirmation = prompt(
-        "This will permanently clear all local submitted requests.\n\nType CLEAR SUBMISSIONS to confirm."
-      );
+    clearAllBtn.addEventListener("click", openDangerModal);
+  }
   
-      if (typedConfirmation !== "CLEAR SUBMISSIONS") {
-        alert("Clear cancelled.");
-        return;
-      }
-  
-      DoGoodStorage.clearSubmissions();
-      renderRequests();
+  if (dangerConfirmInput) {
+    dangerConfirmInput.addEventListener("input", () => {
+      dangerConfirmBtn.disabled = dangerConfirmInput.value.trim() !== "DELETE";
     });
   }
+  
+  if (dangerConfirmBtn) {
+    dangerConfirmBtn.addEventListener("click", async () => {
+      if (dangerConfirmInput.value.trim() !== "DELETE") return;
+  
+      dangerConfirmBtn.disabled = true;
+      dangerConfirmBtn.textContent = "Clearing...";
+  
+      try {
+        await clearAllTestData();
+        closeDangerModal();
+      } catch (error) {
+        console.error("Clear test data failed:", error);
+        alert("Failed to clear test data. Please check the console.");
+      } finally {
+        dangerConfirmBtn.textContent = "Clear Data";
+        dangerConfirmBtn.disabled = dangerConfirmInput.value.trim() !== "DELETE";
+      }
+    });
+  }
+  
+  closeDangerModalBtns.forEach((button) => {
+    button.addEventListener("click", closeDangerModal);
+  });
+  
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && dangerModal?.classList.contains("active")) {
+      closeDangerModal();
+    }
+  });
 
   if (exportBackupBtn) {
     exportBackupBtn.addEventListener("click", exportAdminBackup);
