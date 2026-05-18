@@ -233,3 +233,20 @@ using (status = 'published');
 -- Do not add broad public insert/update/delete policies for production.
 -- Admin insert/update/delete rules should be added after Supabase Auth is configured.
 -- Agent-specific rules should be added after the agent login flow is planned.
+
+-- =========================================================
+-- Temporary Development Policies
+-- =========================================================
+-- These allow local frontend testing before Supabase Auth is added.
+-- Replace with admin-only policies before production.
+
+create policy "Dev can insert published landing pages"
+on published_landing_pages
+for insert
+with check (status = 'published');
+
+create policy "Dev can update published landing pages"
+on published_landing_pages
+for update
+using (true)
+with check (status = 'published');

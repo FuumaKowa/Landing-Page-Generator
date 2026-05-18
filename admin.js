@@ -168,8 +168,38 @@ function previewSubmission(id) {
       status: "approved"
     });
   }
+
+  async function publishPageToSupabase(publishedPage) {
+    if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+      console.warn("Supabase is not configured. Published page saved locally only.");
+      return;
+    }
   
-  function publishSubmission(id) {
+    const payload = {
+      submission_id: null,
+      agent_id: null,
+      slug: publishedPage.slug,
+      public_path: publishedPage.publicPath,
+      status: "published",
+      page_data: publishedPage.agentData,
+      published_at: publishedPage.publishedAt
+    };
+  
+    const { error } = await supabaseClient
+      .from("published_landing_pages")
+      .upsert(payload, {
+        onConflict: "slug"
+      });
+  
+    if (error) {
+      console.warn("Supabase publish failed. Local publish still completed.", error);
+      alert(
+        "The page was published locally, but Supabase publishing failed. Check the console error."
+      );
+    }
+  }
+  
+  async function publishSubmission(id) {
     const submissions = getStoredSubmissions();
     const submission = submissions.find((item) => item.id === id);
   
@@ -217,15 +247,17 @@ function previewSubmission(id) {
     filteredPages.unshift(publishedPage);
   
     saveStoredPublishedPages(filteredPages);
-  
+
+    await publishPageToSupabase(publishedPage);
+    
     updateSubmission(id, {
       status: "published",
       approvalStatus: "published",
       publishedAt: publishedPage.publishedAt,
       publicPath: publishedPage.publicPath
     });
-  
-    alert(`Page published locally.\n\nPublic path: ${publishedPage.publicPath}`);
+    
+    alert(`Page published.\n\nPublic path: ${publishedPage.publicPath}`);
   }
 
   function deletePublishedPage(id) {
