@@ -22,6 +22,38 @@ function getStoredSubmissions() {
   return DoGoodStorage.getSubmissions();
 }
 
+async function getSubmissionsFromSupabase() {
+  if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+    console.warn("Supabase is not configured. Loading local submissions only.");
+    return null;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("landing_page_submissions")
+    .select("*")
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    console.warn("Supabase submissions read failed. Falling back to localStorage.", error);
+    return null;
+  }
+
+  return data.map((item) => ({
+    id: item.id,
+    supabaseId: item.id,
+    status: item.status,
+    paymentStatus: item.payment_status,
+    approvalStatus: item.approval_status,
+    revisionMessage: item.revision_message || "",
+    adminNote: item.admin_note || "",
+    submittedAt: item.submitted_at,
+    resubmittedAt: item.resubmitted_at,
+    reviewedAt: item.reviewed_at,
+    updatedAt: item.updated_at,
+    agentData: item.page_data || {}
+  }));
+}
+
 function saveStoredSubmissions(submissions) {
   DoGoodStorage.saveSubmissions(submissions);
 }
@@ -556,8 +588,9 @@ function previewSubmission(id) {
     });
   }
 
-function renderRequests() {
-    const submissions = getStoredSubmissions();
+async function renderRequests() {
+    const supabaseSubmissions = await getSubmissionsFromSupabase();
+    const submissions = supabaseSubmissions || getStoredSubmissions();
     const filteredSubmissions = getFilteredSubmissions(submissions);
     
     updateStats(submissions);
@@ -717,7 +750,6 @@ function downloadJsonFile(data, filename) {
         DoGoodStorage.importBackupData(backupData);
   
         renderRequests();
-        renderPublishedPages();
   
         alert("Backup imported successfully.");
       } catch (error) {
@@ -784,4 +816,3 @@ if (refreshPublishedBtn) {
   }
 
 renderRequests();
-renderPublishedPages();
