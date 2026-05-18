@@ -373,6 +373,56 @@ async function publishPageToSupabase(publishedPage) {
     );
   }
 }
+
+async function getExistingPublishedPageBySlug(slug) {
+  if (!slug) return null;
+
+  if (typeof supabaseClient !== "undefined" && isSupabaseConfigured()) {
+    const { data, error } = await supabaseClient
+      .from("published_landing_pages")
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error) {
+      console.warn("Could not check existing published slug.", error);
+      return null;
+    }
+
+    return data;
+  }
+
+  const localPages = getStoredPublishedPages();
+  return localPages.find((page) => page.slug === slug) || null;
+}
+
+async function createUniquePublishedSlug(baseSlug, submissionId) {
+  let cleanSlug = String(baseSlug || "agent-page")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "agent-page";
+
+  let finalSlug = cleanSlug;
+  let counter = 2;
+
+  while (true) {
+    const existingPage = await getExistingPublishedPageBySlug(finalSlug);
+
+    if (!existingPage) {
+      return finalSlug;
+    }
+
+    const existingSubmissionId = existingPage.submission_id || existingPage.submissionId;
+
+    if (existingSubmissionId && existingSubmissionId === submissionId) {
+      return finalSlug;
+    }
+
+    finalSlug = `${cleanSlug}-${counter}`;
+    counter += 1;
+  }
+}
   
   async function publishSubmission(id) {
     const submission = findSubmissionById(id);
@@ -403,13 +453,19 @@ async function publishPageToSupabase(publishedPage) {
     }
   
     const agentData = submission.agentData || {};
-    const slug = agentData.slug || `agent-${Date.now()}`;
+    const submissionId = submission.supabaseId || submission.id;
+    const slug = await createUniquePublishedSlug(
+      agentData.slug || agentData.agentName || `agent-${Date.now()}`,
+      submissionId
+    );
+    
+    agentData.slug = slug;
   
     const publishedPages = getStoredPublishedPages();
   
     const publishedPage = {
       id: `published-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      submissionId: submission.supabaseId || submission.id,
+      submissionId,
       agentId: submission.agentId || null,
       slug,
       publicPath: `/a/${slug}`,
