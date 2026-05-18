@@ -336,35 +336,43 @@ function previewSubmission(id) {
     });
   }
 
-  async function publishPageToSupabase(publishedPage) {
-    if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
-      console.warn("Supabase is not configured. Published page saved locally only.");
-      return;
-    }
-  
-    const payload = {
-      submission_id: null,
-      agent_id: null,
-      slug: publishedPage.slug,
-      public_path: publishedPage.publicPath,
-      status: "published",
-      page_data: publishedPage.agentData,
-      published_at: publishedPage.publishedAt
-    };
-  
-    const { error } = await supabaseClient
-      .from("published_landing_pages")
-      .upsert(payload, {
-        onConflict: "slug"
-      });
-  
-    if (error) {
-      console.warn("Supabase publish failed. Local publish still completed.", error);
-      alert(
-        "The page was published locally, but Supabase publishing failed. Check the console error."
-      );
-    }
+  function isValidUuid(value) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
   }
+
+async function publishPageToSupabase(publishedPage) {
+  if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+    console.warn("Supabase is not configured. Published page saved locally only.");
+    return;
+  }
+
+  const payload = {
+    submission_id: isValidUuid(publishedPage.submissionId)
+      ? publishedPage.submissionId
+      : null,
+    agent_id: isValidUuid(publishedPage.agentId)
+      ? publishedPage.agentId
+      : null,
+    slug: publishedPage.slug,
+    public_path: publishedPage.publicPath,
+    status: "published",
+    page_data: publishedPage.agentData,
+    published_at: publishedPage.publishedAt
+  };
+
+  const { error } = await supabaseClient
+    .from("published_landing_pages")
+    .upsert(payload, {
+      onConflict: "slug"
+    });
+
+  if (error) {
+    console.warn("Supabase publish failed. Local publish still completed.", error);
+    alert(
+      "The page was published locally, but Supabase publishing failed. Check the console error."
+    );
+  }
+}
   
   async function publishSubmission(id) {
     const submission = findSubmissionById(id);
@@ -401,7 +409,8 @@ function previewSubmission(id) {
   
     const publishedPage = {
       id: `published-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      submissionId: submission.id,
+      submissionId: submission.supabaseId || submission.id,
+      agentId: submission.agentId || null,
       slug,
       publicPath: `/a/${slug}`,
       publishedAt: new Date().toISOString(),
@@ -416,11 +425,10 @@ function previewSubmission(id) {
 
     await publishPageToSupabase(publishedPage);
     
-    updateSubmission(id, {
+    await updateSubmission(id, {
       status: "published",
       approvalStatus: "published",
-      publishedAt: publishedPage.publishedAt,
-      publicPath: publishedPage.publicPath
+      reviewedAt: publishedPage.publishedAt
     });
     
     alert(`Page published.\n\nPublic path: ${publishedPage.publicPath}`);
