@@ -11,6 +11,7 @@ const sortFilter = document.getElementById("sortFilter");
 const refreshPublishedBtn = document.getElementById("refreshPublishedBtn");
 const publishedEmptyState = document.getElementById("publishedEmptyState");
 const publishedList = document.getElementById("publishedList");
+const openBuilderBtn = document.getElementById("openBuilderBtn");
 
 const totalRequests = document.getElementById("totalRequests");
 const pendingRequests = document.getElementById("pendingRequests");
@@ -882,7 +883,7 @@ function downloadJsonFile(data, filename) {
     const backupData = DoGoodStorage.getBackupData();
   
     const dateStamp = new Date().toISOString().slice(0, 10);
-    const filename = `dogood-landing-backup-${dateStamp}-requests-${backupData.counts.submissions}-published-${backupData.counts.publishedPages}.json`;
+    const filename = `dogood-local-fallback-backup-${dateStamp}-requests-${backupData.counts.submissions}-published-${backupData.counts.publishedPages}.json`;
   
     downloadJsonFile(backupData, filename);
   }
@@ -984,6 +985,12 @@ function downloadJsonFile(data, filename) {
     await renderPublishedPages();
   
     alert("All test submissions and published pages have been cleared.");
+  }
+
+  if (openBuilderBtn) {
+    openBuilderBtn.addEventListener("click", () => {
+      window.open("index.html", "_blank");
+    });
   }
 
 if (refreshBtn) {

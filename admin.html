@@ -62,15 +62,15 @@
 
   <main class="admin-main">
     <section class="backup-reminder">
-        <div>
-          <h2>Local Prototype Reminder</h2>
-          <p>
-            This admin dashboard is currently using browser localStorage. Export a backup regularly before clearing browser data, changing devices, or testing reset actions.
-          </p>
-        </div>
-      
-        <button id="quickBackupBtn" type="button">Export Backup Now</button>
-      </section>
+      <div>
+        <h2>Supabase Admin Reminder</h2>
+        <p>
+          This dashboard now reads and updates landing page data through Supabase. Use backups only for local fallback data during testing.
+        </p>
+      </div>
+    
+      <button id="quickBackupBtn" type="button">Export Local Backup</button>
+    </section>
       
     <section class="stats-grid">
       <div class="stat-card">
@@ -103,7 +103,7 @@
       <div class="panel-header">
         <div>
           <h2>Submitted Requests</h2>
-          <p>These requests are saved locally for now. Later, this will come from Supabase.</p>
+          <p>These requests are loaded from Supabase and managed through admin-only access.</p>
         </div>
 
         <div class="panel-actions">
@@ -142,7 +142,7 @@
         <div class="panel-header">
           <div>
             <h2>Published Pages</h2>
-            <p>These are locally published pages. Later, these will become live routes such as landing.dogood.asia/a/agent-slug.</p>
+            <p>These published pages are loaded from Supabase and displayed through public slug links.</p>
           </div>
       
           <button id="refreshPublishedBtn" type="button">Refresh Published</button>
