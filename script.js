@@ -48,13 +48,44 @@ function getStoredSubmissions() {
   return DoGoodStorage.getSubmissions();
 }
 
-function getSubmissionFromUrl() {
+async function getSubmissionFromUrl() {
   const submissionId = getUrlParam("submission");
 
   if (!submissionId) return null;
 
+  if (typeof supabaseClient !== "undefined" && isSupabaseConfigured()) {
+    const { data, error } = await supabaseClient
+      .from("landing_page_submissions")
+      .select("*")
+      .eq("id", submissionId)
+      .maybeSingle();
+
+    if (error) {
+      console.warn("Supabase submission read failed. Falling back to localStorage.", error);
+    }
+
+    if (data) {
+      return {
+        id: data.id,
+        supabaseId: data.id,
+        status: data.status,
+        paymentStatus: data.payment_status,
+        approvalStatus: data.approval_status,
+        revisionMessage: data.revision_message || "",
+        adminNote: data.admin_note || "",
+        submittedAt: data.submitted_at,
+        resubmittedAt: data.resubmitted_at,
+        updatedAt: data.updated_at,
+        agentData: data.page_data || {}
+      };
+    }
+  }
+
   const submissions = getStoredSubmissions();
-  return submissions.find((submission) => submission.id === submissionId) || null;
+
+  return submissions.find((submission) => {
+    return submission.id === submissionId || submission.supabaseId === submissionId;
+  }) || null;
 }
 
 function updateRevisionNotice(submission) {
@@ -1244,26 +1275,64 @@ function getStoredSubmissions() {
   }
 }
 
-function updateExistingSubmission(id, data) {
+async function updateExistingSubmissionInSupabase(id, data) {
+  if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+    console.warn("Supabase is not configured. Revision updated locally only.");
+    return;
+  }
+
+  const payload = {
+    status: "pending_review",
+    approval_status: "not_approved",
+    revision_message: null,
+    page_data: normalizeAgentData(data),
+    resubmitted_at: new Date().toISOString()
+  };
+
+  const { error } = await supabaseClient
+    .from("landing_page_submissions")
+    .update(payload)
+    .eq("id", id);
+
+  if (error) {
+    console.warn("Supabase revision update failed. Local revision still completed.", error);
+    alert("The revision was saved locally, but Supabase update failed. Check the console error.");
+  }
+}
+
+async function updateExistingSubmission(id, data) {
   const submissions = getStoredSubmissions();
+  const resubmittedAt = new Date().toISOString();
 
   const updatedSubmissions = submissions.map((submission) => {
-    if (submission.id !== id) return submission;
+    if (submission.id !== id && submission.supabaseId !== id) return submission;
 
     return {
       ...submission,
       status: "pending_review",
       approvalStatus: "not_approved",
       revisionMessage: "",
-      resubmittedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      resubmittedAt,
+      updatedAt: resubmittedAt,
       agentData: normalizeAgentData(data)
     };
   });
 
   DoGoodStorage.saveSubmissions(updatedSubmissions);
 
-  return updatedSubmissions.find((submission) => submission.id === id);
+  await updateExistingSubmissionInSupabase(id, data);
+
+  return updatedSubmissions.find((submission) => {
+    return submission.id === id || submission.supabaseId === id;
+  }) || {
+    id,
+    status: "pending_review",
+    approvalStatus: "not_approved",
+    revisionMessage: "",
+    resubmittedAt,
+    updatedAt: resubmittedAt,
+    agentData: normalizeAgentData(data)
+  };
 }
 
 async function saveSubmissionToSupabase(submission) {
@@ -1363,7 +1432,7 @@ function setupSubmitRequestControls() {
     if (!confirmSubmit) return;
 
     const submission = currentRevisionSubmissionId
-    ? updateExistingSubmission(currentRevisionSubmissionId, currentAgentData)
+    ? await updateExistingSubmission(currentRevisionSubmissionId, currentAgentData)
     : await saveSubmission(currentAgentData);
 
 alert(
@@ -1444,7 +1513,7 @@ async function init() {
   try {
     const agentData = await loadAgentData();
     const savedDraft = loadDraftFromBrowser();
-    const urlSubmission = getSubmissionFromUrl();
+    const urlSubmission = await getSubmissionFromUrl();
 
     if (urlSubmission) {
       currentRevisionSubmissionId = urlSubmission.id;
