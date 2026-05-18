@@ -45,6 +45,34 @@ function getUrlParam(name) {
   return params.get(name);
 }
 
+function renderInvalidRevisionPage(message) {
+  document.body.classList.remove("customer-preview");
+
+  if (landingPage) {
+    landingPage.innerHTML = `
+      <section>
+        <div class="container">
+          <p class="eyebrow">Revision Link Invalid</p>
+          <h1>This revision link is no longer available.</h1>
+          <p>${message}</p>
+          <p>Please ask admin to mark the request as Needs Changes again and send you a new revision link.</p>
+        </div>
+      </section>
+    `;
+  }
+
+  const previewPanel = document.querySelector(".preview-panel");
+  const divider = document.querySelector(".builder-preview-divider");
+
+  if (previewPanel) {
+    previewPanel.style.display = "none";
+  }
+
+  if (divider) {
+    divider.style.display = "none";
+  }
+}
+
 function getStoredSubmissions() {
   return DoGoodStorage.getSubmissions();
 }
@@ -52,9 +80,12 @@ function getStoredSubmissions() {
 async function getSubmissionFromUrl() {
   const submissionId = getUrlParam("submission");
   const revisionToken = getUrlParam("token");
+
   currentRevisionToken = revisionToken;
 
   if (!submissionId) return null;
+
+  const isRevisionLink = Boolean(submissionId && revisionToken);
 
   if (
     typeof supabaseClient !== "undefined" &&
@@ -65,14 +96,31 @@ async function getSubmissionFromUrl() {
       p_submission_id: submissionId,
       p_revision_token: revisionToken
     });
-  
+
     if (error) {
-      console.warn("Supabase revision read failed. Falling back to localStorage.", error);
+      console.warn("Supabase revision read failed.", error);
+
+      return {
+        invalidRevision: true,
+        message: "The revision link could not be verified. Please ask admin for a new revision link."
+      };
     }
-  
+
     if (data) {
       return data;
     }
+
+    return {
+      invalidRevision: true,
+      message: "This revision link is invalid, expired, already used, or the request no longer needs changes."
+    };
+  }
+
+  if (isRevisionLink) {
+    return {
+      invalidRevision: true,
+      message: "This revision link is missing valid verification data."
+    };
   }
 
   const submissions = getStoredSubmissions();
@@ -1272,13 +1320,22 @@ function getStoredSubmissions() {
 async function updateExistingSubmissionInSupabase(id, data) {
   if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
     console.warn("Supabase is not configured. Revision updated locally only.");
-    return null;
+
+    return {
+      ok: true,
+      source: "local_fallback",
+      submission: null
+    };
   }
 
   if (!currentRevisionToken) {
-    console.warn("Revision token is missing. Supabase revision update skipped.");
     alert("Revision token is missing. Please use the revision link provided by admin.");
-    return null;
+
+    return {
+      ok: false,
+      source: "missing_token",
+      submission: null
+    };
   }
 
   const { data: updatedSubmission, error } = await supabaseClient.rpc(
@@ -1291,56 +1348,84 @@ async function updateExistingSubmissionInSupabase(id, data) {
   );
 
   if (error) {
-    console.warn("Supabase revision update failed. Local revision still completed.", error);
-    alert("The revision was saved locally, but Supabase update failed. Check the console error.");
-    return null;
+    console.warn("Supabase revision update failed.", error);
+    alert("Revision resubmission failed. Please check the console error or ask admin for a new revision link.");
+
+    return {
+      ok: false,
+      source: "supabase_error",
+      submission: null
+    };
   }
 
   if (!updatedSubmission) {
     alert("Revision link is invalid, expired, or this request no longer needs changes.");
-    return null;
+
+    return {
+      ok: false,
+      source: "invalid_token",
+      submission: null
+    };
   }
 
-  return updatedSubmission;
+  return {
+    ok: true,
+    source: "supabase",
+    submission: updatedSubmission
+  };
 }
 
 async function updateExistingSubmission(id, data) {
-  const submissions = getStoredSubmissions();
   const resubmittedAt = new Date().toISOString();
+
+  const supabaseResult = await updateExistingSubmissionInSupabase(id, data);
+
+  if (!supabaseResult.ok) {
+    return null;
+  }
+
+  const submissions = getStoredSubmissions();
+
+  const updatedSubmission = supabaseResult.submission || {
+    id,
+    supabaseId: id,
+    status: "pending_review",
+    paymentStatus: "unpaid",
+    approvalStatus: "not_approved",
+    revisionMessage: "",
+    adminNote: "",
+    resubmittedAt,
+    updatedAt: resubmittedAt,
+    agentData: normalizeAgentData(data)
+  };
 
   const updatedSubmissions = submissions.map((submission) => {
     if (submission.id !== id && submission.supabaseId !== id) return submission;
 
     return {
       ...submission,
-      status: "pending_review",
-      approvalStatus: "not_approved",
-      revisionMessage: "",
-      resubmittedAt,
-      updatedAt: resubmittedAt,
+      status: updatedSubmission.status || "pending_review",
+      paymentStatus: updatedSubmission.paymentStatus || submission.paymentStatus || "unpaid",
+      approvalStatus: updatedSubmission.approvalStatus || "not_approved",
+      revisionMessage: updatedSubmission.revisionMessage || "",
+      adminNote: updatedSubmission.adminNote || submission.adminNote || "",
+      resubmittedAt: updatedSubmission.resubmittedAt || resubmittedAt,
+      updatedAt: updatedSubmission.updatedAt || resubmittedAt,
       agentData: normalizeAgentData(data)
     };
   });
 
+  const existsLocally = updatedSubmissions.some((submission) => {
+    return submission.id === id || submission.supabaseId === id;
+  });
+
+  if (!existsLocally) {
+    updatedSubmissions.unshift(updatedSubmission);
+  }
+
   DoGoodStorage.saveSubmissions(updatedSubmissions);
 
-  const supabaseUpdatedSubmission = await updateExistingSubmissionInSupabase(id, data);
-
-  if (supabaseUpdatedSubmission) {
-    return supabaseUpdatedSubmission;
-  }
-  
-  return updatedSubmissions.find((submission) => {
-    return submission.id === id || submission.supabaseId === id;
-  }) || {
-    id,
-    status: "pending_review",
-    approvalStatus: "not_approved",
-    revisionMessage: "",
-    resubmittedAt,
-    updatedAt: resubmittedAt,
-    agentData: normalizeAgentData(data)
-  };
+  return updatedSubmission;
 }
 
 async function saveSubmissionToSupabase(submission) {
@@ -1439,18 +1524,32 @@ function setupSubmitRequestControls() {
 
     if (!confirmSubmit) return;
 
-    const submission = currentRevisionSubmissionId
+    submitRequestBtn.disabled = true;
+submitRequestBtn.textContent = currentRevisionSubmissionId
+  ? "Resubmitting..."
+  : "Submitting...";
+
+try {
+  const submission = currentRevisionSubmissionId
     ? await updateExistingSubmission(currentRevisionSubmissionId, currentAgentData)
     : await saveSubmission(currentAgentData);
 
-alert(
-  currentRevisionSubmissionId
-    ? `Your revised landing page has been resubmitted for review.\n\nSubmission ID: ${submission.id}`
-    : `Your landing page request has been submitted for review.\n\nSubmission ID: ${submission.id}\n\nPlease send your payment confirmation to the admin.`
-);
+  if (!submission) {
+    return;
+  }
 
-if (currentRevisionSubmissionId) {
+  alert(
+    currentRevisionSubmissionId
+      ? `Your revised landing page has been resubmitted for review.\n\nSubmission ID: ${submission.id}`
+      : `Your landing page request has been submitted for review.\n\nSubmission ID: ${submission.id}\n\nPlease send your payment confirmation to the admin.`
+  );
+
+  DoGoodStorage.clearDraft();
+
   window.location.href = "index.html";
+} finally {
+  submitRequestBtn.disabled = false;
+  submitRequestBtn.textContent = "Submit Landing Page Request";
 }
   });
 }
@@ -1523,12 +1622,18 @@ async function init() {
     const savedDraft = loadDraftFromBrowser();
     const urlSubmission = await getSubmissionFromUrl();
 
+    if (urlSubmission && urlSubmission.invalidRevision) {
+      renderInvalidRevisionPage(urlSubmission.message);
+      return;
+    }
+    
     if (urlSubmission) {
-      currentRevisionSubmissionId = urlSubmission.id;
+      currentRevisionSubmissionId = urlSubmission.supabaseId || urlSubmission.id;
       currentAgentData = normalizeAgentData(urlSubmission.agentData);
       updateRevisionNotice(urlSubmission);
     } else {
       currentRevisionSubmissionId = null;
+      currentRevisionToken = null;
       currentAgentData = normalizeAgentData(savedDraft || agentData);
       updateRevisionNotice(null);
     }
