@@ -714,6 +714,21 @@
   .detail-box a:hover {
     text-decoration: underline;
   }
+
+  .badge.payment-submitted {
+    background: #fff7d6;
+    color: #6b4e00;
+  }
+  
+  .badge.unpaid {
+    background: #ffdddd;
+    color: #7a1f1f;
+  }
+  
+  .badge.payment-confirmed {
+    background: #dcfce7;
+    color: #14532d;
+  }
   
   @media (max-width: 1000px) {
     .stats-grid,

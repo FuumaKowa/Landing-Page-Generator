@@ -93,16 +93,24 @@ function formatDate(value) {
 }
 
 function getStatusBadgeClass(value) {
-  if (value === "approved" || value === "published" || value === "payment_confirmed") {
+  if (value === "payment_submitted") {
+    return "payment-submitted";
+  }
+
+  if (value === "payment_confirmed") {
+    return "payment-confirmed";
+  }
+
+  if (value === "unpaid") {
+    return "unpaid";
+  }
+
+  if (value === "approved" || value === "published") {
     return "approved";
   }
 
   if (value === "rejected") {
     return "rejected";
-  }
-
-  if (value === "unpaid" || value === "payment_submitted") {
-    return "payment";
   }
 
   return "review";
@@ -143,6 +151,14 @@ function updateStats(submissions) {
   
     if ("paymentStatus" in updates) {
       payload.payment_status = updates.paymentStatus;
+    }
+
+    if ("paymentProofUrl" in updates) {
+      payload.payment_proof_url = updates.paymentProofUrl || null;
+    }
+    
+    if ("paymentSubmittedAt" in updates) {
+      payload.payment_submitted_at = updates.paymentSubmittedAt || null;
     }
   
     if ("approvalStatus" in updates) {
@@ -957,6 +973,36 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     });
   }
 
+  function rejectPaymentProof(id) {
+    const submission = findSubmissionById(id);
+  
+    if (!submission) {
+      alert("Submission not found.");
+      return;
+    }
+  
+    if (submission.status === "published") {
+      alert("This landing page is already published.");
+      return;
+    }
+  
+    const confirmRejectPayment = confirm(
+      "Reject this payment proof?\n\nThe request will be marked as Needs Changes so the agent can upload a new proof."
+    );
+  
+    if (!confirmRejectPayment) return;
+  
+    updateSubmission(submission.id, {
+      status: "needs_changes",
+      paymentStatus: "unpaid",
+      approvalStatus: "not_approved",
+      revisionMessage: "Please upload a clearer or valid payment proof before resubmitting.",
+      paymentProofUrl: "",
+      paymentSubmittedAt: null,
+      revisionToken: createRevisionToken()
+    });
+  }
+
   function confirmPayment(id) {
     const submission = findSubmissionById(id);
   
@@ -982,6 +1028,10 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
   }
 
   function getRequestActions(submission) {
+    const hasPaymentProof = Boolean(
+      submission.paymentProofUrl ||
+      submission.agentData?.paymentProofUrl
+    );
     const isPublished = submission.status === "published";
     const isRejected = submission.status === "rejected";
     const needsChanges = submission.status === "needs_changes";
@@ -1010,15 +1060,45 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
       `);
     }
   
-    if (!paymentConfirmed && !isPublished && !isRejected) {
+    if (
+      (submission.paymentStatus === "payment_submitted" || hasPaymentProof) &&
+      submission.paymentStatus !== "payment_confirmed" &&
+      !isPublished &&
+      !isRejected
+    ) {
       actions.push(`
         <button class="payment-btn" type="button" onclick="confirmPayment('${submission.id}')">
           Confirm Payment
         </button>
       `);
+    
+      actions.push(`
+        <button class="reject-btn" type="button" onclick="rejectPaymentProof('${submission.id}')">
+          Reject Payment Proof
+        </button>
+      `);
+    }
+    
+    if (
+      submission.paymentStatus === "unpaid" &&
+      !hasPaymentProof &&
+      !isPublished &&
+      !isRejected
+    ) {
+      actions.push(`
+        <button class="changes-btn" type="button" onclick="markNeedsChanges('${submission.id}')">
+          Request Payment Proof
+        </button>
+      `);
     }
   
-    if (paymentConfirmed && !approved && !needsChanges && !isPublished && !isRejected) {
+    if (
+      paymentConfirmed &&
+      !approved &&
+      !needsChanges &&
+      !isPublished &&
+      !isRejected
+    ) {
       actions.push(`
         <button class="approve-btn" type="button" onclick="approveSubmission('${submission.id}')">
           Approve
