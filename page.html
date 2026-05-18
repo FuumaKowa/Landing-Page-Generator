@@ -92,6 +92,21 @@
       return params.get(name);
     }
 
+    function getSlugFromPath() {
+      const pathParts = window.location.pathname
+        .split("/")
+        .map((part) => part.trim())
+        .filter(Boolean);
+    
+      const agentRouteIndex = pathParts.indexOf("a");
+    
+      if (agentRouteIndex === -1) {
+        return null;
+      }
+    
+      return pathParts[agentRouteIndex + 1] || null;
+    }
+
     function renderNotFound(message) {
       const landingPage = document.getElementById("landingPage");
 
@@ -106,7 +121,7 @@
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
-      const slug = getUrlParam("slug");
+      const slug = getUrlParam("slug") || getSlugFromPath();
       const submissionId = getUrlParam("submission");
 
       if (slug) {

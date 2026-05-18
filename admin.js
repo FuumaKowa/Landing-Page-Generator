@@ -475,8 +475,29 @@ async function publishPageToSupabase(publishedPage) {
     window.open(`page.html?slug=${encodeURIComponent(slug)}`, "_blank");
   }
 
+  function isLiveServerPreview() {
+    return (
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname === "localhost"
+    ) && window.location.port === "5500";
+  }
+  
   function getPublishedPageLink(slug) {
-    return `${window.location.origin}${window.location.pathname.replace("admin.html", "")}page.html?slug=${encodeURIComponent(slug)}`;
+    const cleanSlug = encodeURIComponent(slug || "");
+  
+    if (!cleanSlug) return "-";
+  
+    const basePath = window.location.pathname.replace("admin.html", "");
+  
+    if (isLiveServerPreview()) {
+      return `${window.location.origin}${basePath}page.html?slug=${cleanSlug}`;
+    }
+  
+    return `${window.location.origin}${basePath}a/${cleanSlug}`;
+  }
+  
+  function getFuturePublicPath(slug) {
+    return slug ? `/a/${slug}` : "-";
   }
   
   function copyPublishedLink(slug) {
@@ -519,6 +540,7 @@ async function publishPageToSupabase(publishedPage) {
             <div class="request-title">
               <h3>${data.agentName || "Unnamed Agent"}</h3>
               <p>Public preview: ${page.slug ? getPublishedPageLink(page.slug) : "-"}</p>
+              <p>Future live path: ${page.slug ? getFuturePublicPath(page.slug) : "-"}</p>
               <p>Published: ${formatDate(page.publishedAt)}</p>
             </div>
   
