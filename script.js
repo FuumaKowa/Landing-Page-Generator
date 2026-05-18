@@ -80,6 +80,50 @@ function renderInvalidRevisionPage(message) {
   }
 }
 
+function renderSubmissionSubmittedPage(submission) {
+  document.body.classList.remove("customer-preview");
+
+  const submissionId = submission?.id || submission?.supabaseId || "-";
+  const agentName = submission?.agentData?.agentName || currentAgentData?.agentName || "Agent";
+
+  if (landingPage) {
+    landingPage.innerHTML = `
+      <section>
+        <div class="container">
+          <p class="eyebrow">Request Submitted</p>
+          <h1>Your landing page request has been submitted.</h1>
+          <p>
+            Thank you, ${agentName}. Your landing page request has been sent to admin for review.
+          </p>
+          <p>
+            Submission ID: ${submissionId}
+          </p>
+          <p>
+            Admin will review your page, check payment proof, and publish the page after approval.
+          </p>
+          <a class="btn" href="index.html">Create Another Landing Page</a>
+        </div>
+      </section>
+    `;
+  }
+
+  const previewPanel = document.querySelector(".preview-panel");
+  const divider = document.querySelector(".builder-preview-divider");
+  const exitPreviewBtn = document.getElementById("exitPreviewModeBtn");
+
+  if (previewPanel) {
+    previewPanel.style.display = "none";
+  }
+
+  if (divider) {
+    divider.style.display = "none";
+  }
+
+  if (exitPreviewBtn) {
+    exitPreviewBtn.style.display = "none";
+  }
+}
+
 function renderRevisionSubmittedPage(submissionId) {
   document.body.classList.remove("customer-preview");
 
@@ -1754,7 +1798,8 @@ try {
     return;
   }
   
-  window.location.href = "index.html";
+  renderSubmissionSubmittedPage(submission);
+  return;
 
 } finally {
   submitRequestBtn.disabled = false;
