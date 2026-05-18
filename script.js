@@ -38,6 +38,7 @@ const builderProgress = document.getElementById("builderProgress");
 
 let currentAgentData = null;
 let currentRevisionSubmissionId = null;
+let currentRevisionToken = null;
 
 function getUrlParam(name) {
   const params = new URLSearchParams(window.location.search);
@@ -50,34 +51,27 @@ function getStoredSubmissions() {
 
 async function getSubmissionFromUrl() {
   const submissionId = getUrlParam("submission");
+  const revisionToken = getUrlParam("token");
+  currentRevisionToken = revisionToken;
 
   if (!submissionId) return null;
 
-  if (typeof supabaseClient !== "undefined" && isSupabaseConfigured()) {
-    const { data, error } = await supabaseClient
-      .from("landing_page_submissions")
-      .select("*")
-      .eq("id", submissionId)
-      .maybeSingle();
-
+  if (
+    typeof supabaseClient !== "undefined" &&
+    isSupabaseConfigured() &&
+    revisionToken
+  ) {
+    const { data, error } = await supabaseClient.rpc("get_landing_page_revision", {
+      p_submission_id: submissionId,
+      p_revision_token: revisionToken
+    });
+  
     if (error) {
-      console.warn("Supabase submission read failed. Falling back to localStorage.", error);
+      console.warn("Supabase revision read failed. Falling back to localStorage.", error);
     }
-
+  
     if (data) {
-      return {
-        id: data.id,
-        supabaseId: data.id,
-        status: data.status,
-        paymentStatus: data.payment_status,
-        approvalStatus: data.approval_status,
-        revisionMessage: data.revision_message || "",
-        adminNote: data.admin_note || "",
-        submittedAt: data.submitted_at,
-        resubmittedAt: data.resubmitted_at,
-        updatedAt: data.updated_at,
-        agentData: data.page_data || {}
-      };
+      return data;
     }
   }
 
@@ -1278,26 +1272,36 @@ function getStoredSubmissions() {
 async function updateExistingSubmissionInSupabase(id, data) {
   if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
     console.warn("Supabase is not configured. Revision updated locally only.");
-    return;
+    return null;
   }
 
-  const payload = {
-    status: "pending_review",
-    approval_status: "not_approved",
-    revision_message: null,
-    page_data: normalizeAgentData(data),
-    resubmitted_at: new Date().toISOString()
-  };
+  if (!currentRevisionToken) {
+    console.warn("Revision token is missing. Supabase revision update skipped.");
+    alert("Revision token is missing. Please use the revision link provided by admin.");
+    return null;
+  }
 
-  const { error } = await supabaseClient
-    .from("landing_page_submissions")
-    .update(payload)
-    .eq("id", id);
+  const { data: updatedSubmission, error } = await supabaseClient.rpc(
+    "resubmit_landing_page_revision",
+    {
+      p_submission_id: id,
+      p_revision_token: currentRevisionToken,
+      p_page_data: normalizeAgentData(data)
+    }
+  );
 
   if (error) {
     console.warn("Supabase revision update failed. Local revision still completed.", error);
     alert("The revision was saved locally, but Supabase update failed. Check the console error.");
+    return null;
   }
+
+  if (!updatedSubmission) {
+    alert("Revision link is invalid, expired, or this request no longer needs changes.");
+    return null;
+  }
+
+  return updatedSubmission;
 }
 
 async function updateExistingSubmission(id, data) {
@@ -1320,8 +1324,12 @@ async function updateExistingSubmission(id, data) {
 
   DoGoodStorage.saveSubmissions(updatedSubmissions);
 
-  await updateExistingSubmissionInSupabase(id, data);
+  const supabaseUpdatedSubmission = await updateExistingSubmissionInSupabase(id, data);
 
+  if (supabaseUpdatedSubmission) {
+    return supabaseUpdatedSubmission;
+  }
+  
   return updatedSubmissions.find((submission) => {
     return submission.id === id || submission.supabaseId === id;
   }) || {

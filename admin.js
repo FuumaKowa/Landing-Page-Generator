@@ -30,6 +30,7 @@ function getStoredSubmissions() {
 }
 
 async function getSubmissionsFromSupabase() {
+  
   if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
     console.warn("Supabase is not configured. Loading local submissions only.");
     return null;
@@ -52,6 +53,7 @@ async function getSubmissionsFromSupabase() {
     paymentStatus: item.payment_status,
     approvalStatus: item.approval_status,
     revisionMessage: item.revision_message || "",
+    revisionToken: item.revision_token || "",
     adminNote: item.admin_note || "",
     submittedAt: item.submitted_at,
     resubmittedAt: item.resubmitted_at,
@@ -128,6 +130,10 @@ function updateStats(submissions) {
 
   function mapSubmissionUpdatesToSupabase(updates) {
     const payload = {};
+
+    if ("revisionToken" in updates) {
+      payload.revision_token = updates.revisionToken;
+    }
   
     if ("status" in updates) {
       payload.status = updates.status;
@@ -647,7 +653,42 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     }).join("");
   }
 
-  function markNeedsChanges(id) {
+  function createRevisionToken() {
+    if (window.crypto && window.crypto.getRandomValues) {
+      const array = new Uint8Array(24);
+      window.crypto.getRandomValues(array);
+  
+      return Array.from(array)
+        .map((value) => value.toString(16).padStart(2, "0"))
+        .join("");
+    }
+  
+    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+  
+  async function ensureRevisionToken(submission) {
+    if (!submission) return "";
+  
+    if (submission.revisionToken) {
+      return submission.revisionToken;
+    }
+  
+    const revisionToken = createRevisionToken();
+  
+    await updateSubmission(submission.id, {
+      revisionToken
+    });
+  
+    return revisionToken;
+  }
+  
+  function getRevisionLink(submissionId, revisionToken) {
+    const basePath = window.location.pathname.replace("admin.html", "");
+  
+    return `${window.location.origin}${basePath}index.html?submission=${encodeURIComponent(submissionId)}&token=${encodeURIComponent(revisionToken)}`;
+  }
+
+  async function markNeedsChanges(id) {
     const submission = findSubmissionById(id);
   
     if (!submission) {
@@ -668,13 +709,16 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
       if (!confirmWithoutMessage) return;
     }
   
-    updateSubmission(submission.id, {
+    const revisionToken = submission.revisionToken || createRevisionToken();
+  
+    await updateSubmission(submission.id, {
       status: "needs_changes",
-      approvalStatus: "not_approved"
+      approvalStatus: "not_approved",
+      revisionToken
     });
   }
 
-  function openBuilderForRevision(id) {
+  async function openBuilderForRevision(id) {
     const submission = findSubmissionById(id);
   
     if (!submission) {
@@ -682,18 +726,40 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
       return;
     }
   
-    window.open(`index.html?submission=${encodeURIComponent(submission.id)}`, "_blank");
+    if (submission.status !== "needs_changes") {
+      alert("Mark this request as Needs Changes before opening a revision link.");
+      return;
+    }
+  
+    const revisionToken = await ensureRevisionToken(submission);
+    const revisionSubmissionId = submission.supabaseId || submission.id;
+  
+    window.open(getRevisionLink(revisionSubmissionId, revisionToken), "_blank");
   }
 
-  function copyRevisionLink(id) {
-    const localLink = `${window.location.origin}${window.location.pathname.replace("admin.html", "")}index.html?submission=${encodeURIComponent(id)}`;
+  async function copyRevisionLink(id) {
+    const submission = findSubmissionById(id);
   
-    navigator.clipboard.writeText(localLink)
+    if (!submission) {
+      alert("Submission not found.");
+      return;
+    }
+  
+    if (submission.status !== "needs_changes") {
+      alert("Mark this request as Needs Changes before copying a revision link.");
+      return;
+    }
+  
+    const revisionToken = await ensureRevisionToken(submission);
+    const revisionSubmissionId = submission.supabaseId || submission.id;
+    const revisionLink = getRevisionLink(revisionSubmissionId, revisionToken);
+  
+    navigator.clipboard.writeText(revisionLink)
       .then(() => {
-        alert(`Agent revision link copied:\n\n${localLink}`);
+        alert(`Agent revision link copied:\n\n${revisionLink}`);
       })
       .catch(() => {
-        prompt("Copy this agent revision link:", localLink);
+        prompt("Copy this agent revision link:", revisionLink);
       });
   }
 
@@ -846,13 +912,13 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
       </button>
     `);
   
-    if (!isPublished && !isRejected) {
+    if (needsChanges && !isPublished && !isRejected) {
       actions.push(`
         <button class="changes-btn" type="button" onclick="openBuilderForRevision('${submission.id}')">
-          Open Builder
+          Open Revision
         </button>
       `);
-  
+    
       actions.push(`
         <button class="changes-btn" type="button" onclick="copyRevisionLink('${submission.id}')">
           Copy Revision Link
