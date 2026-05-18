@@ -1168,6 +1168,7 @@ function normalizeAgentData(data) {
     theme: data.theme || "natural-cream",
     language: data.language || "en",
     heroStyle: data.heroStyle || "product-focus",
+    paymentProofUrl: data.paymentProofUrl || data.payment_proof_url || "",
     heroTitle: data.heroTitle || "",
     heroSubtitle: data.heroSubtitle || "",
     structure: data.structure || getStructureFromSections(data.sections || defaultSections),
@@ -1496,7 +1497,6 @@ function setupContentControls(data) {
       paymentProofInput.value = proofUrl;
       currentAgentData.paymentProofUrl = proofUrl;
   
-      renderLandingPage(currentAgentData);
       saveDraftToBrowser();
     });
   }
@@ -1638,8 +1638,15 @@ async function saveSubmissionToSupabase(submission) {
     return null;
   }
 
+  const finalPageData = {
+    ...submission.agentData,
+    paymentProofUrl: paymentProofInput
+      ? paymentProofInput.value.trim()
+      : submission.agentData.paymentProofUrl || ""
+  };
+  
   const { data, error } = await supabaseClient.rpc("submit_landing_page_request", {
-    p_page_data: submission.agentData
+    p_page_data: finalPageData
   });
 
   if (error) {
@@ -1662,7 +1669,12 @@ async function saveSubmission(data) {
     revisionMessage: "",
     adminNote: "",
     submittedAt: new Date().toISOString(),
-    agentData: normalizeAgentData(data)
+    agentData: normalizeAgentData({
+      ...data,
+      paymentProofUrl: paymentProofInput
+        ? paymentProofInput.value.trim()
+        : data.paymentProofUrl || ""
+    })
   };
 
   const supabaseSubmission = await saveSubmissionToSupabase(submission);
