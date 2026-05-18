@@ -262,6 +262,35 @@ function previewSubmission(id) {
   function getStoredPublishedPages() {
     return DoGoodStorage.getPublishedPages();
   }
+
+  async function getPublishedPagesFromSupabase() {
+    if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+      console.warn("Supabase is not configured. Loading local published pages only.");
+      return null;
+    }
+  
+    const { data, error } = await supabaseClient
+      .from("published_landing_pages")
+      .select("*")
+      .order("published_at", { ascending: false });
+  
+    if (error) {
+      console.warn("Supabase published pages read failed. Falling back to localStorage.", error);
+      return null;
+    }
+  
+    return data.map((item) => ({
+      id: item.id,
+      submissionId: item.submission_id,
+      agentId: item.agent_id,
+      slug: item.slug,
+      publicPath: item.public_path,
+      status: item.status,
+      publishedAt: item.published_at,
+      updatedAt: item.updated_at,
+      agentData: item.page_data || {}
+    }));
+  }
   
   function saveStoredPublishedPages(pages) {
     DoGoodStorage.savePublishedPages(pages);
@@ -392,7 +421,8 @@ function previewSubmission(id) {
   }
 
   async function deletePublishedPage(id) {
-    const publishedPages = getStoredPublishedPages();
+    const supabasePublishedPages = await getPublishedPagesFromSupabase();
+    const publishedPages = supabasePublishedPages || getStoredPublishedPages();
     const page = publishedPages.find((item) => item.id === id);
   
     if (!page) {
@@ -446,10 +476,11 @@ function previewSubmission(id) {
       });
   }
 
-  function renderPublishedPages() {
+ async function renderPublishedPages() {
     if (!publishedList || !publishedEmptyState) return;
   
-    const publishedPages = getStoredPublishedPages();
+    const supabasePublishedPages = await getPublishedPagesFromSupabase();
+    const publishedPages = supabasePublishedPages || getStoredPublishedPages();
   
     if (!publishedPages.length) {
       publishedEmptyState.style.display = "block";
