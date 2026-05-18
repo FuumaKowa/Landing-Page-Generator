@@ -1598,26 +1598,13 @@ async function saveSubmissionToSupabase(submission) {
     return null;
   }
 
-  const payload = {
-    slug: submission.agentData.slug,
-    status: submission.status,
-    payment_status: submission.paymentStatus,
-    approval_status: submission.approvalStatus,
-    revision_message: submission.revisionMessage || null,
-    admin_note: submission.adminNote || null,
-    page_data: submission.agentData,
-    submitted_at: submission.submittedAt
-  };
-
-  const { data, error } = await supabaseClient
-    .from("landing_page_submissions")
-    .insert(payload)
-    .select()
-    .single();
+  const { data, error } = await supabaseClient.rpc("submit_landing_page_request", {
+    p_page_data: submission.agentData
+  });
 
   if (error) {
-    console.warn("Supabase submission insert failed. Local submission still completed.", error);
-    alert("The request was saved locally, but Supabase submission failed. Check the console error.");
+    console.warn("Supabase submission RPC failed. Local submission still completed.", error);
+    alert(`Supabase submission failed:\n\n${error.message}`);
     return null;
   }
 
