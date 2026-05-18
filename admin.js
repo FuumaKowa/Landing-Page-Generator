@@ -467,15 +467,24 @@ function previewSubmission(id) {
     window.open(`page.html?slug=${encodeURIComponent(slug)}`, "_blank");
   }
 
-  function copyPublishedLink(slug) {
-    const localLink = `${window.location.origin}${window.location.pathname.replace("admin.html", "")}page.html?slug=${encodeURIComponent(slug)}`;
+  function getPublishedPageLink(slug) {
+    return `${window.location.origin}${window.location.pathname.replace("admin.html", "")}page.html?slug=${encodeURIComponent(slug)}`;
+  }
   
-    navigator.clipboard.writeText(localLink)
+  function copyPublishedLink(slug) {
+    if (!slug) {
+      alert("Published page slug not found.");
+      return;
+    }
+  
+    const publishedLink = getPublishedPageLink(slug);
+  
+    navigator.clipboard.writeText(publishedLink)
       .then(() => {
-        alert(`Published page link copied:\n\n${localLink}`);
+        alert(`Published page link copied:\n\n${publishedLink}`);
       })
       .catch(() => {
-        prompt("Copy this published page link:", localLink);
+        prompt("Copy this published page link:", publishedLink);
       });
   }
 
@@ -501,7 +510,7 @@ function previewSubmission(id) {
           <div class="request-top">
             <div class="request-title">
               <h3>${data.agentName || "Unnamed Agent"}</h3>
-              <p>Local preview: page.html?slug=${page.slug || "-"}</p>
+              <p>Public preview: ${page.slug ? getPublishedPageLink(page.slug) : "-"}</p>
               <p>Published: ${formatDate(page.publishedAt)}</p>
             </div>
   
@@ -540,7 +549,7 @@ function previewSubmission(id) {
       </button>
 
             <button class="publish-btn" type="button" onclick="copyPublishedLink('${page.slug}')">
-                Copy Local Link
+                Copy Published Link
             </button>
 
             <button class="delete-btn" type="button" onclick="deletePublishedPage('${page.id}')">
