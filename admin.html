@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Do Good Landing Page Admin</title>
   <link rel="stylesheet" href="admin.css" />
+  <style>
+    body {
+      visibility: hidden;
+    }
+  
+    body.admin-authenticated {
+      visibility: visible;
+    }
+  </style>
 </head>
 <body>
   <header class="admin-header">
@@ -26,6 +35,7 @@
     <input type="file" id="importBackupInput" accept="application/json">
     </label>
     </div>
+    <button type="button" data-admin-logout>Logout</button>
   </header>
 
   <main class="admin-main">
@@ -128,6 +138,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js"></script>
   <script src="storage.js"></script>
+  <script src="admin-protect.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>
