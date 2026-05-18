@@ -250,3 +250,30 @@ on published_landing_pages
 for update
 using (true)
 with check (status = 'published');
+
+-- =========================================================
+-- Temporary Development Submission Policies
+-- =========================================================
+-- Allows local frontend testing before Supabase Auth is added.
+-- Replace with proper authenticated agent/admin policies before production.
+
+drop policy if exists "Dev can insert landing page submissions" on landing_page_submissions;
+drop policy if exists "Dev anon can insert landing page submissions" on landing_page_submissions;
+drop policy if exists "Dev public can insert landing page submissions" on landing_page_submissions;
+drop policy if exists "Dev public can read landing page submissions" on landing_page_submissions;
+
+create policy "Dev public can insert landing page submissions"
+on landing_page_submissions
+for insert
+to public
+with check (
+  status = 'pending_review'
+  and payment_status = 'unpaid'
+  and approval_status = 'not_approved'
+);
+
+create policy "Dev public can read landing page submissions"
+on landing_page_submissions
+for select
+to public
+using (true);

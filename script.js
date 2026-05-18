@@ -1266,7 +1266,39 @@ function updateExistingSubmission(id, data) {
   return updatedSubmissions.find((submission) => submission.id === id);
 }
 
-function saveSubmission(data) {
+async function saveSubmissionToSupabase(submission) {
+  if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+    console.warn("Supabase is not configured. Submission saved locally only.");
+    return null;
+  }
+
+  const payload = {
+    slug: submission.agentData.slug,
+    status: submission.status,
+    payment_status: submission.paymentStatus,
+    approval_status: submission.approvalStatus,
+    revision_message: submission.revisionMessage || null,
+    admin_note: submission.adminNote || null,
+    page_data: submission.agentData,
+    submitted_at: submission.submittedAt
+  };
+
+  const { data, error } = await supabaseClient
+    .from("landing_page_submissions")
+    .insert(payload)
+    .select()
+    .single();
+
+  if (error) {
+    console.warn("Supabase submission insert failed. Local submission still completed.", error);
+    alert("The request was saved locally, but Supabase submission failed. Check the console error.");
+    return null;
+  }
+
+  return data;
+}
+
+async function saveSubmission(data) {
   const submissions = getStoredSubmissions();
 
   const submission = {
@@ -1274,9 +1306,17 @@ function saveSubmission(data) {
     status: "pending_review",
     paymentStatus: "unpaid",
     approvalStatus: "not_approved",
+    revisionMessage: "",
+    adminNote: "",
     submittedAt: new Date().toISOString(),
     agentData: normalizeAgentData(data)
   };
+
+  const supabaseSubmission = await saveSubmissionToSupabase(submission);
+
+  if (supabaseSubmission && supabaseSubmission.id) {
+    submission.supabaseId = supabaseSubmission.id;
+  }
 
   submissions.unshift(submission);
 
@@ -1304,7 +1344,7 @@ function setupPreviewModeControls() {
 function setupSubmitRequestControls() {
   if (!submitRequestBtn) return;
 
-  submitRequestBtn.addEventListener("click", () => {
+  submitRequestBtn.addEventListener("click", async () => {
     if (!currentAgentData) return;
 
     const issues = validateAgentData(currentAgentData);
@@ -1323,8 +1363,8 @@ function setupSubmitRequestControls() {
     if (!confirmSubmit) return;
 
     const submission = currentRevisionSubmissionId
-  ? updateExistingSubmission(currentRevisionSubmissionId, currentAgentData)
-  : saveSubmission(currentAgentData);
+    ? updateExistingSubmission(currentRevisionSubmissionId, currentAgentData)
+    : await saveSubmission(currentAgentData);
 
 alert(
   currentRevisionSubmissionId
