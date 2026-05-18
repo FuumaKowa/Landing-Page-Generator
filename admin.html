@@ -35,7 +35,17 @@
     <input type="file" id="importBackupInput" accept="application/json">
     </label>
     </div>
-    <button type="button" data-admin-logout>Logout</button>
+    
+    <div class="admin-session">
+      <div class="admin-session-info">
+        <span class="admin-session-label">Logged in as</span>
+        <strong data-admin-email>Admin</strong>
+      </div>
+    
+      <button type="button" class="admin-logout-btn" data-admin-logout>
+        Logout
+      </button>
+    </div>
   </header>
 
   <main class="admin-main">

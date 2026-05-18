@@ -1,3 +1,5 @@
+// admin-protect.js
+
 function getSupabaseClient() {
   if (!window.supabaseClient) {
     console.error("Supabase client not found. Check supabase.js.");
@@ -7,11 +9,25 @@ function getSupabaseClient() {
   return window.supabaseClient;
 }
 
+function redirectToLogin(reason = "") {
+  const query = reason ? `?reason=${encodeURIComponent(reason)}` : "";
+  window.location.href = `admin-login.html${query}`;
+}
+
+function showAdminEmail(session) {
+  const emailElements = document.querySelectorAll("[data-admin-email]");
+  const email = session?.user?.email || "Admin";
+
+  emailElements.forEach((element) => {
+    element.textContent = email;
+  });
+}
+
 async function protectAdminPage() {
   const supabaseClient = getSupabaseClient();
 
   if (!supabaseClient) {
-    window.location.href = "admin-login.html";
+    redirectToLogin("connection_failed");
     return;
   }
 
@@ -19,7 +35,7 @@ async function protectAdminPage() {
     await supabaseClient.auth.getSession();
 
   if (sessionError || !sessionData.session) {
-    window.location.href = "admin-login.html";
+    redirectToLogin("session_required");
     return;
   }
 
@@ -30,10 +46,11 @@ async function protectAdminPage() {
     console.error("Admin verification failed:", adminError);
 
     await supabaseClient.auth.signOut();
-    window.location.href = "admin-login.html";
+    redirectToLogin("unauthorized");
     return;
   }
 
+  showAdminEmail(sessionData.session);
   document.body.classList.add("admin-authenticated");
 }
 
@@ -41,7 +58,7 @@ async function adminLogout() {
   const supabaseClient = getSupabaseClient();
 
   if (!supabaseClient) {
-    window.location.href = "admin-login.html";
+    redirectToLogin("connection_failed");
     return;
   }
 
