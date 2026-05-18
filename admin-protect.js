@@ -1,24 +1,35 @@
 function getSupabaseClient() {
-  if (window.supabaseClient) return window.supabaseClient;
-  if (window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-    return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  if (!window.supabaseClient) {
+    console.error("Supabase client not found. Check supabase.js.");
+    return null;
   }
 
-  console.error("Supabase client not found. Check supabase.js.");
-  return null;
+  return window.supabaseClient;
 }
 
 async function protectAdminPage() {
-  const client = getSupabaseClient();
+  const supabaseClient = getSupabaseClient();
 
-  if (!client) {
+  if (!supabaseClient) {
     window.location.href = "admin-login.html";
     return;
   }
 
-  const { data, error } = await client.auth.getSession();
+  const { data: sessionData, error: sessionError } =
+    await supabaseClient.auth.getSession();
 
-  if (error || !data.session) {
+  if (sessionError || !sessionData.session) {
+    window.location.href = "admin-login.html";
+    return;
+  }
+
+  const { data: isAdmin, error: adminError } =
+    await supabaseClient.rpc("is_admin");
+
+  if (adminError || !isAdmin) {
+    console.error("Admin verification failed:", adminError);
+
+    await supabaseClient.auth.signOut();
     window.location.href = "admin-login.html";
     return;
   }
@@ -27,14 +38,14 @@ async function protectAdminPage() {
 }
 
 async function adminLogout() {
-  const client = getSupabaseClient();
+  const supabaseClient = getSupabaseClient();
 
-  if (!client) {
+  if (!supabaseClient) {
     window.location.href = "admin-login.html";
     return;
   }
 
-  await client.auth.signOut();
+  await supabaseClient.auth.signOut();
   window.location.href = "admin-login.html";
 }
 
