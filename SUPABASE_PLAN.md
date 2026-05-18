@@ -1,5 +1,4 @@
-````markdown
-# Supabase Migration Plan
+## Supabase Migration Plan
 
 This document explains the planned Supabase database structure and migration direction for the Do Good Agent Landing Page Builder.
 
