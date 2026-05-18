@@ -694,6 +694,16 @@
     background: #241f1b;
     color: #ffffff;
   }
+
+  .request-actions .unpublish-btn {
+    background: #fff7d6;
+    color: #6b4e00;
+  }
+  
+  .request-actions .republish-btn {
+    background: #dcfce7;
+    color: #14532d;
+  }
   
   @media (max-width: 1000px) {
     .stats-grid,

@@ -579,6 +579,98 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
       });
   }
 
+  async function updatePublishedPageStatus(slug, status) {
+    if (!slug) {
+      alert("Published page slug not found.");
+      return;
+    }
+  
+    const localPages = getStoredPublishedPages();
+    const updatedLocalPages = localPages.map((page) => {
+      if (page.slug !== slug) return page;
+  
+      return {
+        ...page,
+        status,
+        updatedAt: new Date().toISOString()
+      };
+    });
+  
+    saveStoredPublishedPages(updatedLocalPages);
+  
+    if (typeof supabaseClient !== "undefined" && isSupabaseConfigured()) {
+      const { error } = await supabaseClient
+        .from("published_landing_pages")
+        .update({
+          status,
+          updated_at: new Date().toISOString()
+        })
+        .eq("slug", slug);
+  
+      if (error) {
+        console.warn("Supabase published page status update failed.", error);
+        alert("Published page status update failed. Check console.");
+        return;
+      }
+    }
+  
+    await renderPublishedPages();
+  }
+  
+  async function unpublishPublishedPage(slug) {
+    const confirmUnpublish = confirm(
+      "Unpublish this landing page?\n\nThe public link will stop working, but the page data will stay saved."
+    );
+  
+    if (!confirmUnpublish) return;
+  
+    await updatePublishedPageStatus(slug, "unpublished");
+  }
+  
+  async function republishPublishedPage(slug) {
+    const confirmRepublish = confirm(
+      "Republish this landing page?\n\nThe public link will become active again."
+    );
+  
+    if (!confirmRepublish) return;
+  
+    await updatePublishedPageStatus(slug, "published");
+  }
+  
+  function getPublishedPageActions(page) {
+    const status = page.status || "published";
+  
+    if (status === "published") {
+      return `
+        <button type="button" onclick="previewPublishedPage('${page.slug}')">
+          Preview Published Page
+        </button>
+  
+        <button class="publish-btn" type="button" onclick="copyPublishedLink('${page.slug}')">
+          Copy Published Link
+        </button>
+  
+        <button class="unpublish-btn" type="button" onclick="unpublishPublishedPage('${page.slug}')">
+          Unpublish
+        </button>
+  
+        <button class="delete-btn" type="button" onclick="deletePublishedPage('${page.id}')">
+          Delete Published Page
+        </button>
+      `;
+    }
+  
+    return `
+      <button class="republish-btn" type="button" onclick="republishPublishedPage('${page.slug}')">
+        Republish
+      </button>
+  
+      <button class="delete-btn" type="button" onclick="deletePublishedPage('${page.id}')">
+        Delete Published Page
+      </button>
+    `;
+  }
+
  async function renderPublishedPages() {
     if (!publishedList || !publishedEmptyState) return;
   
@@ -636,18 +728,8 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
           </div>
   
           <div class="request-actions">
-          <button type="button" onclick="previewPublishedPage('${page.slug}')">
-          Preview Published Page
-      </button>
-
-            <button class="publish-btn" type="button" onclick="copyPublishedLink('${page.slug}')">
-                Copy Published Link
-            </button>
-
-            <button class="delete-btn" type="button" onclick="deletePublishedPage('${page.id}')">
-                Delete Published Page
-            </button>
-            </div>
+            ${getPublishedPageActions(page)}
+          </div>
         </article>
       `;
     }).join("");
