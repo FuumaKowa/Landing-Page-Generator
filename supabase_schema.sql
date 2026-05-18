@@ -292,3 +292,24 @@ for update
 to public
 using (true)
 with check (true);
+
+-- =========================================================
+-- Temporary Development Delete Policies
+-- =========================================================
+-- Allows local admin dashboard testing before Supabase Auth is added.
+-- Replace with proper admin-only policies before production.
+
+drop policy if exists "Dev public can delete landing page submissions" on landing_page_submissions;
+drop policy if exists "Dev public can delete published landing pages" on published_landing_pages;
+
+create policy "Dev public can delete landing page submissions"
+on landing_page_submissions
+for delete
+to public
+using (true);
+
+create policy "Dev public can delete published landing pages"
+on published_landing_pages
+for delete
+to public
+using (true);

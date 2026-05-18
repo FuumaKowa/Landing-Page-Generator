@@ -214,17 +214,39 @@ function updateAdminNote(id, note) {
     });
   }
 
-function deleteSubmission(id) {
-  const confirmDelete = confirm("Delete this test submission?");
-
-  if (!confirmDelete) return;
-
-  const submissions = getStoredSubmissions();
-  const updatedSubmissions = submissions.filter((submission) => submission.id !== id);
-
-  saveStoredSubmissions(updatedSubmissions);
-  renderRequests();
-}
+  async function deleteSubmission(id) {
+    const submission = findSubmissionById(id);
+  
+    if (!submission) {
+      alert("Submission not found.");
+      return;
+    }
+  
+    const confirmDelete = confirm("Delete this submission from local data and Supabase?");
+  
+    if (!confirmDelete) return;
+  
+    const localSubmissions = getStoredSubmissions();
+    const updatedLocalSubmissions = localSubmissions.filter((item) => {
+      return item.id !== submission.id && item.supabaseId !== submission.id;
+    });
+  
+    saveStoredSubmissions(updatedLocalSubmissions);
+  
+    if (typeof supabaseClient !== "undefined" && isSupabaseConfigured()) {
+      const { error } = await supabaseClient
+        .from("landing_page_submissions")
+        .delete()
+        .eq("id", submission.id);
+  
+      if (error) {
+        console.warn("Supabase submission delete failed. Local delete still completed.", error);
+        alert("The submission was deleted locally, but Supabase delete failed. Check the console error.");
+      }
+    }
+  
+    renderRequests();
+  }
 
 function previewSubmission(id) {
   const submission = findSubmissionById(id);
@@ -369,15 +391,34 @@ function previewSubmission(id) {
     alert(`Page published.\n\nPublic path: ${publishedPage.publicPath}`);
   }
 
-  function deletePublishedPage(id) {
-    const confirmDelete = confirm("Delete this locally published page?");
+  async function deletePublishedPage(id) {
+    const publishedPages = getStoredPublishedPages();
+    const page = publishedPages.find((item) => item.id === id);
+  
+    if (!page) {
+      alert("Published page not found.");
+      return;
+    }
+  
+    const confirmDelete = confirm("Delete this published page from local data and Supabase?");
   
     if (!confirmDelete) return;
   
-    const publishedPages = getStoredPublishedPages();
-    const updatedPages = publishedPages.filter((page) => page.id !== id);
+    const updatedLocalPages = publishedPages.filter((item) => item.id !== id);
+    saveStoredPublishedPages(updatedLocalPages);
   
-    saveStoredPublishedPages(updatedPages);
+    if (typeof supabaseClient !== "undefined" && isSupabaseConfigured()) {
+      const { error } = await supabaseClient
+        .from("published_landing_pages")
+        .delete()
+        .eq("slug", page.slug);
+  
+      if (error) {
+        console.warn("Supabase published page delete failed. Local delete still completed.", error);
+        alert("The published page was deleted locally, but Supabase delete failed. Check the console error.");
+      }
+    }
+  
     renderPublishedPages();
   }
   
