@@ -17,6 +17,7 @@ const pendingRequests = document.getElementById("pendingRequests");
 const paidRequests = document.getElementById("paidRequests");
 const approvedRequests = document.getElementById("approvedRequests");
 const publishedRequests = document.getElementById("publishedRequests");
+let currentAdminSubmissions = [];
 
 function getStoredSubmissions() {
   return DoGoodStorage.getSubmissions();
@@ -52,6 +53,20 @@ async function getSubmissionsFromSupabase() {
     updatedAt: item.updated_at,
     agentData: item.page_data || {}
   }));
+}
+
+function getCurrentAdminSubmissions() {
+  return Array.isArray(currentAdminSubmissions) && currentAdminSubmissions.length
+    ? currentAdminSubmissions
+    : getStoredSubmissions();
+}
+
+function findSubmissionById(id) {
+  const submissions = getCurrentAdminSubmissions();
+
+  return submissions.find((submission) => {
+    return submission.id === id || submission.supabaseId === id;
+  }) || null;
 }
 
 function saveStoredSubmissions(submissions) {
@@ -105,22 +120,87 @@ function updateStats(submissions) {
     }
   }
 
-function updateSubmission(id, updates) {
-  const submissions = getStoredSubmissions();
+  function mapSubmissionUpdatesToSupabase(updates) {
+    const payload = {};
+  
+    if ("status" in updates) {
+      payload.status = updates.status;
+    }
+  
+    if ("paymentStatus" in updates) {
+      payload.payment_status = updates.paymentStatus;
+    }
+  
+    if ("approvalStatus" in updates) {
+      payload.approval_status = updates.approvalStatus;
+    }
+  
+    if ("revisionMessage" in updates) {
+      payload.revision_message = updates.revisionMessage;
+    }
+  
+    if ("adminNote" in updates) {
+      payload.admin_note = updates.adminNote;
+    }
+  
+    if ("resubmittedAt" in updates) {
+      payload.resubmitted_at = updates.resubmittedAt;
+    }
+  
+    if ("reviewedAt" in updates) {
+      payload.reviewed_at = updates.reviewedAt;
+    }
+  
+    if ("publishedAt" in updates) {
+      payload.reviewed_at = updates.publishedAt;
+    }
+  
+    return payload;
+  }
+  
+  async function updateSubmissionInSupabase(id, updates) {
+    if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+      console.warn("Supabase is not configured. Submission updated locally only.");
+      return;
+    }
+  
+    const payload = mapSubmissionUpdatesToSupabase(updates);
+  
+    if (!Object.keys(payload).length) {
+      return;
+    }
+  
+    const { error } = await supabaseClient
+      .from("landing_page_submissions")
+      .update(payload)
+      .eq("id", id);
+  
+    if (error) {
+      console.warn("Supabase submission update failed. Local update still completed.", error);
+      alert("The admin change was saved locally, but Supabase update failed. Check the console error.");
+    }
+  }
 
-  const updatedSubmissions = submissions.map((submission) => {
-    if (submission.id !== id) return submission;
-
-    return {
-      ...submission,
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-  });
-
-  saveStoredSubmissions(updatedSubmissions);
-  renderRequests();
-}
+  async function updateSubmission(id, updates) {
+    const submissions = getCurrentAdminSubmissions();
+  
+    const updatedSubmissions = submissions.map((submission) => {
+      if (submission.id !== id && submission.supabaseId !== id) return submission;
+  
+      return {
+        ...submission,
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+    });
+  
+    saveStoredSubmissions(updatedSubmissions);
+    currentAdminSubmissions = updatedSubmissions;
+  
+    await updateSubmissionInSupabase(id, updates);
+  
+    renderRequests();
+  }
 
 function updateAdminNote(id, note) {
     updateSubmission(id, {
@@ -147,16 +227,15 @@ function deleteSubmission(id) {
 }
 
 function previewSubmission(id) {
-    const submissions = getStoredSubmissions();
-    const submission = submissions.find((item) => item.id === id);
-  
-    if (!submission) {
-      alert("Submission not found.");
-      return;
-    }
-  
-    window.open(`page.html?submission=${encodeURIComponent(submission.id)}`, "_blank");
+  const submission = findSubmissionById(id);
+
+  if (!submission) {
+    alert("Submission not found.");
+    return;
   }
+
+  window.open(`page.html?submission=${encodeURIComponent(submission.id)}`, "_blank");
+}
 
   function getStoredPublishedPages() {
     return DoGoodStorage.getPublishedPages();
@@ -167,18 +246,17 @@ function previewSubmission(id) {
   }
 
   function approveSubmission(id) {
-    const submissions = getStoredSubmissions();
-    const submission = submissions.find((item) => item.id === id);
+    const submission = findSubmissionById(id);
   
     if (!submission) {
       alert("Submission not found.");
       return;
     }
-
+  
     if (submission.status === "published") {
-        alert("This landing page is already published.");
-        return;
-      }
+      alert("This landing page is already published.");
+      return;
+    }
   
     if (submission.paymentStatus !== "payment_confirmed") {
       alert("Payment must be confirmed before this landing page can be approved.");
@@ -195,7 +273,7 @@ function previewSubmission(id) {
       return;
     }
   
-    updateSubmission(id, {
+    updateSubmission(submission.id, {
       approvalStatus: "approved",
       status: "approved"
     });
@@ -232,8 +310,7 @@ function previewSubmission(id) {
   }
   
   async function publishSubmission(id) {
-    const submissions = getStoredSubmissions();
-    const submission = submissions.find((item) => item.id === id);
+    const submission = findSubmissionById(id);
   
     if (!submission) {
       alert("Submission not found.");
@@ -401,18 +478,17 @@ function previewSubmission(id) {
   }
 
   function markNeedsChanges(id) {
-    const submissions = getStoredSubmissions();
-    const submission = submissions.find((item) => item.id === id);
+    const submission = findSubmissionById(id);
   
     if (!submission) {
       alert("Submission not found.");
       return;
     }
-
+  
     if (submission.status === "published") {
-        alert("This landing page is already published. Published pages should be edited through a separate update workflow.");
-        return;
-      }
+      alert("This landing page is already published. Published pages should be edited through a separate update workflow.");
+      return;
+    }
   
     if (!submission.revisionMessage || !submission.revisionMessage.trim()) {
       const confirmWithoutMessage = confirm(
@@ -422,15 +498,14 @@ function previewSubmission(id) {
       if (!confirmWithoutMessage) return;
     }
   
-    updateSubmission(id, {
+    updateSubmission(submission.id, {
       status: "needs_changes",
       approvalStatus: "not_approved"
     });
   }
 
   function openBuilderForRevision(id) {
-    const submissions = getStoredSubmissions();
-    const submission = submissions.find((item) => item.id === id);
+    const submission = findSubmissionById(id);
   
     if (!submission) {
       alert("Submission not found.");
@@ -540,8 +615,7 @@ function previewSubmission(id) {
   }
 
   function rejectSubmission(id) {
-    const submissions = getStoredSubmissions();
-    const submission = submissions.find((item) => item.id === id);
+    const submission = findSubmissionById(id);
   
     if (!submission) {
       alert("Submission not found.");
@@ -557,15 +631,14 @@ function previewSubmission(id) {
   
     if (!confirmReject) return;
   
-    updateSubmission(id, {
+    updateSubmission(submission.id, {
       status: "rejected",
       approvalStatus: "not_approved"
     });
   }
 
   function confirmPayment(id) {
-    const submissions = getStoredSubmissions();
-    const submission = submissions.find((item) => item.id === id);
+    const submission = findSubmissionById(id);
   
     if (!submission) {
       alert("Submission not found.");
@@ -582,7 +655,7 @@ function previewSubmission(id) {
       return;
     }
   
-    updateSubmission(id, {
+    updateSubmission(submission.id, {
       paymentStatus: "payment_confirmed",
       status: "pending_review"
     });
@@ -591,6 +664,9 @@ function previewSubmission(id) {
 async function renderRequests() {
     const supabaseSubmissions = await getSubmissionsFromSupabase();
     const submissions = supabaseSubmissions || getStoredSubmissions();
+
+    currentAdminSubmissions = submissions;
+
     const filteredSubmissions = getFilteredSubmissions(submissions);
     
     updateStats(submissions);

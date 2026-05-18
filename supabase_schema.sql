@@ -277,3 +277,18 @@ on landing_page_submissions
 for select
 to public
 using (true);
+
+-- =========================================================
+-- Temporary Development Submission Update Policy
+-- =========================================================
+-- Allows local admin dashboard testing before Supabase Auth is added.
+-- Replace with proper admin-only policies before production.
+
+drop policy if exists "Dev public can update landing page submissions" on landing_page_submissions;
+
+create policy "Dev public can update landing page submissions"
+on landing_page_submissions
+for update
+to public
+using (true)
+with check (true);
