@@ -73,6 +73,44 @@ function renderInvalidRevisionPage(message) {
   }
 }
 
+function renderRevisionSubmittedPage(submissionId) {
+  document.body.classList.remove("customer-preview");
+
+  if (landingPage) {
+    landingPage.innerHTML = `
+      <section>
+        <div class="container">
+          <p class="eyebrow">Revision Submitted</p>
+          <h1>Your revised landing page has been resubmitted.</h1>
+          <p>
+            Your changes have been sent back to admin for review.
+          </p>
+          <p>
+            Submission ID: ${submissionId || "-"}
+          </p>
+          <a class="btn" href="index.html">Create Another Landing Page</a>
+        </div>
+      </section>
+    `;
+  }
+
+  const previewPanel = document.querySelector(".preview-panel");
+  const divider = document.querySelector(".builder-preview-divider");
+  const exitPreviewBtn = document.getElementById("exitPreviewModeBtn");
+
+  if (previewPanel) {
+    previewPanel.style.display = "none";
+  }
+
+  if (divider) {
+    divider.style.display = "none";
+  }
+
+  if (exitPreviewBtn) {
+    exitPreviewBtn.style.display = "none";
+  }
+}
+
 function getStoredSubmissions() {
   return DoGoodStorage.getSubmissions();
 }
@@ -1546,7 +1584,13 @@ try {
 
   DoGoodStorage.clearDraft();
 
+  if (currentRevisionSubmissionId) {
+    renderRevisionSubmittedPage(submission.id);
+    return;
+  }
+  
   window.location.href = "index.html";
+  
 } finally {
   submitRequestBtn.disabled = false;
   submitRequestBtn.textContent = "Submit Landing Page Request";
