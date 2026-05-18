@@ -165,12 +165,24 @@
 
       <label class="wide-control">
         Product Image URL
-        <input type="text" id="productImageInput" placeholder="Paste product image URL">
+        <input type="text" id="productImageInput" placeholder="Paste product image URL or upload below">
       </label>
-
+      
+      <label class="wide-control upload-control">
+        Upload Product Image
+        <input type="file" id="productImageUploadInput" accept="image/*">
+        <span id="productImageUploadStatus" class="upload-status"></span>
+      </label>
+      
       <label class="wide-control">
         Agent Photo URL
-        <input type="text" id="agentPhotoInput" placeholder="Paste agent photo URL">
+        <input type="text" id="agentPhotoInput" placeholder="Paste agent photo URL or upload below">
+      </label>
+      
+      <label class="wide-control upload-control">
+        Upload Agent Photo
+        <input type="file" id="agentPhotoUploadInput" accept="image/*">
+        <span id="agentPhotoUploadStatus" class="upload-status"></span>
       </label>
 
       <label class="wide-control">

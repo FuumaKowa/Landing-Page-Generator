@@ -20,6 +20,10 @@ const heroSubtitleInput = document.getElementById("heroSubtitleInput");
 const packageDetailsInput = document.getElementById("packageDetailsInput");
 const productImageInput = document.getElementById("productImageInput");
 const agentPhotoInput = document.getElementById("agentPhotoInput");
+const productImageUploadInput = document.getElementById("productImageUploadInput");
+const agentPhotoUploadInput = document.getElementById("agentPhotoUploadInput");
+const productImageUploadStatus = document.getElementById("productImageUploadStatus");
+const agentPhotoUploadStatus = document.getElementById("agentPhotoUploadStatus");
 const agentDescriptionInput = document.getElementById("agentDescriptionInput");
 const whatsappMessageInput = document.getElementById("whatsappMessageInput");
 
@@ -1257,6 +1261,83 @@ function createSlug(text) {
     .replace(/^-+|-+$/g, "") || "agent-page";
 }
 
+function setUploadStatus(element, message, type = "") {
+  if (!element) return;
+
+  element.textContent = message;
+  element.className = `upload-status ${type}`.trim();
+}
+
+function getFileExtension(file) {
+  const fileName = file?.name || "";
+  const extension = fileName.split(".").pop();
+
+  return extension ? extension.toLowerCase() : "jpg";
+}
+
+function createUploadFilePath(type, file) {
+  const extension = getFileExtension(file);
+  const safeAgentSlug = createSlug(currentAgentData?.agentName || "agent");
+  const timestamp = Date.now();
+  const randomPart = Math.random().toString(16).slice(2);
+
+  return `${safeAgentSlug}/${type}-${timestamp}-${randomPart}.${extension}`;
+}
+
+async function uploadLandingPageImage(file, type, statusElement) {
+  if (!file) return null;
+
+  if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+    setUploadStatus(statusElement, "Supabase is not connected. Image upload unavailable.", "error");
+    return null;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    setUploadStatus(statusElement, "Please upload an image file only.", "error");
+    return null;
+  }
+
+  const maxSizeInMb = 5;
+  const maxSizeInBytes = maxSizeInMb * 1024 * 1024;
+
+  if (file.size > maxSizeInBytes) {
+    setUploadStatus(statusElement, `Image is too large. Maximum size is ${maxSizeInMb}MB.`, "error");
+    return null;
+  }
+
+  const filePath = createUploadFilePath(type, file);
+
+  setUploadStatus(statusElement, "Uploading image...");
+
+  const { error } = await supabaseClient.storage
+    .from("landing-page-assets")
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false
+    });
+
+  if (error) {
+    console.warn("Image upload failed:", error);
+    setUploadStatus(statusElement, "Image upload failed. Check console.", "error");
+    return null;
+  }
+
+  const { data } = supabaseClient.storage
+    .from("landing-page-assets")
+    .getPublicUrl(filePath);
+
+  const publicUrl = data?.publicUrl || null;
+
+  if (!publicUrl) {
+    setUploadStatus(statusElement, "Image uploaded, but public URL could not be created.", "error");
+    return null;
+  }
+
+  setUploadStatus(statusElement, "Image uploaded successfully.", "success");
+
+  return publicUrl;
+}
+
 function setupContentControls(data) {
   if (
     !agentNameInput ||
@@ -1335,6 +1416,51 @@ function setupContentControls(data) {
   agentPhotoInput.addEventListener("input", updateContent);
   agentDescriptionInput.addEventListener("input", updateContent);
   whatsappMessageInput.addEventListener("input", updateContent);
+
+  if (productImageUploadInput) {
+    productImageUploadInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+  
+      if (!file) return;
+  
+      const imageUrl = await uploadLandingPageImage(
+        file,
+        "product",
+        productImageUploadStatus
+      );
+  
+      if (!imageUrl) return;
+  
+      productImageInput.value = imageUrl;
+      currentAgentData.productImage = imageUrl;
+  
+      renderLandingPage(currentAgentData);
+      saveDraftToBrowser();
+    });
+  }
+  
+  if (agentPhotoUploadInput) {
+    agentPhotoUploadInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+  
+      if (!file) return;
+  
+      const imageUrl = await uploadLandingPageImage(
+        file,
+        "agent",
+        agentPhotoUploadStatus
+      );
+  
+      if (!imageUrl) return;
+  
+      agentPhotoInput.value = imageUrl;
+      currentAgentData.agentPhoto = imageUrl;
+  
+      renderLandingPage(currentAgentData);
+      saveDraftToBrowser();
+    });
+  }
+
 }
 
 function createSubmissionId() {
@@ -1590,7 +1716,7 @@ try {
   }
   
   window.location.href = "index.html";
-  
+
 } finally {
   submitRequestBtn.disabled = false;
   submitRequestBtn.textContent = "Submit Landing Page Request";
