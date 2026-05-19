@@ -729,6 +729,11 @@
     background: #dcfce7;
     color: #14532d;
   }
+
+  .request-actions .edit-btn {
+    background: #e0f2fe;
+    color: #075985;
+  }
   
   @media (max-width: 1000px) {
     .stats-grid,

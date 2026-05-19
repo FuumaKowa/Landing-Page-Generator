@@ -46,10 +46,16 @@ const builderProgress = document.getElementById("builderProgress");
 let currentAgentData = null;
 let currentRevisionSubmissionId = null;
 let currentRevisionToken = null;
+let currentPublishedEditSlug = null;
+let currentPublishedEditPage = null;
 
 function getUrlParam(name) {
   const params = new URLSearchParams(window.location.search);
   return params.get(name);
+}
+
+function isPublishedEditMode() {
+  return Boolean(currentPublishedEditSlug);
 }
 
 function renderInvalidRevisionPage(message) {
@@ -78,6 +84,85 @@ function renderInvalidRevisionPage(message) {
   if (divider) {
     divider.style.display = "none";
   }
+}
+
+function renderUnauthorizedPublishedEditPage() {
+  document.body.classList.remove("customer-preview");
+
+  if (landingPage) {
+    landingPage.innerHTML = `
+      <section>
+        <div class="container">
+          <p class="eyebrow">Admin Access Required</p>
+          <h1>You must be logged in as admin to edit a published page.</h1>
+          <p>Please log in through the admin dashboard before editing published content.</p>
+          <a class="btn" href="admin-login.html">Go to Admin Login</a>
+        </div>
+      </section>
+    `;
+  }
+
+  const previewPanel = document.querySelector(".preview-panel");
+  const divider = document.querySelector(".builder-preview-divider");
+  const exitPreviewBtn = document.getElementById("exitPreviewModeBtn");
+
+  if (previewPanel) previewPanel.style.display = "none";
+  if (divider) divider.style.display = "none";
+  if (exitPreviewBtn) exitPreviewBtn.style.display = "none";
+}
+
+function renderPublishedEditNotFoundPage(slug) {
+  document.body.classList.remove("customer-preview");
+
+  if (landingPage) {
+    landingPage.innerHTML = `
+      <section>
+        <div class="container">
+          <p class="eyebrow">Published Page Not Found</p>
+          <h1>No published page found for this slug.</h1>
+          <p>Slug: ${slug || "-"}</p>
+          <a class="btn" href="admin.html">Back to Admin</a>
+        </div>
+      </section>
+    `;
+  }
+
+  const previewPanel = document.querySelector(".preview-panel");
+  const divider = document.querySelector(".builder-preview-divider");
+  const exitPreviewBtn = document.getElementById("exitPreviewModeBtn");
+
+  if (previewPanel) previewPanel.style.display = "none";
+  if (divider) divider.style.display = "none";
+  if (exitPreviewBtn) exitPreviewBtn.style.display = "none";
+}
+
+function renderPublishedSavedPage(slug) {
+  document.body.classList.remove("customer-preview");
+
+  const previewLink = `page.html?slug=${encodeURIComponent(slug)}`;
+
+  if (landingPage) {
+    landingPage.innerHTML = `
+      <section>
+        <div class="container">
+          <p class="eyebrow">Published Page Updated</p>
+          <h1>Your published landing page has been updated.</h1>
+          <p>The same public link is still active.</p>
+          <p>Slug: ${slug}</p>
+          <a class="btn" href="${previewLink}" target="_blank">Preview Updated Page</a>
+          <a class="btn" href="admin.html">Back to Admin</a>
+        </div>
+      </section>
+    `;
+  }
+
+  const previewPanel = document.querySelector(".preview-panel");
+  const divider = document.querySelector(".builder-preview-divider");
+  const exitPreviewBtn = document.getElementById("exitPreviewModeBtn");
+
+  if (previewPanel) previewPanel.style.display = "none";
+  if (divider) divider.style.display = "none";
+  if (exitPreviewBtn) exitPreviewBtn.style.display = "none";
 }
 
 function renderSubmissionSubmittedPage(submission) {
@@ -1430,7 +1515,9 @@ function setupContentControls(data) {
 
   const updateContent = () => {
     currentAgentData.agentName = agentNameInput.value.trim();
-    currentAgentData.slug = createSlug(currentAgentData.agentName);
+    currentAgentData.slug = isPublishedEditMode()
+    ? currentPublishedEditSlug
+    : createSlug(currentAgentData.agentName);
     currentAgentData.whatsappNumber = whatsappInput.value.trim();
     currentAgentData.productName = productNameInput.value.trim();
     currentAgentData.productDescription = productDescriptionInput.value.trim();
@@ -1765,6 +1852,30 @@ function setupSubmitRequestControls() {
       return;
     }
 
+    if (currentPublishedEditSlug) {
+      const confirmSave = confirm(
+        "Save changes to this published landing page?\n\nThe public link will stay the same."
+      );
+    
+      if (!confirmSave) return;
+    
+      submitRequestBtn.disabled = true;
+      submitRequestBtn.textContent = "Saving Published Page...";
+    
+      try {
+        const updatedPage = await savePublishedPageChanges();
+    
+        if (!updatedPage) return;
+    
+        DoGoodStorage.clearDraft();
+        renderPublishedSavedPage(currentPublishedEditSlug);
+        return;
+      } finally {
+        submitRequestBtn.disabled = false;
+        submitRequestBtn.textContent = "Save Published Page Changes";
+      }
+    }
+
     const confirmSubmit = confirm(
       "Submit this landing page request for admin review?"
     );
@@ -1870,17 +1981,169 @@ function setupImportControls() {
   });
 }
 
+async function checkAdminAccessForPublishedEdit() {
+  if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+    return false;
+  }
+
+  const { data: sessionData, error: sessionError } =
+    await supabaseClient.auth.getSession();
+
+  if (sessionError || !sessionData.session) {
+    return false;
+  }
+
+  const { data: isAdmin, error: adminError } =
+    await supabaseClient.rpc("is_admin");
+
+  if (adminError || !isAdmin) {
+    return false;
+  }
+
+  return true;
+}
+
+async function getPublishedPageForEdit(slug) {
+  if (!slug) return null;
+
+  if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
+    return null;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("published_landing_pages")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Published page edit read failed:", error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    submissionId: data.submission_id,
+    agentId: data.agent_id,
+    slug: data.slug,
+    publicPath: data.public_path,
+    status: data.status,
+    publishedAt: data.published_at,
+    updatedAt: data.updated_at,
+    agentData: data.page_data || {}
+  };
+}
+
+function showPublishedEditNotice(page) {
+  if (!revisionNotice) return;
+
+  revisionNotice.style.display = "block";
+  revisionNotice.innerHTML = `
+    <strong>Editing published page</strong>
+    <p>You are editing the live published page for slug: ${page.slug}</p>
+    <p>The public link will stay the same after saving.</p>
+  `;
+}
+
+async function savePublishedPageChanges() {
+  if (!currentPublishedEditSlug || !currentAgentData) {
+    alert("No published page is currently being edited.");
+    return null;
+  }
+
+  const isAdmin = await checkAdminAccessForPublishedEdit();
+
+  if (!isAdmin) {
+    renderUnauthorizedPublishedEditPage();
+    return null;
+  }
+
+  const updatedPageData = normalizeAgentData({
+    ...currentAgentData,
+    slug: currentPublishedEditSlug
+  });
+
+  const { data, error } = await supabaseClient
+    .from("published_landing_pages")
+    .update({
+      page_data: updatedPageData,
+      public_path: `/a/${currentPublishedEditSlug}`,
+      updated_at: new Date().toISOString()
+    })
+    .eq("slug", currentPublishedEditSlug)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Published page update failed:", error);
+    alert(`Published page update failed:\n\n${error.message}`);
+    return null;
+  }
+
+  if (!data) {
+    alert("Published page could not be updated.");
+    return null;
+  }
+
+  return data;
+}
+
 async function init() {
   try {
     const agentData = await loadAgentData();
     const savedDraft = loadDraftFromBrowser();
+    const publishedSlug = getUrlParam("published");
     const urlSubmission = await getSubmissionFromUrl();
+
+    if (publishedSlug) {
+      currentPublishedEditSlug = publishedSlug;
+
+      const isAdmin = await checkAdminAccessForPublishedEdit();
+
+      if (!isAdmin) {
+        renderUnauthorizedPublishedEditPage();
+        return;
+      }
+
+      const publishedPage = await getPublishedPageForEdit(publishedSlug);
+
+      if (!publishedPage) {
+        renderPublishedEditNotFoundPage(publishedSlug);
+        return;
+      }
+
+      currentRevisionSubmissionId = null;
+      currentRevisionToken = null;
+      currentPublishedEditPage = publishedPage;
+      currentAgentData = normalizeAgentData({
+        ...publishedPage.agentData,
+        slug: publishedPage.slug
+      });
+
+      renderLandingPage(currentAgentData);
+      showPublishedEditNotice(publishedPage);
+      setupScrollToPreviewControl();
+      setupPreviewModeControls();
+      setupPreviewControls(currentAgentData);
+      setupContentControls(currentAgentData);
+      setupSubmitRequestControls();
+      setupExportControls();
+      setupImportControls();
+
+      if (submitRequestBtn) {
+        submitRequestBtn.textContent = "Save Published Page Changes";
+      }
+
+      return;
+    }
 
     if (urlSubmission && urlSubmission.invalidRevision) {
       renderInvalidRevisionPage(urlSubmission.message);
       return;
     }
-    
+
     if (urlSubmission) {
       currentRevisionSubmissionId = urlSubmission.supabaseId || urlSubmission.id;
       currentAgentData = normalizeAgentData(urlSubmission.agentData);
@@ -1888,6 +2151,8 @@ async function init() {
     } else {
       currentRevisionSubmissionId = null;
       currentRevisionToken = null;
+      currentPublishedEditSlug = null;
+      currentPublishedEditPage = null;
       currentAgentData = normalizeAgentData(savedDraft || agentData);
       updateRevisionNotice(null);
     }
@@ -1897,7 +2162,6 @@ async function init() {
     setupPreviewModeControls();
     setupPreviewControls(currentAgentData);
     setupContentControls(currentAgentData);
-    setupPreviewModeControls();
     setupSubmitRequestControls();
     setupExportControls();
     setupImportControls();

@@ -667,6 +667,10 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
         <button class="publish-btn" type="button" onclick="copyPublishedLink('${page.slug}')">
           Copy Published Link
         </button>
+
+        <button class="edit-btn" type="button" onclick="editPublishedPage('${page.slug}')">
+        Edit Published Page
+        </button>
   
         <button class="unpublish-btn" type="button" onclick="unpublishPublishedPage('${page.slug}')">
           Unpublish
@@ -679,14 +683,27 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     }
   
     return `
+      <button class="edit-btn" type="button" onclick="editPublishedPage('${page.slug}')">
+        Edit Published Page
+      </button>
+      
       <button class="republish-btn" type="button" onclick="republishPublishedPage('${page.slug}')">
         Republish
       </button>
-  
+      
       <button class="delete-btn" type="button" onclick="deletePublishedPage('${page.id}')">
         Delete Published Page
       </button>
     `;
+  }
+
+  function editPublishedPage(slug) {
+    if (!slug) {
+      alert("Published page slug not found.");
+      return;
+    }
+  
+    window.open(`index.html?published=${encodeURIComponent(slug)}`, "_blank");
   }
 
  async function renderPublishedPages() {
