@@ -54,6 +54,15 @@ function getUrlParam(name) {
   return params.get(name);
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function isPublishedEditMode() {
   return Boolean(currentPublishedEditSlug);
 }
@@ -67,7 +76,7 @@ function renderInvalidRevisionPage(message) {
         <div class="container">
           <p class="eyebrow">Revision Link Invalid</p>
           <h1>This revision link is no longer available.</h1>
-          <p>${message}</p>
+          <p>${escapeHtml(message)}</p>
           <p>Please ask admin to mark the request as Needs Changes again and send you a new revision link.</p>
         </div>
       </section>
@@ -120,7 +129,7 @@ function renderPublishedEditNotFoundPage(slug) {
         <div class="container">
           <p class="eyebrow">Published Page Not Found</p>
           <h1>No published page found for this slug.</h1>
-          <p>Slug: ${slug || "-"}</p>
+          <p>Slug: ${escapeHtml(slug || "-")}</p>
           <a class="btn" href="admin.html">Back to Admin</a>
         </div>
       </section>
@@ -148,7 +157,7 @@ function renderPublishedSavedPage(slug) {
           <p class="eyebrow">Published Page Updated</p>
           <h1>Your published landing page has been updated.</h1>
           <p>The same public link is still active.</p>
-          <p>Slug: ${slug}</p>
+          <p>Slug: ${escapeHtml(slug)}</p>
           <a class="btn" href="${previewLink}" target="_blank">Preview Updated Page</a>
           <a class="btn" href="admin.html">Back to Admin</a>
         </div>
@@ -178,10 +187,10 @@ function renderSubmissionSubmittedPage(submission) {
           <p class="eyebrow">Request Submitted</p>
           <h1>Your landing page request has been submitted.</h1>
           <p>
-            Thank you, ${agentName}. Your landing page request has been sent to admin for review.
+            Thank you, ${escapeHtml(agentName)}. Your landing page request has been sent to admin for review.
           </p>
           <p>
-            Submission ID: ${submissionId}
+            Submission ID: ${escapeHtml(submissionId)}
           </p>
           <p>
             Admin will review your page, check payment proof, and publish the page after approval.
@@ -222,7 +231,7 @@ function renderRevisionSubmittedPage(submissionId) {
             Your changes have been sent back to admin for review.
           </p>
           <p>
-            Submission ID: ${submissionId || "-"}
+            Submission ID: ${escapeHtml(submissionId || "-")}
           </p>
           <a class="btn" href="index.html">Create Another Landing Page</a>
         </div>
@@ -326,13 +335,19 @@ function updateRevisionNotice(submission) {
 }
 
 async function loadAgentData() {
-  const response = await fetch("data/agent.json");
+  try {
+    const response = await fetch("data/agent.json");
 
-  if (!response.ok) {
-    throw new Error("Failed to load agent data.");
+    if (!response.ok) {
+      console.warn("data/agent.json not found. Using default agent data.");
+      return {};
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.warn("Failed to fetch data/agent.json. Using default agent data.", error);
+    return {};
   }
-
-  return await response.json();
 }
 
 function createWhatsAppLink(number, message) {
@@ -1638,20 +1653,6 @@ function createSubmissionId() {
   return `submission-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function getStoredSubmissions() {
-  const savedSubmissions = localStorage.getItem("dogoodLandingSubmissions");
-
-  if (!savedSubmissions) return [];
-
-  try {
-    const parsedSubmissions = JSON.parse(savedSubmissions);
-    return Array.isArray(parsedSubmissions) ? parsedSubmissions : [];
-  } catch (error) {
-    console.warn("Invalid submission list found. Resetting submissions.", error);
-    return [];
-  }
-}
-
 async function updateExistingSubmissionInSupabase(id, data) {
   if (typeof supabaseClient === "undefined" || !isSupabaseConfigured()) {
     console.warn("Supabase is not configured. Revision updated locally only.");
@@ -2042,7 +2043,7 @@ function showPublishedEditNotice(page) {
   revisionNotice.style.display = "block";
   revisionNotice.innerHTML = `
     <strong>Editing published page</strong>
-    <p>You are editing the live published page for slug: ${page.slug}</p>
+    <p>You are editing the live published page for slug: ${escapeHtml(page.slug)}</p>
     <p>The public link will stay the same after saving.</p>
   `;
 }

@@ -114,7 +114,7 @@ async function getPublishedPageBySlug(slug) {
         <section>
           <div class="container">
             <h1>Landing page preview not found</h1>
-            <p>${message}</p>
+            <p>${escapeHtml(message)}</p>
           </div>
         </section>
       `;
@@ -128,18 +128,18 @@ async function getPublishedPageBySlug(slug) {
         const publishedPage = await getPublishedPageBySlug(slug);
 
         if (!publishedPage) {
-  renderNotFound("No landing page exists for this slug.");
-  return;
-}
+          renderNotFound("No landing page exists for this slug.");
+          return;
+        }
 
-if (publishedPage.status !== "published") {
-  renderNotFound("This landing page is currently unpublished.");
-  return;
-}
+        if (publishedPage.status !== "published") {
+          renderNotFound("This landing page is currently unpublished.");
+          return;
+        }
 
-currentAgentData = normalizeAgentData(publishedPage.agentData);
-renderLandingPage(currentAgentData);
-return;
+        currentAgentData = normalizeAgentData(publishedPage.agentData);
+        renderLandingPage(currentAgentData);
+        return;
       }
 
       if (submissionId) {

@@ -25,6 +25,23 @@ const dangerConfirmBtn = document.getElementById("dangerConfirmBtn");
 const closeDangerModalBtns = document.querySelectorAll("[data-close-danger-modal]");
 let currentAdminSubmissions = [];
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function debounce(fn, delay) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 function getStoredSubmissions() {
   return DoGoodStorage.getSubmissions();
 }
@@ -90,6 +107,17 @@ function formatDate(value) {
     dateStyle: "medium",
     timeStyle: "short"
   });
+}
+
+function previewPublishedPage(encodedSlug) {
+  const slug = decodeURIComponent(encodedSlug);
+
+  if (!slug) {
+    alert("Published page slug not found.");
+    return;
+  }
+
+  window.open(`page.html?slug=${encodeURIComponent(slug)}`, "_blank");
 }
 
 function getStatusBadgeClass(value) {
@@ -182,7 +210,11 @@ function updateStats(submissions) {
     }
   
     if ("publishedAt" in updates) {
-      payload.reviewed_at = updates.publishedAt;
+      payload.published_at = updates.publishedAt;
+    }
+
+    if ("agentData" in updates) {
+      payload.page_data = updates.agentData;
     }
   
     return payload;
@@ -232,17 +264,41 @@ function updateStats(submissions) {
     renderRequests();
   }
 
-function updateAdminNote(id, note) {
-    updateSubmission(id, {
-      adminNote: note
-    });
-  }
+const saveAdminNoteToSupabase = debounce(async (id, note) => {
+  await updateSubmissionInSupabase(id, { adminNote: note });
+}, 800);
 
-  function updateRevisionMessage(id, message) {
-    updateSubmission(id, {
-      revisionMessage: message
-    });
-  }
+const saveRevisionMessageToSupabase = debounce(async (id, message) => {
+  await updateSubmissionInSupabase(id, { revisionMessage: message });
+}, 800);
+
+function updateAdminNote(id, note) {
+  const submissions = getCurrentAdminSubmissions();
+
+  const updatedSubmissions = submissions.map((submission) => {
+    if (submission.id !== id && submission.supabaseId !== id) return submission;
+    return { ...submission, adminNote: note, updatedAt: new Date().toISOString() };
+  });
+
+  saveStoredSubmissions(updatedSubmissions);
+  currentAdminSubmissions = updatedSubmissions;
+
+  saveAdminNoteToSupabase(id, note);
+}
+
+function updateRevisionMessage(id, message) {
+  const submissions = getCurrentAdminSubmissions();
+
+  const updatedSubmissions = submissions.map((submission) => {
+    if (submission.id !== id && submission.supabaseId !== id) return submission;
+    return { ...submission, revisionMessage: message, updatedAt: new Date().toISOString() };
+  });
+
+  saveStoredSubmissions(updatedSubmissions);
+  currentAdminSubmissions = updatedSubmissions;
+
+  saveRevisionMessageToSupabase(id, message);
+}
 
   async function deleteSubmission(id) {
     const submission = findSubmissionById(id);
@@ -430,7 +486,10 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
   let finalSlug = cleanSlug;
   let counter = 2;
 
-  while (true) {
+  let attempts = 0;
+
+  while (attempts < 50) {
+    attempts++;
     const existingPage = await getExistingPublishedPageBySlug(finalSlug);
 
     if (!existingPage) {
@@ -446,6 +505,7 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     finalSlug = `${cleanSlug}-${counter}`;
     counter += 1;
   }
+  throw new Error("Unable to generate unique slug.");
 }
   
   async function publishSubmission(id) {
@@ -515,20 +575,43 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
   }
 
   async function deletePublishedPage(id) {
-    const supabasePublishedPages = await getPublishedPagesFromSupabase();
-    const publishedPages = supabasePublishedPages || getStoredPublishedPages();
-    const page = publishedPages.find((item) => item.id === id);
-  
+    const localPages = getStoredPublishedPages();
+    const page = localPages.find((item) => item.id === id);
+
     if (!page) {
-      alert("Published page not found.");
+      // Also check Supabase in case local is empty
+      const supabasePages = await getPublishedPagesFromSupabase();
+      const supabasePage = supabasePages ? supabasePages.find((item) => item.id === id) : null;
+
+      if (!supabasePage) {
+        alert("Published page not found.");
+        return;
+      }
+
+      const confirmDelete = confirm("Delete this published page from local data and Supabase?");
+      if (!confirmDelete) return;
+
+      if (typeof supabaseClient !== "undefined" && isSupabaseConfigured()) {
+        const { error } = await supabaseClient
+          .from("published_landing_pages")
+          .delete()
+          .eq("slug", supabasePage.slug);
+
+        if (error) {
+          console.warn("Supabase published page delete failed.", error);
+          alert("Supabase delete failed. Check the console error.");
+        }
+      }
+
+      renderPublishedPages();
       return;
     }
-  
+
     const confirmDelete = confirm("Delete this published page from local data and Supabase?");
   
     if (!confirmDelete) return;
   
-    const updatedLocalPages = publishedPages.filter((item) => item.id !== id);
+    const updatedLocalPages = localPages.filter((item) => item.id !== id);
     saveStoredPublishedPages(updatedLocalPages);
   
     if (typeof supabaseClient !== "undefined" && isSupabaseConfigured()) {
@@ -546,15 +629,6 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     renderPublishedPages();
   }
   
-  function previewPublishedPage(slug) {
-    if (!slug) {
-      alert("Published page slug not found.");
-      return;
-    }
-  
-    window.open(`page.html?slug=${encodeURIComponent(slug)}`, "_blank");
-  }
-
   function isLiveServerPreview() {
     return (
       window.location.hostname === "127.0.0.1" ||
@@ -580,7 +654,9 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     return slug ? `/a/${slug}` : "-";
   }
   
-  function copyPublishedLink(slug) {
+  function copyPublishedLink(encodedSlug) {
+    const slug = decodeURIComponent(encodedSlug);
+
     if (!slug) {
       alert("Published page slug not found.");
       return;
@@ -635,7 +711,9 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     await renderPublishedPages();
   }
   
-  async function unpublishPublishedPage(slug) {
+  async function unpublishPublishedPage(encodedSlug) {
+    const slug = decodeURIComponent(encodedSlug);
+
     const confirmUnpublish = confirm(
       "Unpublish this landing page?\n\nThe public link will stop working, but the page data will stay saved."
     );
@@ -645,7 +723,9 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     await updatePublishedPageStatus(slug, "unpublished");
   }
   
-  async function republishPublishedPage(slug) {
+  async function republishPublishedPage(encodedSlug) {
+    const slug = decodeURIComponent(encodedSlug);
+
     const confirmRepublish = confirm(
       "Republish this landing page?\n\nThe public link will become active again."
     );
@@ -660,19 +740,19 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
   
     if (status === "published") {
       return `
-        <button type="button" onclick="previewPublishedPage('${page.slug}')">
+        <button type="button" onclick="previewPublishedPage('${encodeURIComponent(page.slug)}')">
           Preview Published Page
         </button>
   
-        <button class="publish-btn" type="button" onclick="copyPublishedLink('${page.slug}')">
+        <button class="publish-btn" type="button" onclick="copyPublishedLink('${encodeURIComponent(page.slug)}')">
           Copy Published Link
         </button>
 
-        <button class="edit-btn" type="button" onclick="editPublishedPage('${page.slug}')">
+        <button class="edit-btn" type="button" onclick="editPublishedPage('${encodeURIComponent(page.slug)}')">
         Edit Published Page
         </button>
   
-        <button class="unpublish-btn" type="button" onclick="unpublishPublishedPage('${page.slug}')">
+        <button class="unpublish-btn" type="button" onclick="unpublishPublishedPage('${encodeURIComponent(page.slug)}')">
           Unpublish
         </button>
   
@@ -683,11 +763,11 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     }
   
     return `
-      <button class="edit-btn" type="button" onclick="editPublishedPage('${page.slug}')">
+      <button class="edit-btn" type="button" onclick="editPublishedPage('${encodeURIComponent(page.slug)}')">
         Edit Published Page
       </button>
       
-      <button class="republish-btn" type="button" onclick="republishPublishedPage('${page.slug}')">
+      <button class="republish-btn" type="button" onclick="republishPublishedPage('${encodeURIComponent(page.slug)}')">
         Republish
       </button>
       
@@ -697,7 +777,9 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
     `;
   }
 
-  function editPublishedPage(slug) {
+  function editPublishedPage(encodedSlug) {
+    const slug = decodeURIComponent(encodedSlug);
+
     if (!slug) {
       alert("Published page slug not found.");
       return;
@@ -727,7 +809,7 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
         <article class="request-card">
           <div class="request-top">
             <div class="request-title">
-              <h3>${data.agentName || "Unnamed Agent"}</h3>
+              <h3>${escapeHtml(data.agentName || "Unnamed Agent")}</h3>
               <p>Public preview: ${page.slug ? getPublishedPageLink(page.slug) : "-"}</p>
               <p>Future live path: ${page.slug ? getFuturePublicPath(page.slug) : "-"}</p>
               <p>Published: ${formatDate(page.publishedAt)}</p>
@@ -743,12 +825,12 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
           <div class="request-details">
             <div class="detail-box">
               <span>Slug</span>
-              <strong>${page.slug || "-"}</strong>
+              <strong>${escapeHtml(page.slug || "-")}</strong>
             </div>
   
             <div class="detail-box">
               <span>WhatsApp</span>
-              <strong>${data.whatsappNumber || "-"}</strong>
+              <strong>${escapeHtml(data.whatsappNumber || "-")}</strong>
             </div>
   
             <div class="detail-box">
@@ -1009,6 +1091,11 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
   
     if (!confirmRejectPayment) return;
   
+    const updatedAgentData = {
+      ...(submission.agentData || {}),
+      paymentProofUrl: ""
+    };
+  
     updateSubmission(submission.id, {
       status: "needs_changes",
       paymentStatus: "unpaid",
@@ -1016,7 +1103,8 @@ async function createUniquePublishedSlug(baseSlug, submissionId) {
       revisionMessage: "Please upload a clearer or valid payment proof before resubmitting.",
       paymentProofUrl: "",
       paymentSubmittedAt: null,
-      revisionToken: createRevisionToken()
+      revisionToken: createRevisionToken(),
+      agentData: updatedAgentData
     });
   }
 
@@ -1173,7 +1261,6 @@ async function renderRequests() {
     const filteredSubmissions = getFilteredSubmissions(submissions);
     
     updateStats(submissions);
-    renderPublishedPages();
     
     if (!filteredSubmissions.length) {
       emptyState.style.display = "block";
@@ -1193,7 +1280,7 @@ async function renderRequests() {
       <article class="request-card">
         <div class="request-top">
           <div class="request-title">
-            <h3>${data.agentName || "Unnamed Agent"}</h3>
+            <h3>${escapeHtml(data.agentName || "Unnamed Agent")}</h3>
             <p>${submission.id}</p>
             <p>Submitted: ${formatDate(submission.submittedAt)}</p>
           </div>
@@ -1208,7 +1295,7 @@ async function renderRequests() {
         <div class="request-details">
           <div class="detail-box">
             <span>WhatsApp</span>
-            <strong>${data.whatsappNumber || "-"}</strong>
+            <strong>${escapeHtml(data.whatsappNumber || "-")}</strong>
           </div>
 
           <div class="detail-box">
@@ -1238,8 +1325,8 @@ async function renderRequests() {
       Internal Admin Note
       <textarea 
         placeholder="Write internal admin note..."
-        onchange="updateAdminNote('${submission.id}', this.value)"
-      >${submission.adminNote || ""}</textarea>
+        oninput="updateAdminNote('${submission.id}', this.value)"
+      >${escapeHtml(submission.adminNote || "")}</textarea>
     </label>
   </div>
 
@@ -1248,8 +1335,8 @@ async function renderRequests() {
       Agent Revision Message
       <textarea 
         placeholder="Write what the agent needs to change..."
-        onchange="updateRevisionMessage('${submission.id}', this.value)"
-      >${submission.revisionMessage || ""}</textarea>
+        oninput="updateRevisionMessage('${submission.id}', this.value)"
+      >${escapeHtml(submission.revisionMessage || "")}</textarea>
     </label>
   </div>
 </div>
@@ -1369,8 +1456,8 @@ function downloadJsonFile(data, filename) {
   }
   
   async function clearAllTestData() {
-    await deleteAllSupabaseRows("landing_page_submissions");
     await deleteAllSupabaseRows("published_landing_pages");
+    await deleteAllSupabaseRows("landing_page_submissions");
   
     DoGoodStorage.clearSubmissions();
     saveStoredPublishedPages([]);
