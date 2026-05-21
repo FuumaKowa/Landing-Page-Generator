@@ -987,35 +987,72 @@ function getRequiredFieldStatus(data) {
   };
 }
 
-function updateBuilderProgress(data) {
-  if (!builderProgress) return;
+function getRequiredSubmissionFields() {
+  return [
+    {
+      label: "Agent name",
+      value: agentNameInput?.value?.trim() || ""
+    },
+    {
+      label: "WhatsApp number",
+      value: whatsappInput?.value?.trim() || ""
+    },
+    {
+      label: "Product name",
+      value: productNameInput?.value?.trim() || ""
+    },
+    {
+      label: "Product description",
+      value: productDescriptionInput?.value?.trim() || ""
+    },
+    {
+      label: "Package name",
+      value: packageNameInput?.value?.trim() || ""
+    },
+    {
+      label: "Package price",
+      value: packagePriceInput?.value?.trim() || ""
+    },
+    {
+      label: "Checkout link",
+      value: packageCheckoutInput?.value?.trim() || ""
+    },
+    {
+      label: "Payment proof",
+      value: paymentProofInput?.value?.trim() || currentAgentData?.paymentProofUrl || ""
+    }
+  ];
+}
 
-  const status = getRequiredFieldStatus(data);
-  const remainingFields = status.requiredFields
-    .filter((field) => !field.valid)
-    .map((field) => field.label);
+function updateSubmitReadiness() {
+  const requiredFields = getRequiredSubmissionFields();
+  const completedFields = requiredFields.filter((field) => field.value).length;
+  const totalFields = requiredFields.length;
+  const isReady = completedFields === totalFields;
 
-  const isReady = remainingFields.length === 0;
+  const readinessText = document.getElementById("readinessText");
+  const readinessCount = document.getElementById("readinessCount");
+  const readinessBadge = document.getElementById("readinessBadge");
 
-  builderProgress.className = isReady
-    ? "builder-progress ready"
-    : "builder-progress incomplete";
+  if (readinessText) {
+    readinessText.textContent = isReady ? "Ready to submit" : "Not ready yet";
+  }
 
-  builderProgress.innerHTML = `
-    <div class="builder-progress-text">
-      <div class="builder-progress-title">
-        ${isReady ? "Ready to submit" : "Complete your landing page request"}
-      </div>
-      <div class="builder-progress-meta">
-        ${status.completedCount} / ${status.totalCount} required fields completed
-        ${isReady ? "" : ` • Missing: ${remainingFields.slice(0, 3).join(", ")}${remainingFields.length > 3 ? "..." : ""}`}
-      </div>
-    </div>
+  if (readinessCount) {
+    readinessCount.textContent = `${completedFields} / ${totalFields} required fields completed`;
+  }
 
-    <div class="builder-progress-pill">
-      ${isReady ? "Ready" : `${status.totalCount - status.completedCount} missing`}
-    </div>
-  `;
+  if (readinessBadge) {
+    readinessBadge.textContent = isReady ? "Ready" : "Incomplete";
+    readinessBadge.classList.toggle("ready", isReady);
+    readinessBadge.classList.toggle("incomplete", !isReady);
+  }
+
+  if (submitRequestBtn) {
+    submitRequestBtn.disabled = !isReady;
+  }
+
+  return isReady;
 }
 
 function validateAgentData(data) {
@@ -1253,6 +1290,7 @@ function setupPreviewControls(data) {
 
       renderLandingPage(currentAgentData);
       saveDraftToBrowser();
+      updateSubmitReadiness();
     });
   });
 
@@ -1260,24 +1298,28 @@ function setupPreviewControls(data) {
     currentAgentData.theme = themeSelect.value;
     renderLandingPage(currentAgentData);
     saveDraftToBrowser();
+    updateSubmitReadiness();
   });
 
   audienceSelect.addEventListener("change", () => {
     currentAgentData.targetAudience = audienceSelect.value;
     renderLandingPage(currentAgentData);
     saveDraftToBrowser();
+    updateSubmitReadiness();
   });
 
   heroStyleSelect.addEventListener("change", () => {
     currentAgentData.heroStyle = heroStyleSelect.value;
     renderLandingPage(currentAgentData);
     saveDraftToBrowser();
+    updateSubmitReadiness();
   });
 
   languageSelect.addEventListener("change", () => {
     currentAgentData.language = languageSelect.value;
     renderLandingPage(currentAgentData);
     saveDraftToBrowser();
+    updateSubmitReadiness();
   });
 
   structureSelect.addEventListener("change", () => {
@@ -1290,6 +1332,7 @@ function setupPreviewControls(data) {
     syncSectionCheckboxes(selectedSections);
     renderLandingPage(currentAgentData);
     saveDraftToBrowser();
+    updateSubmitReadiness();
   });
 }
 
@@ -1554,6 +1597,7 @@ function setupContentControls(data) {
 
     renderLandingPage(currentAgentData);
     saveDraftToBrowser();
+    updateSubmitReadiness();
   };
 
   agentNameInput.addEventListener("input", updateContent);
@@ -1572,6 +1616,22 @@ function setupContentControls(data) {
   agentPhotoInput.addEventListener("input", updateContent);
   agentDescriptionInput.addEventListener("input", updateContent);
   whatsappMessageInput.addEventListener("input", updateContent);
+
+  [
+    agentNameInput,
+    whatsappInput,
+    productNameInput,
+    productDescriptionInput,
+    packageNameInput,
+    packagePriceInput,
+    packageCheckoutInput,
+    paymentProofInput
+  ].forEach((input) => {
+    if (!input) return;
+  
+    input.addEventListener("input", updateSubmitReadiness);
+    input.addEventListener("change", updateSubmitReadiness);
+  });
 
   if (productImageUploadInput) {
     productImageUploadInput.addEventListener("change", async (event) => {
@@ -1592,6 +1652,7 @@ function setupContentControls(data) {
   
       renderLandingPage(currentAgentData);
       saveDraftToBrowser();
+      updateSubmitReadiness();
     });
   }
   
@@ -1614,6 +1675,7 @@ function setupContentControls(data) {
   
       renderLandingPage(currentAgentData);
       saveDraftToBrowser();
+      updateSubmitReadiness();
     });
   }
 
@@ -1623,6 +1685,7 @@ function setupContentControls(data) {
   
       renderLandingPage(currentAgentData);
       saveDraftToBrowser();
+      updateSubmitReadiness();
     });
   }
   
@@ -1644,6 +1707,7 @@ function setupContentControls(data) {
       currentAgentData.paymentProofUrl = proofUrl;
   
       saveDraftToBrowser();
+      updateSubmitReadiness();
     });
   }
 
@@ -1842,6 +1906,17 @@ function setupSubmitRequestControls() {
   if (!submitRequestBtn) return;
 
   submitRequestBtn.addEventListener("click", async () => {
+    const isReady = updateSubmitReadiness();
+
+if (!isReady) {
+  const missingFields = getRequiredSubmissionFields()
+    .filter((field) => !field.value)
+    .map((field) => `- ${field.label}`)
+    .join("\n");
+
+  alert(`Please complete the required fields before submitting:\n\n${missingFields}`);
+  return;
+}
     if (!currentAgentData) return;
 
     const issues = validateAgentData(currentAgentData);
@@ -1971,6 +2046,7 @@ function setupImportControls() {
         currentAgentData = normalizeAgentData(importedData);
 
         saveDraftToBrowser();
+        updateSubmitReadiness();
         window.location.reload();
       } catch (error) {
         alert("Invalid JSON file. Please import a valid agent JSON file.");
@@ -2166,6 +2242,7 @@ async function init() {
     setupSubmitRequestControls();
     setupExportControls();
     setupImportControls();
+    updateSubmitReadiness();
   } catch (error) {
     landingPage.innerHTML = `
       <section>

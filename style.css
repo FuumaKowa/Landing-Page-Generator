@@ -545,6 +545,54 @@ section {
   opacity: 0.86;
 }
 
+.builder-actions {
+  width: min(1720px, calc(100% - 96px));
+  margin: 32px auto 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.builder-actions .primary-action,
+#submitRequestBtn {
+  min-height: 58px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 34px;
+  background: #ffffff;
+  color: #111111;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+  transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.builder-actions .primary-action:hover,
+#submitRequestBtn:hover {
+  transform: translateY(-2px);
+  background: #f2c94c;
+}
+
+.builder-actions .primary-action:disabled,
+#submitRequestBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 720px) {
+  .builder-actions {
+    width: min(100% - 32px, 1720px);
+  }
+
+  .builder-actions .primary-action,
+  #submitRequestBtn {
+    width: 100%;
+  }
+}
+
 .builder-preview-divider {
   padding: 18px 8%;
   background: #111111;
