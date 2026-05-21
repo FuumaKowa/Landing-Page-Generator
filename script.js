@@ -1013,7 +1013,7 @@ function getRequiredSubmissionFields() {
     },
     {
       label: "Payment proof",
-      value: paymentProofInput?.value?.trim() || currentAgentData?.paymentProofUrl || ""
+      value: currentAgentData?.paymentProofUrl || paymentProofInput?.value?.trim() || ""
     }
   ];
 }
@@ -1627,7 +1627,7 @@ function setupContentControls(data) {
     productDescriptionInput,
     packageNameInput,
     packagePriceInput,
-    packageCheckoutInput,
+    packageCheckoutLinkInput,
     paymentProofInput
   ].forEach((input) => {
     if (!input) return;
