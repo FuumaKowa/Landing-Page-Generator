@@ -1019,10 +1019,23 @@ function getRequiredSubmissionFields() {
 }
 
 function updateSubmitReadiness() {
+  // Sync live input values into currentAgentData so getRequiredFieldStatus is accurate.
+  if (typeof currentAgentData !== "undefined" && currentAgentData) {
+    if (agentNameInput) currentAgentData.agentName = agentNameInput.value.trim();
+    if (whatsappInput) currentAgentData.whatsappNumber = whatsappInput.value.trim();
+    if (productNameInput) currentAgentData.productName = productNameInput.value.trim();
+    if (productDescriptionInput) currentAgentData.productDescription = productDescriptionInput.value.trim();
+    if (packageNameInput) currentAgentData.packageName = packageNameInput.value.trim();
+    if (packagePriceInput) currentAgentData.packagePrice = packagePriceInput.value.trim();
+    if (packageCheckoutLinkInput) currentAgentData.packageCheckoutLink = packageCheckoutLinkInput.value.trim();
+  }
+
   const requiredFields = getRequiredSubmissionFields();
   const completedFields = requiredFields.filter((field) => field.value).length;
   const totalFields = requiredFields.length;
   const isReady = completedFields === totalFields;
+
+  updateBuilderProgress();
 
   const readinessText = document.getElementById("readinessText");
   const readinessCount = document.getElementById("readinessCount");
@@ -1116,7 +1129,9 @@ function updateValidationStatus(data) {
 function updateBuilderProgress(data) {
   if (!builderProgress) return;
 
-  const { completedCount, totalCount } = getRequiredFieldStatus(data);
+  // Always use the live currentAgentData so upload-triggered updates are reflected.
+  const source = (typeof currentAgentData !== "undefined" && currentAgentData) ? currentAgentData : (data || {});
+  const { completedCount, totalCount } = getRequiredFieldStatus(source);
   const isReady = completedCount === totalCount;
 
   builderProgress.className = `builder-progress ${isReady ? "ready" : "incomplete"}`;
