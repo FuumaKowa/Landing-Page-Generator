@@ -607,11 +607,7 @@ function getPublishedPageLink(slug) {
 
   if (!cleanSlug) return "-";
 
-  if (isLocalPreviewHost()) {
-    return `${window.location.origin}/page.html?slug=${cleanSlug}`;
-  }
-
-  return `${window.location.origin}/a/${cleanSlug}`;
+  return `${window.location.origin}/page.html?slug=${cleanSlug}`;
 }
 
 function getFuturePublicPath(slug) {
@@ -619,9 +615,14 @@ function getFuturePublicPath(slug) {
 }
 
 function previewPublishedPage(encodedSlug) {
-  const slug = decodeURIComponent(encodedSlug);
-  if (!slug) { alert("Published page slug not found."); return; }
-  window.open(`page.html?slug=${encodeURIComponent(slug)}`, "_blank");
+  const slug = decodeURIComponent(encodedSlug || "");
+
+  if (!slug) {
+    alert("Published page slug not found.");
+    return;
+  }
+
+  window.open(`/page.html?slug=${encodeURIComponent(slug)}`, "_blank");
 }
 
 function copyPublishedLink(encodedSlug) {
