@@ -99,12 +99,20 @@
 
       <label>
         Agent Name
-        <input type="text" id="agentNameInput" placeholder="Agent name">
+        <input
+          type="text"
+          id="agentNameInput"
+          placeholder="Enter your name"
+        />
       </label>
 
       <label>
         WhatsApp
-        <input type="text" id="whatsappInput" placeholder="60123456789">
+        <input
+          type="text"
+          id="whatsappInput"
+          placeholder="Enter your WhatsApp number"
+        />
       </label>
 
       <div class="form-group-title">Product Details</div>
@@ -133,7 +141,11 @@
 
       <label class="wide-control">
         Package Checkout Link
-        <input type="text" id="packageCheckoutLinkInput" placeholder="Paste checkout link">
+        <input
+          type="text"
+          id="packageCheckoutInput"
+          placeholder="Paste your checkout/payment link"
+        />
       </label>
 
       <label>
@@ -163,27 +175,21 @@
 
       <div class="form-group-title">Images</div>
 
-      <label class="wide-control">
-        Product Image URL
-        <input type="text" id="productImageInput" placeholder="Paste product image URL or upload below">
-      </label>
-      
-      <label class="wide-control upload-control">
-        Upload Product Image
-        <input type="file" id="productImageUploadInput" accept="image/*">
-        <span id="productImageUploadStatus" class="upload-status"></span>
-      </label>
-      
-      <label class="wide-control">
-        Agent Photo URL
-        <input type="text" id="agentPhotoInput" placeholder="Paste agent photo URL or upload below">
-      </label>
-      
-      <label class="wide-control upload-control">
-        Upload Agent Photo
-        <input type="file" id="agentPhotoUploadInput" accept="image/*">
-        <span id="agentPhotoUploadStatus" class="upload-status"></span>
-      </label>
+      <input type="hidden" id="productImageInput" />
+
+<label class="wide-control upload-control">
+  Upload Product Image
+  <input type="file" id="productImageUploadInput" accept="image/*">
+  <span id="productImageUploadStatus" class="upload-status"></span>
+</label>
+
+<input type="hidden" id="agentPhotoInput" />
+
+<label class="wide-control upload-control">
+  Upload Agent Photo
+  <input type="file" id="agentPhotoUploadInput" accept="image/*">
+  <span id="agentPhotoUploadStatus" class="upload-status"></span>
+</label>
 
       <label class="wide-control">
         Agent Description
@@ -191,11 +197,13 @@
       </label>
 
       <div class="form-group-title">Payment Proof</div>
+      <input type="hidden" id="paymentProofInput" />
 
-<label class="wide-control">
-  Payment Proof URL
-  <input type="text" id="paymentProofInput" placeholder="Upload payment proof below or paste proof image URL">
-</label>
+      <label class="wide-control upload-control">
+        Upload Payment Proof
+        <input type="file" id="paymentProofUploadInput" accept="image/*">
+        <span id="paymentProofUploadStatus" class="upload-status"></span>
+      </label>
 
 <label class="wide-control upload-control">
   Upload Payment Proof
@@ -218,20 +226,7 @@
     </div>
 
     <div id="builderProgress" class="builder-progress"></div>
-
-    <div class="export-controls">
-      <label class="import-json-label">
-        Import Agent JSON
-        <input type="file" id="importJsonInput" accept="application/json">
-      </label>
-
-      <button id="scrollToPreviewBtn" type="button">Jump to Live Preview</button>
-      <button id="previewModeBtn" type="button">Full Customer Preview</button>
-      <button id="submitRequestBtn" type="button">Submit Landing Page Request</button>
-      <button id="exportJsonBtn" type="button">Export Agent JSON</button>
-      <button id="exportHtmlBtn" type="button">Export Landing Page HTML</button>
-      <button id="clearDraftBtn" type="button">Clear Draft</button>
-    </div>
+    <button id="submitRequestBtn" type="button">Submit Landing Page Request</button>
   </div>
 
   <div class="builder-preview-divider">
