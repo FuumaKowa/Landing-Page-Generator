@@ -33,12 +33,6 @@ const whatsappMessageInput = document.getElementById("whatsappMessageInput");
 const previewModeBtn = document.getElementById("previewModeBtn");
 const exitPreviewModeBtn = document.getElementById("exitPreviewModeBtn");
 const submitRequestBtn = document.getElementById("submitRequestBtn");
-const exportJsonBtn = document.getElementById("exportJsonBtn");
-const exportHtmlBtn = document.getElementById("exportHtmlBtn");
-const clearDraftBtn = document.getElementById("clearDraftBtn");
-const scrollToPreviewBtn = document.getElementById("scrollToPreviewBtn");
-
-const importJsonInput = document.getElementById("importJsonInput");
 const validationStatus = document.getElementById("validationStatus");
 const revisionNotice = document.getElementById("revisionNotice");
 const builderProgress = document.getElementById("builderProgress");
@@ -1106,16 +1100,32 @@ function updateValidationStatus(data) {
 
   if (!issues.length) {
     validationStatus.className = "validation-status valid";
-    validationStatus.innerHTML = "Page status: Ready to export.";
+    validationStatus.innerHTML = "Page status: Ready to submit.";
     return;
   }
 
   validationStatus.className = "validation-status warning";
   validationStatus.innerHTML = `
-    <strong>Page status: Needs attention before final export.</strong>
+    <strong>Page status: Complete the required fields before submitting.</strong>
     <ul>
       ${issues.map((issue) => `<li>${issue}</li>`).join("")}
     </ul>
+  `;
+}
+
+function updateBuilderProgress(data) {
+  if (!builderProgress) return;
+
+  const { completedCount, totalCount } = getRequiredFieldStatus(data);
+  const isReady = completedCount === totalCount;
+
+  builderProgress.className = `builder-progress ${isReady ? "ready" : "incomplete"}`;
+  builderProgress.innerHTML = `
+    <div class="builder-progress-text">
+      <span class="builder-progress-title">${isReady ? "Ready to submit" : "Not ready yet"}</span>
+      <span class="builder-progress-meta">${completedCount} / ${totalCount} required fields completed</span>
+    </div>
+    <span class="builder-progress-pill">${isReady ? "Ready" : "Incomplete"}</span>
   `;
 }
 
@@ -1236,14 +1246,7 @@ function syncSectionCheckboxes(sections) {
 }
 
 function setupScrollToPreviewControl() {
-  if (!scrollToPreviewBtn) return;
-
-  scrollToPreviewBtn.addEventListener("click", () => {
-    landingPage.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-  });
+  // Scroll-to-preview button removed from builder UI.
 }
 
 function setupPreviewControls(data) {
@@ -1350,7 +1353,7 @@ function normalizeAgentData(data) {
 
   return {
     slug: data.slug || createSlug(data.agentName || "agent-page"),
-    agentName: data.agentName || "Do Good Agent",
+    agentName: data.agentName || "",
     whatsappNumber: data.whatsappNumber || "",
     theme: data.theme || "natural-cream",
     language: data.language || "en",
@@ -1363,16 +1366,16 @@ function normalizeAgentData(data) {
       ? data.sections
       : getStructureSections(data.structure || "standard"),
     targetAudience: data.targetAudience || "General audience",
-    packageName: data.packageName || "Starter Wellness Package",
+    packageName: data.packageName || "",
     packagePrice: data.packagePrice || "",
-    packageCheckoutLink: data.packageCheckoutLink || "https://dogood.asia/Checkout?cl=8f14e45fceea167a5a36dedd4bea2543",
-    packageButtonText: data.packageButtonText || "Checkout Package",
+    packageCheckoutLink: data.packageCheckoutLink || "",
+    packageButtonText: data.packageButtonText || "",
     packageDetails: data.packageDetails || "",
-    shortMessage: data.shortMessage || "Start your simple daily wellness routine with guidance from your Do Good agent.",
-    productName: data.productName || "Do Good Premium Natural Complex Enzyme 131",
-    productDescription: data.productDescription || "Do Good is a convenient enzyme-based wellness drink designed for people who want to build a simple daily health routine. It comes in sachet form, making it easy to consume at home, at work, or while travelling.",
-    productImage: data.productImage || "https://placehold.co/600x600?text=Do+Good+Product",
-    agentPhoto: data.agentPhoto || "https://placehold.co/600x600?text=Agent+Photo",
+    shortMessage: data.shortMessage || "",
+    productName: data.productName || "",
+    productDescription: data.productDescription || "",
+    productImage: data.productImage || "",
+    agentPhoto: data.agentPhoto || "",
     agentDescription: data.agentDescription || "",
     whatsappMessage: data.whatsappMessage || ""
   };
@@ -1996,66 +1999,13 @@ try {
 }
 
 function setupExportControls() {
-  if (exportJsonBtn) {
-    exportJsonBtn.addEventListener("click", () => {
-      if (!currentAgentData) return;
-
-      const safeSlug = currentAgentData.slug || "agent-page";
-      downloadJsonFile(currentAgentData, `${safeSlug}.json`);
-    });
-  }
-
-  if (exportHtmlBtn) {
-    exportHtmlBtn.addEventListener("click", () => {
-      if (!currentAgentData) return;
-
-      const safeSlug = currentAgentData.slug || "agent-page";
-      const htmlText = generateStandaloneHtml(currentAgentData);
-
-      downloadTextFile(htmlText, `${safeSlug}.html`);
-    });
-  }
-
-  if (clearDraftBtn) {
-    clearDraftBtn.addEventListener("click", () => {
-      const confirmClear = confirm(
-        "Clear saved draft and reload the original agent data?"
-      );
-
-      if (!confirmClear) return;
-
-      DoGoodStorage.clearDraft();
-      window.location.reload();
-    });
-  }
+  // Export and import controls removed from builder UI.
+  // This function is kept as a safe no-op for any remaining call sites.
 }
 
 function setupImportControls() {
-  if (!importJsonInput) return;
-
-  importJsonInput.addEventListener("change", (event) => {
-    const file = event.target.files[0];
-
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      try {
-        const importedData = JSON.parse(reader.result);
-        currentAgentData = normalizeAgentData(importedData);
-
-        saveDraftToBrowser();
-        updateSubmitReadiness();
-        window.location.reload();
-      } catch (error) {
-        alert("Invalid JSON file. Please import a valid agent JSON file.");
-        console.error(error);
-      }
-    };
-
-    reader.readAsText(file);
-  });
+  // Import JSON control removed from builder UI.
+  // This function is kept as a safe no-op for any remaining call sites.
 }
 
 async function checkAdminAccessForPublishedEdit() {
@@ -2230,7 +2180,9 @@ async function init() {
       currentRevisionToken = null;
       currentPublishedEditSlug = null;
       currentPublishedEditPage = null;
-      currentAgentData = normalizeAgentData(savedDraft || agentData);
+      // Always start with a blank form — no pre-filled defaults or saved drafts.
+      // Draft restore is intentionally disabled so agents fill in their own details fresh.
+      currentAgentData = normalizeAgentData({});
       updateRevisionNotice(null);
     }
 
