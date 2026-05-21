@@ -595,14 +595,23 @@ async function publishSubmission(id) {
 
 // ─── Published page management ────────────────────────────────────────────────
 
+function isLocalPreviewHost() {
+  return (
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost"
+  );
+}
+
 function getPublishedPageLink(slug) {
   const cleanSlug = encodeURIComponent(slug || "");
+
   if (!cleanSlug) return "-";
-  const basePath = window.location.pathname.replace("admin.html", "");
-  if (isLiveServerPreview()) {
-    return `${window.location.origin}${basePath}page.html?slug=${cleanSlug}`;
+
+  if (isLocalPreviewHost()) {
+    return `${window.location.origin}/page.html?slug=${cleanSlug}`;
   }
-  return `${window.location.origin}${basePath}a/${cleanSlug}`;
+
+  return `${window.location.origin}/a/${cleanSlug}`;
 }
 
 function getFuturePublicPath(slug) {
