@@ -951,6 +951,10 @@ function getRequiredFieldStatus(data) {
       valid: Boolean(data.productName && data.productName.trim())
     },
     {
+      label: "Product Description",
+      valid: Boolean(data.productDescription && data.productDescription.trim())
+    },
+    {
       label: "Package Name",
       valid: Boolean(data.packageName && data.packageName.trim())
     },
@@ -963,12 +967,8 @@ function getRequiredFieldStatus(data) {
       valid: Boolean(data.packageCheckoutLink && data.packageCheckoutLink.trim())
     },
     {
-      label: "Product Image",
-      valid: Boolean(data.productImage && data.productImage.trim())
-    },
-    {
-      label: "Agent Photo",
-      valid: Boolean(data.agentPhoto && data.agentPhoto.trim())
+      label: "Payment Proof",
+      valid: Boolean(data.paymentProofUrl && data.paymentProofUrl.trim())
     }
   ];
 
@@ -1009,7 +1009,7 @@ function getRequiredSubmissionFields() {
     },
     {
       label: "Checkout link",
-      value: packageCheckoutInput?.value?.trim() || ""
+      value: packageCheckoutLinkInput?.value?.trim() || ""
     },
     {
       label: "Payment proof",
